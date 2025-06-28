@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
+    .duelo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 10px auto;
+      max-width: 500px;
+      text-align: left;
+    }
+    #whatsappBtn { display: none; margin-top: 20px; }
+    button { padding: 10px 15px; background: #25d366; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #1ebd5b; }
+    #dataHora { margin-top: 10px; font-weight: bold; color: #444; }
+  </style>
+</head>
+<body>
+  <h2>Buscar Aposta por Código</h2>
+  <input type="text" id="codigoBusca" placeholder="Ex: 123456" />
+  <button id="btnBuscar">Buscar</button>
+
+  <div id="resultado"></div>
+  <p id="dataHora"></p>
+  <button id="whatsappBtn">📲 Enviar no WhatsApp</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA5a-2HzvcljnAfXE7P3ThDnq6m6E568ZA",
+  authDomain: "jogo-60a9e.firebaseapp.com",
+  projectId: "jogo-60a9e",
+  storageBucket: "jogo-60a9e.appspot.com",
+  messagingSenderId: "352852303591",
+  appId: "1:352852303591:web:8083c950047c9026bd8c42",
+  databaseURL: "https://jogo-60a9e-default-rtdb.firebaseio.com/"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const btnBuscar = document.getElementById("btnBuscar");
+const resultado = document.getElementById("resultado");
+const dataHoraEl = document.getElementById("dataHora");
+const whatsappBtn = document.getElementById("whatsappBtn");
+
+btnBuscar.onclick = () => {
+  const codigo = document.getElementById("codigoBusca").value.trim();
+  resultado.innerHTML = "";
+  dataHoraEl.textContent = "";
+  whatsappBtn.style.display = "none";
+
+  if (!codigo) return alert("Digite o código!");
+
+  get(child(ref(db), `apostas/${codigo}`)).then(snapshot => {
+    if (snapshot.exists()) {
+      const dados = snapshot.val();
+
+      const nome = dados.nome || "Desconhecido";
+      const data = new Date(dados.dataRegistro);
+      const dataFormatada = data.toLocaleString("pt-BR");
+      const valorUnicoGlobal = dados.duelos?.[0]?.valorUnico?.toFixed(2) || "0,00";
+      const valorTotal = dados.valorTotal?.toFixed(2) || "0,00";
+
+      dataHoraEl.innerHTML = `
+        👤 Nome: ${nome}<br>
+        📅 Data da aposta: ${dataFormatada}<br>
+        💸 Valor Único: R$ ${valorUnicoGlobal}<br>
+        💰 Total Geral: R$ ${valorTotal}
+      `;
+
+      let mensagemWhatsapp = `👤 Nome: ${nome}\n📅 Data: ${dataFormatada}\n💸 Valor Único: R$ ${valorUnicoGlobal}\n💰 Total Geral: R$ ${valorTotal}\n`;
+
+      (dados.duelos || []).forEach((duelo, i) => {
+        const jogo = document.createElement("div");
+        jogo.className = "duelo";
+
+        const timeA = duelo.nomeTimeA || duelo.duelo?.split(" x ")[0] || "Time A";
+        const timeB = duelo.nomeTimeB || duelo.duelo?.split(" x ")[1] || "Time B";
+        const dataHoraJogo = new Date(duelo.dataHora).toLocaleString("pt-BR");
+
+        let selecaoTexto = "Não selecionado";
+
+        if (duelo.selecaoA) {
+          selecaoTexto = typeof duelo.selecaoA === 'string'
+            ? duelo.selecaoA.replace("|", " ")
+            : duelo.selecaoA.texto.replace("|", " ");
+        } else if (duelo.selecaoB) {
+          selecaoTexto = typeof duelo.selecaoB === 'string'
+            ? duelo.selecaoB.replace("|", " ")
+            : duelo.selecaoB.texto.replace("|", " ");
+        }
+
+        jogo.innerHTML = `
+          <strong>Jogo:</strong> ${timeA} x ${timeB}<br>
+          <strong>Escolha:</strong> ${selecaoTexto}<br>
+          <strong>Data/Hora do Jogo:</strong> ${dataHoraJogo}
+        `;
+
+        resultado.appendChild(jogo);
+
+        mensagemWhatsapp += `\n⚽ ${timeA} x ${timeB}\n🎯 Escolha: ${selecaoTexto}\n🕒 ${dataHoraJogo}\n------------------------`;
+      });
+
+      whatsappBtn.style.display = "inline-block";
+      whatsappBtn.onclick = () => {
+        const url = `https://wa.me/?text=${encodeURIComponent(mensagemWhatsapp)}`;
+        window.open(url, "_blank");
+      };
+    } else {
+      resultado.innerHTML = "<p><strong>Código não encontrado.</strong></p>";
+    }
+  }).catch(error => {
+    console.error("Erro ao buscar:", error);
+    alert("Erro ao buscar código.");
+  });
+};
+</script>
+</body>
+</html>
