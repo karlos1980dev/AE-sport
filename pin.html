@@ -20,11 +20,18 @@
     button { padding: 10px 15px; background: #25d366; color: white; border: none; border-radius: 5px; cursor: pointer; }
     button:hover { background: #1ebd5b; }
     #dataHora { margin-top: 10px; font-weight: bold; color: #444; }
+    .codigoInput{
+        text-align:center;
+        dispaly:flex;
+        height:30px;
+        background:black;
+        color:white;
+    }
   </style>
 </head>
 <body>
   <h2>Buscar Aposta por Código</h2>
-  <input type="text" id="codigoBusca" placeholder="Ex: 123456" />
+  <input class="codigoInput" type="text" id="codigoBusca" placeholder="Ex: 123456" />
   <button id="btnBuscar">Buscar</button>
 
   <div id="resultado"></div>
@@ -74,11 +81,11 @@ btnBuscar.onclick = () => {
       dataHoraEl.innerHTML = `
         👤 Nome: ${nome}<br>
         📅 Data da aposta: ${dataFormatada}<br>
-        💸 Valor Único: R$ ${valorUnicoGlobal}<br>
-        💰 Total Geral: R$ ${valorTotal}
+        💸 VALOR A PAGAR: R$ ${valorUnicoGlobal}<br>
+        💰 TOTAL RECEBER: R$ ${valorTotal}
       `;
 
-      let mensagemWhatsapp = `👤 Nome: ${nome}\n📅 Data: ${dataFormatada}\n💸 Valor Único: R$ ${valorUnicoGlobal}\n💰 Total Geral: R$ ${valorTotal}\n`;
+      let mensagemWhatsapp = `👤 Nome: ${nome}\n📅 Data: ${dataFormatada}\n💸 Valor Único: R$ ${valorUnicoGlobal}\n💰 Total Geral: R$ ${valorTotal}\n============================\n`;
 
       (dados.duelos || []).forEach((duelo, i) => {
         const jogo = document.createElement("div");
@@ -108,7 +115,7 @@ btnBuscar.onclick = () => {
 
         resultado.appendChild(jogo);
 
-        mensagemWhatsapp += `\n⚽ ${timeA} x ${timeB}\n🎯 Escolha: ${selecaoTexto}\n🕒 ${dataHoraJogo}\n------------------------`;
+        mensagemWhatsapp += `\n⚽ ${timeA} x ${timeB}\n🎯 Escolha: ${selecaoTexto}\n🕒 ${dataHoraJogo}\n============================`;
       });
 
       whatsappBtn.style.display = "inline-block";
