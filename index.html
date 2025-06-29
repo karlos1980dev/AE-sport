@@ -109,8 +109,9 @@
 </head>
 <body>
   <h2>MULTIJOGO</h2>
-  <input type="text" id="nomeJogador" placeholder="Seu nome" />
+
   <div id="containerApostas"></div>
+    <input type="text" id="nomeJogador" placeholder="Seu nome" />
     <div id="totalFinal">Total: R$ 0,00</div>
   <input type="number" id="valorUnico" placeholder="Valor por aposta (R$)" min="1">
 
@@ -150,25 +151,45 @@ const db = getDatabase(app);
 
 // Dados dos jogos
 const ladoAImagens = [
-  "https://raw.githubusercontent.com/Savanty/AE/main/botafogo.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/main/atletico-mg.jpeg",
   "https://raw.githubusercontent.com/Savanty/AE/main/flamengo.jpeg",
   "https://raw.githubusercontent.com/Savanty/AE/main/atletico-mg.jpeg",
   "https://raw.githubusercontent.com/Savanty/AE/main/bahia.jpg",
-  "https://raw.githubusercontent.com/Savanty/AE/main/vitoria.jpeg"
+  "https://raw.githubusercontent.com/Savanty/AE/main/vitoria.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg"
 ];
+
 const ladoBImagens = [
   "https://raw.githubusercontent.com/Savanty/AE/main/botafogo.jpeg",
   "https://raw.githubusercontent.com/Savanty/AE/main/flamengo.jpeg",
   "https://raw.githubusercontent.com/Savanty/AE/main/atletico-mg.jpeg",
   "https://raw.githubusercontent.com/Savanty/AE/main/bahia.jpg",
-  "https://raw.githubusercontent.com/Savanty/AE/main/santos.jpeg"
+  "https://raw.githubusercontent.com/Savanty/AE/main/santos.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg",
+  "https://raw.githubusercontent.com/Savanty/AE/refs/heads/main/Palmeiras.jpeg"
 ];
+
 const horarios = [
-  "2025-06-29T22:00:00",
-  "2025-06-29T23:00:00",
-  "2025-06-29T00:00:00",
-  "2025-06-29T01:00:00",
-  "2025-06-29T02:00:00"
+  "2025-07-01T22:00:00",
+  "2025-07-29T23:00:00",
+  "2025-07-29T00:00:00",
+  "2025-07-29T01:00:00",
+  "2025-07-29T02:00:00",
+  "2025-07-29T02:00:00",
+  "2025-07-29T22:00:00",
+  "2025-07-29T23:00:00",
+  "2025-07-29T00:00:00",
+  "2025-07-29T01:00:00",
+  "2025-07-29T02:00:00",
 ];
 
 // Utilidades
@@ -176,16 +197,19 @@ function extrairNomeDoTime(url) {
   const nome = url.split("/").pop().split(".")[0];
   return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
 }
+
 const ladoA = ladoAImagens.map((url, i) => ({
   imagem: url,
   nome: extrairNomeDoTime(url),
   horario: horarios[i]
 }));
+
 const ladoB = ladoBImagens.map(url => ({
   imagem: url,
   nome: extrairNomeDoTime(url)
 }));
-const opcoes = ["casa", "fora", "ambas marcas", "acima +2", "abaixo -2"];
+
+const opcoes = ["casa", "empate", "fora", "ambas marcas", "acima +2", "abaixo -2"];
 const container = document.getElementById("containerApostas");
 const selects = [];
 
@@ -219,6 +243,7 @@ for (let i = 0; i < ladoA.length; i++) {
       ${bloqueado ? '<small style="color:red;font-weight:bold;">⚠️ Apostas encerradas para este jogo</small>' : ''}
     </div>
   `;
+
   container.appendChild(div);
 
   const selectA = div.querySelector(`#selectA-${i}`);
@@ -236,6 +261,13 @@ for (let i = 0; i < ladoA.length; i++) {
     if (selectB.value === "Selecione") selectA.disabled = false;
     atualizarTotal();
   });
+
+  // ✅ Alerta ao clicar nas imagens
+  const imgA = div.querySelector("img:first-child");
+  const imgB = div.querySelector("img:last-child");
+
+  imgA.addEventListener("click", () => alert(`${ladoA[i].nome}`));
+  imgB.addEventListener("click", () => alert(`${ladoB[i].nome}`));
 }
 
 // Atualizar total
@@ -326,7 +358,6 @@ document.getElementById("apostarBtn").onclick = () => {
       valorDuelo: a.valorTotalDuelo
     }))
   }).then(() => {
-    // Resetar campos
     document.getElementById("nomeJogador").value = "";
     document.getElementById("valorUnico").value = "";
     selects.forEach(({ selectA, selectB }) => {
