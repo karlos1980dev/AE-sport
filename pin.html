@@ -213,11 +213,32 @@ btnBuscar.onclick = () => {
       };
 
       btnGerarLink.onclick = () => {
-        const dadosTexto = `${dataHoraEl.textContent}\n\n` + Array.from(resultado.children).map(el => el.innerText).join('\n\n');
-        const base64 = btoa(unescape(encodeURIComponent(dadosTexto)));
-        const linkFinal = `${location.origin}/aposta_viewer.html?data=${base64}`;
-        navigator.clipboard.writeText(linkFinal).then(() => alert("🔗 Link gerado e copiado!"));
-      };
+  const selectedOption = contatoSelect.options[contatoSelect.selectedIndex];
+  const nomeContato = selectedOption?.getAttribute("data-nome") || "Desconhecido";
+  const telefoneContato = contatoSelect.value;
+
+  const dadosParaSalvar = {
+    nome: nomeContato,
+    telefone: telefoneContato,
+    dataHora: dataHoraEl.textContent,
+    jogos: Array.from(resultado.children).map(el => el.innerText)
+  };
+
+  const dbRef = ref(db, "links_apostas");
+  const novoRef = push(dbRef);
+
+  set(novoRef, dadosParaSalvar).then(() => {
+    const id = novoRef.key;
+    const linkFinal = `${location.origin}/aposta_viewer.html?id=${id}`;
+    navigator.clipboard.writeText(linkFinal).then(() => {
+      alert("🔗 Link gerado e copiado com sucesso!");
+    });
+  }).catch(error => {
+    alert("Erro ao salvar os dados no Firebase.");
+    console.log("Erro ao salvar:", error);
+  });
+};
+    
     } else {
       resultado.innerHTML = "<p><strong>Código não encontrado.</strong></p>";
     }
