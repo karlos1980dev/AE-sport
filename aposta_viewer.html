@@ -8,7 +8,7 @@
     body {
       font-family: sans-serif;
       text-align: center;
-      background: #f3f3f3;
+      background: black;
       padding: 20px;
     }
     .container {
@@ -63,15 +63,13 @@
       get(child(ref(db), `links_apostas/${id}`)).then(snapshot => {
         if (snapshot.exists()) {
           const dados = snapshot.val();
-          const nome = dados.nome || "Desconhecido";
-          const telefone = dados.telefone || "Não informado";
+          const Nome = dados.novoNome || "Desconhecido";
           const dataHora = dados.dataHora || "Data/Hora indisponível";
           const jogos = dados.jogos || [];
 
           container.innerHTML = `
             <h2>📄 Visualização da Aposta</h2>
             <p><strong>👤 Jogador:</strong> ${nome}</p>
-            <p><strong>📱 Telefone:</strong> ${telefone}</p>
             <p><strong>📅 Data:</strong> ${dataHora}</p>
             <hr />
             <h3>🎮 Jogos:</h3>
