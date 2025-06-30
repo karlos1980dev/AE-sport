@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Visualizador de Aposta</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f3f3f3;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .duelo {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    h2 { color: #25d366; }
+    hr { border: none; border-top: 1px solid #ccc; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container" id="visualizacao">
+    <h2>🔎 Carregando aposta...</h2>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+    import { getDatabase, ref, child, get } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5a-2HzvcljnAfXE7P3ThDnq6m6E568ZA",
+      authDomain: "jogo-60a9e.firebaseapp.com",
+      projectId: "jogo-60a9e",
+      storageBucket: "jogo-60a9e.appspot.com",
+      messagingSenderId: "352852303591",
+      appId: "1:352852303591:web:8083c950047c9026bd8c42",
+      databaseURL: "https://jogo-60a9e-default-rtdb.firebaseio.com/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    const container = document.getElementById("visualizacao");
+
+    if (!id) {
+      container.innerHTML = "<h2>❌ ID inválido ou ausente na URL.</h2>";
+    } else {
+      get(child(ref(db), `links_apostas/${id}`)).then(snapshot => {
+        if (snapshot.exists()) {
+          const dados = snapshot.val();
+          const nome = dados.nome || "Desconhecido";
+          const telefone = dados.telefone || "Não informado";
+          const dataHora = dados.dataHora || "Data/Hora indisponível";
+          const jogos = dados.jogos || [];
+
+          container.innerHTML = `
+            <h2>📄 Visualização da Aposta</h2>
+            <p><strong>👤 Jogador:</strong> ${nome}</p>
+            <p><strong>📱 Telefone:</strong> ${telefone}</p>
+            <p><strong>📅 Data:</strong> ${dataHora}</p>
+            <hr />
+            <h3>🎮 Jogos:</h3>
+            ${jogos.map(j => `<div class="duelo">${j.replace(/\n/g, "<br>")}</div>`).join("")}
+          `;
+        } else {
+          container.innerHTML = "<h2>❌ Aposta não encontrada.</h2>";
+        }
+      }).catch(error => {
+        console.error("Erro ao buscar aposta:", error);
+        container.innerHTML = "<h2>⚠️ Erro ao carregar os dados da aposta.</h2>";
+      });
+    }
+  </script>
+</body>
+</html>
