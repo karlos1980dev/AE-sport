@@ -419,7 +419,7 @@ const totalFinal = multiplicadores * multiplicadorFinal * valorUnico;
   }).catch(error => alert("Erro ao salvar aposta: " + error.message));
 
   console.log("Código gerado:", codigoGerado);
-  codigoTexto.textContent = `${codigoGerado} - Total: R$ ${totalFinal.toFixed(2)}`;
+  codigoTexto.textContent = `${codigoGerado}`;
   modal.style.display = "flex";
 };
 
@@ -428,7 +428,11 @@ btnWhatsapp.onclick = () => {
   const msg = `✅ Meu Codigo para Valida!\n🔢 Código: ${codigoGerado}`;
   window.open(`https://wa.me/5571992290058?text=${encodeURIComponent(msg)}`, "_blank");
 };
-
+btnCopiar.onclick = () => {
+  navigator.clipboard.writeText(codigoTexto.textContent)
+    .then(() => alert("Código copiado!"))
+    .catch(err => alert("Erro ao copiar código: " + err));
+};
 btnFechar.onclick = () => modal.style.display = "none";
 </script>
 </body>
