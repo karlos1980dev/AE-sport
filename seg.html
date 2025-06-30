@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MULTIJOGO EA</title>
   <style>
     body {
       font-family: sans-serif;
@@ -388,25 +389,30 @@ if (totalSelecoes > 3) {
   multiplicadorFinal = Math.pow(2, gruposExtras);
 }
 
-const totalFinal = multiplicadores * multiplicadorFinal * valorUnico;
+let totalFinalCorrigido = 0;
+apostas.forEach(a => {
+  totalFinalCorrigido += a.valorTotalDuelo;
+});
+totalFinalCorrigido *= multiplicadorFinal;
   if (apostas.length === 0) return alert("Marque pelo menos uma opção!");
 
   codigoGerado = Math.floor(100000 + Math.random() * 900000).toString();
 
   set(ref(db, "apostas/" + codigoGerado), {
-
-    valorDigitado: valorUnico,
-    valorTotal: totalFinal,
-    dataRegistro: new Date().toISOString(),
-    duelos: apostas.map(a => ({
-      duelo: `${a.nomeTimeA} x ${a.nomeTimeB}`,
-      selecaoA: a.selecaoA?.texto || null,
-      selecaoB: a.selecaoB?.texto || null,
-      dataHora: a.dataHora,
-      valorUnico: a.valorDigitado,
-      valorDuelo: a.valorTotalDuelo
-    }))
-  }).then(() => {
+  valorDigitado: valorUnico,
+  valorTotal: totalFinalCorrigido,
+  dataRegistro: new Date().toISOString(),
+  duelos: apostas.map(a => ({
+    duelo: `${a.nomeTimeA} x ${a.nomeTimeB}`,
+    selecaoA: a.selecaoA?.texto || null,
+    selecaoB: a.selecaoB?.texto || null,
+    dataHora: a.dataHora,
+    valorUnico: a.valorDigitado,
+    valorDuelo: a.valorTotalDuelo
+  }))
+})
+  
+  .then(() => {
     
     document.getElementById("valorUnico").value = "";
     selects.forEach(({ selectA, selectB }) => {
