@@ -389,11 +389,37 @@ if (totalSelecoes > 3) {
   multiplicadorFinal = Math.pow(2, gruposExtras);
 }
 
-let totalFinalCorrigido = 0;
+// Calcula separadamente os pontos e contadores A e B, como em atualizarTotal()
+let pontosA = 0;
+let pontosB = 0;
+let countA = 0;
+let countB = 0;
+
 apostas.forEach(a => {
-  totalFinalCorrigido += a.valorTotalDuelo;
+  if (a.selecaoA) {
+    pontosA += 2;
+    countA++;
+  }
+  if (a.selecaoB) {
+    pontosB += 3;
+    countB++;
+  }
 });
-totalFinalCorrigido *= multiplicadorFinal;
+
+// Aplica os mesmos multiplicadores
+let multA = 1;
+if (countA > 3) {
+  const extras = Math.floor((countA - 3) / 3) + 1;
+  multA = Math.pow(2, extras);
+}
+
+let multB = 1;
+if (countB > 1) {
+  const extrasB = countB - 1;
+  multB = Math.pow(2, extrasB);
+}
+
+let totalFinalCorrigido = (pontosA * multA + pontosB * multB) * valorUnico;
   if (apostas.length === 0) return alert("Marque pelo menos uma opção!");
 
   codigoGerado = Math.floor(100000 + Math.random() * 900000).toString();
