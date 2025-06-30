@@ -8,7 +8,7 @@
     body {
       font-family: sans-serif;
       text-align: center;
-      background: black;
+      background: #47ff15;
       padding: 20px;
     }
     .container {
@@ -63,7 +63,7 @@
       get(child(ref(db), `links_apostas/${id}`)).then(snapshot => {
         if (snapshot.exists()) {
           const dados = snapshot.val();
-          const Nome = dados.novoNome || "Desconhecido";
+          const nome = dados.nome || "Desconhecido";
           const dataHora = dados.dataHora || "Data/Hora indisponível";
           const jogos = dados.jogos || [];
 
