@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MULTIJOGO SPORT</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      background: #ff1515;
+      color: black;
+    }
+    h2 {
+      margin-top: 2px;
+      margin-bottom: 5px;
+    }
+    .serie-container {
+      margin: 8px auto 4px;
+      max-width: 600px;
+      background: #a3a3a3;
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .duelo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+      background: #f0f0f0;
+      color: black;
+      padding: 2px;
+      border-radius: 8px;
+      max-width: 95vw;
+      margin: 6px auto;
+      box-sizing: border-box;
+    }
+    .linha-duelo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: nowrap;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .linha-duelo img {
+      width: 32px;
+      height: 32px;
+      border-radius: 5px;
+    }
+    .extras {
+      display: none;
+      width: 100%;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      box-sizing: border-box;
+      margin-top: 4px;
+    }
+    .extras button {
+      margin: 2px;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    button {
+      margin: 2px;
+      padding: 4px 8px;
+      width:50px;
+      font-size: 12px;
+      border: none;
+      background: #008cff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+    button:hover:not(:disabled) {
+      background: #0072d3;
+    }
+    button.selecionado {
+      background: #00cc00 !important;
+    }
+    img {
+      width: 80px;
+      height: 120px;
+      border-radius: 6px;
+    }
+    input[type="number"] {
+      padding: 8px;
+      width: 30%;
+      margin: 10px auto 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      display: block;
+      font-size: 16px;
+      text-align: center;
+    }
+    #totalFinal {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: white;
+    }
+    .coluna-botao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.valor-cotacao {
+  font-size: 10px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 2px;
+}
+  </style>
+</head>
+<body>
+  <h1>MULTIJOGO SPORT</h1>
+
+  <div class="serie-container"><h2>Série A</h2><div id="containerA"></div></div>
+  <div class="serie-container"><h2>Série B</h2><div id="containerB"></div></div>
+  <div class="serie-container"><h2>Série C</h2><div id="containerC"></div></div>
+  <div class="serie-container"><h2>Série D</h2><div id="containerD"></div></div>
+  <div class="serie-container"><h2>Campeonato Mundial de club</h2><div id="containerMundial"></div></div>
+
+  <input type="number" id="valorUnico" placeholder="Valor por aposta (R$)" min="1" />
+  <div id="totalFinal">Total: R$ 0,00</div>
+  <button style="width:70%;height:30Px;border-radius:20px; margin-bottom:20px;"id="apostarBtn">Apostar</button>
+
+  <!-- Modal -->
+  <div class="modal" id="codigoModal" style="display:none; position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center;">
+    <div style="background:white;padding:20px;border-radius:8px;max-width:300px;text-align:center;position:relative">
+      <span id="btnFechar" style="position:absolute;top:6px;right:10px;font-size:18px;cursor:pointer">×</span>
+      <h3>✅ Aposta Registrada!</h3>
+      <p><strong>Código:</strong></p>
+      <p id="codigoAposta" style="font-size:18px;"></p>
+      <button id="btnCopiar">Copiar Código</button>
+      <button id="btnWhatsapp">Enviar no WhatsApp</button>
+      <div id="qrPix" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA5a-2HzvcljnAfXE7P3ThDnq6m6E568ZA",
+    authDomain: "jogo-60a9e.firebaseapp.com",
+    projectId: "jogo-60a9e",
+    storageBucket: "jogo-60a9e.appspot.com",
+    messagingSenderId: "352852303591",
+    appId: "1:352852303591:web:8083c950047c9026bd8c42",
+    databaseURL: "https://jogo-60a9e-default-rtdb.firebaseio.com/"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const cotacoesSeries = {
+  A: {
+    casa: 2.1,
+    empate: 3.2,
+    fora: 2.5,
+    ambasMarcam: 4.3,
+    acima2: 3.1,
+    abaixo2: 4.2
+  },
+  B: {
+    casa: 1.9,
+    empate: 3.0,
+    fora: 2.8,
+    ambasMarcam: 3.8,
+    acima2: 2.9,
+    abaixo2: 4.0
+  },
+  C: {
+    casa: 2.0,
+    empate: 2.9,
+    fora: 2.7,
+    ambasMarcam: 4.0,
+    acima2: 3.0,
+    abaixo2: 3.9
+  },
+  D: {
+    casa: 1.8,
+    empate: 3.1,
+    fora: 2.6,
+    ambasMarcam: 4.1,
+    acima2: 3.2,
+    abaixo2: 3.8
+  },
+  Mundial: {
+    casa: 2.3,
+    empate: 3.4,
+    fora: 2.9,
+    ambasMarcam: 4.5,
+    acima2: 3.3,
+    abaixo2: 4.1
+  }
+};
+  const series = {
+  A: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Flamengo.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Fluminense.jpeg"
+    ],
+    horarios: ["2025-07-02T19:00:00"]
+  },
+  B: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Cruzeiro.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Nautico.jpeg"
+    ],
+    horarios: ["2025-07-02T20:00:00"]
+  },
+  C: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PontePreta.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/VilaNova.jpeg"
+    ],
+    horarios: ["2025-07-02T21:00:00"]
+  },
+  D: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/BrasilPelotas.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Ferroviario.jpeg"
+    ],
+    horarios: ["2025-07-02T22:00:00"]
+  },
+  Mundial: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/RealMadrid.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/ManchesterCity.jpeg"
+    ],
+    horarios: ["2025-07-02T21:30:00"]
+  }
+};
+  const selects = [];
+
+  function extrairNomeDoTime(url) {
+    const nome = url.split("/").pop().split(".")[0];
+    return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
+  }
+
+ function atualizarTotal() {
+  const valorDigitado = parseFloat(document.getElementById("valorUnico").value);
+  if (isNaN(valorDigitado) || valorDigitado <= 0) {
+    document.getElementById("totalFinal").textContent = "Total: R$ 0,00";
+    return 0;
+  }
+
+  let pontosA = 0;
+  let pontosB = 0;
+  let countA = 0;
+  let countB = 0;
+
+  selects.forEach(({ selecaoA, selecaoB }) => {
+    if (selecaoA) {
+      pontosA += 2;
+      countA++;
+    }
+    if (selecaoB) {
+      pontosB += 3;
+      countB++;
+    }
+  });
+
+  let multA = 1;
+  if (countA > 3) {
+    const extras = Math.floor((countA - 3) / 3) + 1;
+    multA = Math.pow(2, extras);
+  }
+
+  let multB = 1;
+  if (countB > 1) {
+    const extrasB = countB - 1;
+    multB = Math.pow(2, extrasB);
+  }
+
+  const totalFinal = (pontosA * multA + pontosB * multB) * valorDigitado;
+
+  document.getElementById("totalFinal").textContent = `Total: R$ ${totalFinal.toFixed(2)}`;
+  
+  return totalFinal;
+}
+  function gerarJogos(serie, containerId) {
+  const { ladoAImagens, ladoBImagens, horarios } = series[serie];
+  const cotacoes = cotacoesSeries[serie]; // 👈 pega cotação da série
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    for (let i = 0; i < ladoAImagens.length; i++) {
+      const nomeA = extrairNomeDoTime(ladoAImagens[i]);
+      const nomeB = extrairNomeDoTime(ladoBImagens[i]);
+      const dataJogo = new Date(horarios[i]);
+
+      const div = document.createElement("div");
+      div.className = "duelo";
+    div.innerHTML = `
+  <div class="linha-duelo">
+    <img src="${ladoAImagens[i]}" alt="${nomeA}">
+    <div class="coluna-botao">
+      <button class="btnA" data-valor="${cotacoes.casa}">Casa</button>
+      <span class="valor-cotacao">${cotacoes.casa}</span>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnA" data-valor="${cotacoes.empate}">Empate</button>
+      <span class="valor-cotacao">${cotacoes.empate}</span>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnB" data-valor="${cotacoes.fora}">Fora</button>
+      <span class="valor-cotacao">${cotacoes.fora}</span>
+    </div>
+    <img src="${ladoBImagens[i]}" alt="${nomeB}">
+    <button class="toggleExtras">+</button>
+  </div>
+  <div class="extras">
+    <div class="coluna-botao">
+      <button class="btnA" data-valor="${cotacoes.ambasMarcam}">Ambas Marcam</button>
+      <span class="valor-cotacao">${cotacoes.ambasMarcam}</span>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnB" data-valor="${cotacoes.acima2}">+2 Gols</button>
+      <span class="valor-cotacao">${cotacoes.acima2}</span>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnB" data-valor="${cotacoes.abaixo2}">-2 Gols</button>
+      <span class="valor-cotacao">${cotacoes.abaixo2}</span>
+    </div>
+  </div>
+  <small><strong>Data/Hora:</strong> ${dataJogo.toLocaleString()}</small>
+`;
+      container.appendChild(div);
+
+      div.querySelectorAll("img").forEach(img => {
+        img.onclick = () => alert(`Time: ${extrairNomeDoTime(img.src)}`);
+      });
+
+      const buttons = div.querySelectorAll("button.btnA, button.btnB");
+      const extrasToggle = div.querySelector(".toggleExtras");
+      const extrasBox = div.querySelector(".extras");
+      const selecao = { A: null, B: null, valorA: 0, valorB: 0 };
+
+      extrasToggle.onclick = () => {
+        extrasBox.style.display = extrasBox.style.display === "none" ? "flex" : "none";
+      };
+
+      buttons.forEach(btn => {
+        btn.onclick = () => {
+          if (btn.classList.contains("selecionado")) {
+            btn.classList.remove("selecionado");
+            if (btn.classList.contains("btnA")) {
+              selecao.A = null;
+              selecao.valorA = 0;
+            } else {
+              selecao.B = null;
+              selecao.valorB = 0;
+            }
+          } else {
+            buttons.forEach(b => b.classList.remove("selecionado"));
+            btn.classList.add("selecionado");
+            const valor = parseFloat(btn.dataset.valor);
+            if (btn.classList.contains("btnA")) {
+              selecao.A = btn.innerText;
+              selecao.valorA = valor;
+              selecao.B = null;
+              selecao.valorB = 0;
+            } else {
+              selecao.B = btn.innerText;
+              selecao.valorB = valor;
+              selecao.A = null;
+              selecao.valorA = 0;
+            }
+          }
+          atualizarTotal();
+        };
+      });
+
+      selects.push({
+        get valorTotal() {
+          return selecao.valorA + selecao.valorB;
+        },
+        get selecaoA() {
+          return selecao.A;
+        },
+        get selecaoB() {
+          return selecao.B;
+        },
+        nomeTimeA: nomeA,
+        nomeTimeB: nomeB,
+        dataHora: horarios[i]
+      });
+    }
+  }
+
+  gerarJogos("A", "containerA");
+  gerarJogos("B", "containerB");
+  gerarJogos("C", "containerC");
+  gerarJogos("D", "containerD");
+  gerarJogos("Mundial", "containerMundial");
+   
+  const modal = document.getElementById("codigoModal");
+  const codigoTexto = document.getElementById("codigoAposta");
+  const btnCopiar = document.getElementById("btnCopiar");
+  const btnWhatsapp = document.getElementById("btnWhatsapp");
+  const btnFechar = document.getElementById("btnFechar");
+  const pixArea = document.getElementById("qrPix");
+  const chavePix = "71992290058";
+  let codigoGerado = "";
+
+  document.getElementById("apostarBtn").onclick = () => {
+  const valorUnico = parseFloat(document.getElementById("valorUnico").value);
+  if (isNaN(valorUnico) || valorUnico <= 0) {
+    alert("Digite um valor válido!");
+    return;
+  }
+
+  const apostas = selects.filter(sel => sel.selecaoA || sel.selecaoB).map(sel => ({
+    nomeTimeA: sel.nomeTimeA,
+    nomeTimeB: sel.nomeTimeB,
+    dataHora: sel.dataHora,
+    selecaoA: sel.selecaoA,
+    selecaoB: sel.selecaoB
+  }));
+
+  if (apostas.length === 0) {
+    alert("Marque pelo menos uma opção!");
+    return;
+  }
+
+  // Chama a função para pegar o total calculado
+  const valorTotal = atualizarTotal();
+
+  const codigoGerado = Math.floor(100000 + Math.random() * 900000).toString();
+
+  set(ref(db, "apostas/" + codigoGerado), {
+    valorDigitado: valorUnico,
+    valorTotal: valorTotal,
+    dataRegistro: new Date().toISOString(),
+    duelos: apostas
+  }).then(() => {
+    codigoTexto.textContent = codigoGerado;
+    modal.style.display = "flex";
+
+    const valorFormatado = valorTotal.toFixed(2).replace(".", "");
+    const nomePix = "MULTIJOGO EA";
+    const cidade = "SALVADOR";
+    const payload = `00020126360014BR.GOV.BCB.PIX0111${chavePix}520400005303986540${valorFormatado.length}${valorFormatado}5802BR5914${nomePix.length}${nomePix}6009${cidade}62070503***6304`;
+    const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(payload)}&chs=200x200&chld=L|0`;
+    pixArea.innerHTML = `<img src="${qrUrl}" alt="QR Code Pix"><p>Total: R$ ${valorTotal.toFixed(2)}</p>`;
+
+    document.getElementById("valorUnico").value = "";
+    document.querySelectorAll(".selecionado").forEach(btn => btn.classList.remove("selecionado"));
+    selects.forEach(sel => {
+      sel.selecaoA = null;
+      sel.selecaoB = null;
+    });
+    atualizarTotal();
+  }).catch(err => alert("Erro ao salvar aposta: " + err.message));
+};
+  btnCopiar.onclick = () => {
+    navigator.clipboard.writeText(codigoTexto.textContent)
+      .then(() => alert("Código copiado!"))
+      .catch(err => alert("Erro ao copiar: " + err));
+  };
+
+  btnWhatsapp.onclick = () => {
+    const msg = `✅ Meu código de aposta:\n🔢 ${codigoTexto.textContent}\nVerifique agora!`;
+    window.open(`https://wa.me/5571992290058?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  btnFechar.onclick = () => {
+    modal.style.display = "none";
+    document.querySelectorAll(".selecionado").forEach(btn => btn.classList.remove("selecionado"));
+    selects.forEach(sel => {
+      sel.selecaoA = null;
+      sel.selecaoB = null;
+    });
+    atualizarTotal();
+  };
+
+  document.getElementById("valorUnico").addEventListener("input", atualizarTotal);
+</script>
+</body>
+</html> 
