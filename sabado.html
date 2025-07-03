@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MULTIJOGO SPORT</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      padding-top: 80px;
+      background: #ff1515;
+      color: black;
+    }
+    h1{
+        font-size:20px;
+        margin:0px;
+    }
+    h2 {
+      margin-top: 2px;
+      background:red;
+      color:white;
+      font-size:20px;
+      border-radius:5px;
+      margin-bottom: 0px;
+    }
+    .serie-container {
+      margin: 8px auto 4px;
+      max-width: 600px;
+      background: #a3a3a3;
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .duelo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+      background: #f0f0f0;
+      color: black;
+      padding: 2px;
+      border-radius: 8px;
+      max-width: 95vw;
+      margin: 6px auto;
+      box-sizing: border-box;
+    }
+    .linha-duelo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: nowrap;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .linha-duelo img {
+      width: 32px;
+      height: 32px;
+      border-radius: 5px;
+    }
+    .extras {
+      display: none;
+      width: 100%;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      box-sizing: border-box;
+      margin-top: 4px;
+    }
+    .extras button {
+      margin: 2px;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+    button {
+    display:inline;
+      margin: 2px;
+      padding: 4px 8px;
+      width:50px;
+      font-size: 12px;
+      border: none;
+      background: #008cff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+    }
+    button:hover:not(:disabled) {
+      background: #0072d3;
+    }
+    button.selecionado {
+      background: #00cc00 !important;
+    }
+    img {
+      width: 80px;
+      height: 120px;
+      border-radius: 6px;
+    }
+    input[type="number"] {
+      padding: 8px;
+      width: 30%;
+    margin:bottom:50px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      
+      font-size: 16px;
+      text-align: center;
+    }
+    #totalFinal {
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: white;
+    }
+    .coluna-botao {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .valor-cotacao {
+      font-size: 10px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 2px;
+    }
+ 
+.time-nome-img {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width:100px;
+}
+
+.nome-time {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  text-align: center;
+}
+
+  .topo-fixo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .topo-fixo > * {
+    flex: 1;
+    margin: 0 5px;
+    text-align: center;
+  }
+
+  #totalFinal {
+    font-weight: bold;
+    color:black;
+    font-size: 16px;
+  }
+
+  #valorUnico {
+    width: 100%;
+    height: 35px;
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+
+  #apostarBtn {
+    width: 100%;
+    height: 40px;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  </style>
+</head>
+<body>
+  <h1>MULTISPORT.BET</h1>
+  <div class="topo-fixo">
+  <div id="totalFinal">Total: R$ 0,00</div>
+<input type="number" id="valorUnico" placeholder="Valor por aposta (R$)" min="1" />
+
+  <button style="width:50%;height:40Px;border-radius:20px; " id="apostarBtn">Apostar</button>
+</div> 
+<div>
+<div class="serie-container"><h2></h2><div id="containerA"></div></div>
+<div class="serie-container"><h2></h2><div id="containerB"></div></div>
+<div class="serie-container"><h2></h2><div id="containerC"></div></div>
+<div class="serie-container"><h2></h2><div id="containerD"></div></div>
+<div class="serie-container"><h2></h2><div id="containerMundial"></div></div>
+<div class="serie-container"><h2></h2><div id="containerSub20"></div></div>
+<div class="serie-container"><h2></h2><div id="containerMundo"></div></div>
+<div class="serie-container"><h2></h2><div id="containerJogoAmistososClubs"></div></div>
+<div class="serie-container"><h2></h2><div id="containerEuropeanChampionShip"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCopaMundoClub"></div></div>
+<div class="serie-container"><h2></h2><div id="containerLigarPro"></div></div>
+<div class="serie-container"><h2></h2><div id="containerQueenland"></div></div>
+<div class="serie-container"><h2></h2><div id="containerNovaPaisGales"></div></div>
+
+
+    <div class="serie-container"><h2></h2><div id="containerCopaOuroConcacaf"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCopaRioBrasil"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCopaArgentina"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCopaPaulistaSub20"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCopaPaulista"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCampeonatoNoruegues"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptUruguaio"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptChileno"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptCoreano2div"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptIrlandes"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptJapones"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptParaguaio"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptEquatoriano"></div></div>
+
+
+
+<div class="serie-container"><h2></h2><div id="containerCptPeruano"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptLeagueSoccerUsa"></div></div>
+<div class="serie-container"><h2></h2><div id="containerCptFinlandes"></div></div>
+
+<div class="serie-container"><h2></h2><div id="containerCptSueco"></div></div>
+<div class="serie-container"><h2></h2><div id="containerAmistosoInternacionalClub"></div></div>
+<div class="serie-container"><h2></h2><div id="containerAmsFemininoSelecoes"></div></div>
+<div class="serie-container"><h2></h2><div id="containerUslEstadoUnidos"></div></div>
+<div class="serie-container"><h2></h2><div id="containerLigaUm"></div></div>
+<div class="serie-container"><h2></h2><div id="containerPlnQueenLandAustralia"></div></div>
+<div class="serie-container"><h2></h2><div id="containerEurocopaFeminina"></div></div>
+<div class="serie-container"><h2></h2><div id="containerPrimeiraDivisaoIlhaFaroe"></div></div>
+<div class="serie-container"><h2></h2><div id="containerPremiereLeague"></div></div>
+
+</div>
+
+  <!-- Modal -->
+  <div class="modal" id="codigoModal" style="display:none; position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.6); justify-content: center; align-items: center;">
+    <div style="background:white;padding:20px;border-radius:8px;max-width:300px;text-align:center;position:relative">
+      <span id="btnFechar" style="position:absolute;top:6px;right:10px;font-size:18px;cursor:pointer">×</span>
+      <h3>✅ Aposta Registrada!</h3>
+      <p><strong>Código:</strong></p>
+      <p id="codigoAposta" style="font-size:18px;"></p>
+      <button id="btnCopiar">Copiar Código</button>
+      <button id="btnWhatsapp">Enviar no WhatsApp</button>
+      <div id="qrPix" style="margin-top:10px;"></div>
+    </div>
+  </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA5a-2HzvcljnAfXE7P3ThDnq6m6E568ZA",
+  authDomain: "jogo-60a9e.firebaseapp.com",
+  projectId: "jogo-60a9e",
+  storageBucket: "jogo-60a9e.appspot.com",
+  messagingSenderId: "352852303591",
+  appId: "1:352852303591:web:8083c950047c9026bd8c42",
+  databaseURL: "https://jogo-60a9e-default-rtdb.firebaseio.com/"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const cotacoesSeries = {
+  A: [
+    { casa: 2.1, empate: 3.2, fora: 2.70, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 4.7, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 3.80, empate: 3.1, fora: 1.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.5 },
+    // ... continue para cada duelo da série A
+  ],
+  B: [
+      { casa: 2.1, empate: 3.2, fora: 2.70, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 4.7, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 3.80, empate: 3.1, fora: 1.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 },
+    // ...
+  ],
+  C: [
+    { casa: 1.70, empate: 3.2, fora: 4.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.90, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 1.67, empate: 3.1, fora: 4.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 },
+    // ...
+  ],
+  Sub20: [
+    { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 2.9 },
+     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.5 },
+    // ...
+  ],
+  D: [
+    { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },
+    // ...
+  ],
+Mundial :[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+  
+  Mundo: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+    
+  JogoAmistososClubs:[ 
+  { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+  
+    { casa: 1.9, empate: 3.50, fora: 4.0, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 2.70, empate: 3.1, fora: 2.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },
+    { casa: 5.30, empate: 4.2, fora: 1.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+  
+    { casa: 1.9, empate: 4.4, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 2.90, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },  
+      { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 1.70, empate: 4.5, fora: 5.9, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, 
+      { casa: 2.25, empate: 4.0, fora: 3.2, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 }, 
+    ],
+    
+  LigarPro: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 2.2, empate: 3.8, fora: 3.0, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+  Queenland: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+  PremiereLeague: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },
+  
+ ],
+ CopaOuroConcacaf:[ { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 3.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CopaRioBrasil: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 2.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CopaArgentina:[ { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CopaPaulistaSub20:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CopaPaulista: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CampeonatoNoruegues:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptUruguaio:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptChileno: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptCoreano2div: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptIrlandes:[ { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptJapones: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptParaguaio:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptEquatoriano:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptPeruano: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptLeagueSoccerUsa: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptFinlandes: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptIrlandes:[ { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ CptSueco: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ AmistosoInternacionalClub: [{ casa: 2.1, empate: 3.2, fora: 4.1, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 3.2 },
+ 
+    { casa: 1.9, empate: 3.5, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 },],
+    
+ AmsFemininoSelecoes: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ UslEstadoUnidos: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ LigaUm:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ PlnQueenLandAustralia:[ { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ EurocopaFeminina: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
+    PrimeiraDivisaoIlhaFaroe: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
+    
+EuropeanChampionShip:[{ casa: 5.1, empate: 3.2, fora: 1.90, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 8.0, fora: 20.0, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
+    
+    CopaMundoClub:[{ casa: 3.1, empate: 3.2, fora: 2.0, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 4.1, empate: 3.0, fora: 2.2, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
+    
+    
+};
+
+const limitePorSerie = {
+  A: 3,
+  B: 3,
+  C: 4,
+  D: 3,
+  Mundial: 3,
+  Sub20: 1,
+  Mundo:1,
+  
+  
+  CopaMundoClub:2,
+  JogoAmistososClubs:6,
+  LigarPro:3,
+  Queenland:2,
+  
+  PremiereLeague:3,
+  
+  EuropeanChampionShip:2,
+ NovaPaisGales:5,
+ CopaOuroConcacaf:3,
+ CopaRioBrasil:3,
+ CopaArgentina:3,
+ CopaPaulistaSub20:3,
+ CopaPaulista:3,
+ CampeonatoNoruegues:3,
+ CptUruguaio:3,
+ CptChileno:3,
+ CptCoreano2div:3,
+ CptIrlandes:2,
+ CptJapones:3,
+ CptParaguaio:4,
+ CptEquatoriano:3,
+ CptPeruano:3,
+ CptLeagueSoccerUsa:3,
+ CptFinlandes:3,
+ CptIrlandes:3,
+ CptSueco:3,
+ AmistosoInternacionalClub:3,
+ AmsFemininoSelecoes:3,
+ UslEstadoUnidos:10,
+ LigaUm:3,
+ PlnQueenLandAustralia:6,
+ EurocopaFeminina:3, PrimeiraDivisaoIlhaFaroe:3,
+ 
+};
+
+const series = {
+  A: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Man-City.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+      "2025-07-02T23:00:00",
+    ],
+  },
+  B: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Remo.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Avai.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Amazonas.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Cuiaba.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Paysandu.jpeg",
+       "https://raw.githubusercontent.com/Savanty/AE/main/atletico-paranaense.jpeg"
+    ],
+    horarios: [
+   "2025-07-05T16:00:00",
+      "2025-07-05T19:30:00",
+       "2025-07-05T20:30:00",
+        "2025-07-05T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+    ]
+  },
+  C: {
+    ladoAImagens: [
+     "https://raw.githubusercontent.com/Savanty/AE/main/Ituano.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Nautico.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Confianca.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/CSA.jpeg"
+    ],
+    ladoBImagens: [
+     "https://raw.githubusercontent.com/Savanty/AE/main/Retro.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Floresta.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/ABC.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Caxias.jpeg"
+    ],
+    horarios: [
+   "2025-07-05T17:00:00",
+      "2025-07-05T17:00:00",
+       "2025-07-05T19:00:00",
+        "2025-07-05T19:00:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+    ]
+  },
+  D: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Mushuc Runa SC.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/CS Emelec.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/CSD Independiente del Valle.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/CD Universidade Católica.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Cuniburo FC.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona SC.jpeg"
+    ],
+    horarios: [
+   "2025-07-05T16:00:00",
+      "2025-07-05T18:30:00",
+       "2025-07-05T21:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+    ]
+  },
+  Mundial: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Man-City.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+      "2025-07-02T23:00:00"
+      
+    ]
+  },
+  Sub20: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/San-Lorenzo-de-Almagro.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Quilmes AC.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+      "2025-07-02T23:00:00"
+    ]
+  },
+Mundo: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/União Espanhola.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Universidade do Chile.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-06T16:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+      "2025-07-02T23:00:00"
+    ]
+  },
+  JogoAmistososClubs: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/San Telmo.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Australia Klagenfurt.jpeg",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Los angeles fc.png",
+        
+         "https://raw.githubusercontent.com/Savanty/AE/main/San-Miguel.jpeg",
+         
+      "https://raw.githubusercontent.com/Savanty/AE/main/Club-Almagro.jpeg",
+      
+       "https://raw.githubusercontent.com/Savanty/AE/main/Ferro-Carril-Oeste.jpeg",
+       
+      "https://raw.githubusercontent.com/Savanty/AE/main/Dinamo moscou.jpeg",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Sigma olomouc.jpeg"
+    ],
+    ladoBImagens: [
+   
+      "https://raw.githubusercontent.com/Savanty/AE/main/Estudiantes-Rio-Cuarto.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/CA Colegiales.jpeg",
+        
+     "https://raw.githubusercontent.com/Savanty/AE/main/Deportivo-Madryun.jpeg",
+     
+      "https://raw.githubusercontent.com/Savanty/AE/main/SV 07 Elversberg.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Maipu.jpeg",
+        
+      "https://raw.githubusercontent.com/Savanty/AE/main/Gimnasia Y Tiro de Salta.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/FC Partizan.jpeg",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Debrecen VSC.jpeg",
+        
+       
+    ],
+    horarios: [
+  "2025-07-05T15:00:00",
+      "2025-07-05T15:00:00",
+       "2025-07-05T15:30:00",
+        "2025-07-05T15:30:00",
+      "2025-07-05T11:19:00",
+       "2025-07-05T11:00:00",
+          "2025-07-05T11:30:00",
+      "2025-07-05T13:00:00",
+       "2025-07-05T14:00:00",
+    ]
+  },
+  EuropeanChampionShip: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Pais_de_Gales.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Franca.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Holanda.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Inglaterra.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+  "2025-07-04T13:00:00",
+      "2025-07-04T16:00:00",
+       "2025-07-04T20:00:00",
+    ]
+  },
+  
+  CopaMundoClub: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Paris-Saint-Germain.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern-de-Munique.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Borussia dortmund.png",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+  "2025-07-04T16:00:00",
+      "2025-07-04T22:00:00",
+       "2025-07-04T20:00:00",
+    ]
+  },
+  LigarPro: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Cerro porteno.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Clube liberta assunção.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/FC Neman Grodno.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Club general caballer.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Clube_desportivo_luqueno.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/FC Isloch.jpeg"
+    ],
+    horarios: [
+  "2025-07-04T16:00:00",
+      "2025-07-04T18:30:00",
+       "2025-07-04T14:55:00",
+    ]
+  },
+  NovaPaisGales: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Balcatta sc.png",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Olympic kingsway sc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Fremantle city.jpeg",
+        
+         "https://raw.githubusercontent.com/Savanty/AE/main/Bayswater_city_sc.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Perth sc.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Fremantle City.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Armadale_SC.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Ecu joondalup sc.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Stirling_macedonia_fc.png",
+         "https://raw.githubusercontent.com/Savanty/AE/mainWestern knights sc.png",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Sorrento fc.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Stirling Macedonia FC.jpeg"
+    ],
+    horarios: [
+      "2025-07-05T04:00:00",
+      "2025-07-05T04:00:00",
+      "2025-07-05T04:00:00",
+      "2025-07-05T04:00:00",
+      "2025-07-05T04:00:00",
+    ]
+  },
+   Queenland: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/O_connor_knights_fc.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Monaro panthers fc.png",
+      
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Tuggeranong_united_fc.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Queanbeyan city fc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+       "2025-07-05T02:00:00",
+      "2025-07-05T04:45:00",
+       "2025-07-05T10:00:00",
+        "2025-07-05T10:30:00",
+      "2025-07-05T11:00:00",
+       "2025-07-05T11:00:00",
+          "2025-07-06T11:30:00",
+      "2025-07-05T13:00:00",
+       "2025-07-05T14:00:00",
+      "2025-07-05T23:00:00",
+    ]
+  },
+  
+  
+
+    CopaOuroConcacaf: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Man-City.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+      "2025-07-02T23:00:00"
+    ]
+  },
+  CopaRioBrasil: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+       "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg"
+    ],
+    horarios: [
+      "2025-07-04T20:00:00",
+      "2025-07-02T20:30:00",
+      "2025-07-02T20:30:00"
+    ]
+  },
+  CopaArgentina: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Man-City.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+    ]
+  },
+  CopaPaulistaSub20: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Man-City.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",
+    ]
+  },
+  CopaPaulista: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Man-City.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Real-Madrid.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+      
+    ]
+  },
+  CampeonatoNoruegues: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+CptUruguaio: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+  CptIrlandes: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+  CptJapones: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+  
+  CptParaguaio: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Western sydney wanderer.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Nsw spirit.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/South coast wolves fc.jpeg",
+          "https://raw.githubusercontent.com/Savanty/AE/main/St. George City FA.png",
+      "https://raw.githubusercontent.com/Savanty/AE/main/NSW Spirit.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/South Coast Wolves FC.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Apia leichhardt.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Manly united.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/St George Saints FC.jpeg",
+        
+        
+        "https://raw.githubusercontent.com/Savanty/AE/main/Druitt town rangers.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Manly United.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/St. George Saints FC.jpeg"],
+    horarios: [
+      "2025-07-05T00:00:00",
+      "2025-07-05T04:30:00",
+      "2025-07-05T05:00:00",
+      "2025-07-05T06:15:00"
+    ]
+  },
+  CptChileno: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+  CptCoreano2div: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+  
+  
+   CptFinlandes: {
+    ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+  },
+  containerPrimeiraDivisaoIlhaFaroe :{ ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/PSG.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Barcelona.jpeg",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Bayern.jpeg",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Chelsea.jpeg"
+    ],
+    horarios: [
+   "2025-07-04T09:00:00",
+      "2025-07-04T09:00:00",
+       "2025-07-04T10:00:00",
+        "2025-07-04T10:30:00",
+      "2025-07-04T11:00:00",
+       "2025-07-04T11:00:00",
+          "2025-07-04T11:30:00",
+      "2025-07-04T13:00:00",
+       "2025-07-04T14:00:00",,
+      "2025-07-02T23:00:00"
+    ]
+    },
+    
+    CptEquatoriano:{
+        ladoAImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Fc smorgon.png",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Fc slavia mozyr.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Fc bate borisov.jpeg"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Fc gomel.png",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Fc vitebsk.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Fc minsk.jpeg"
+    ],
+    horarios: [
+      "2025-07-05T10:30:00",
+      "2025-07-05T12:45:00",
+       "2025-07-05T14:55:00"
+    ]
+    },
+    PlnQueenLandAustralia:{
+    ladoAImagens:[
+      "https://raw.githubusercontent.com/Savanty/AE/main/Adelaide city fc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Adelaide united fc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Adelaide croatia raid.png",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Campbelltown city sc.png",
+          
+      "https://raw.githubusercontent.com/Savanty/AE/main/White city fk beograd.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Metrostars sc do nordeste.png"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Adelaide comets fc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Para hills knights sc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Modbury jets sc.png",
+          "https://raw.githubusercontent.com/Savanty/AE/main/Croydon fc.png",
+      "https://raw.githubusercontent.com/Savanty/AE/main/Cidade de playford.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Wt birkalla sc.png"
+    ],
+    horarios: [
+
+      "2025-07-05T02:00:00",
+      "2025-07-05T02:30:00",
+      "2025-07-05T02:30:00",
+      "2025-07-05T02:30:00",
+      "2025-07-05T04:30:00",
+       "2025-07-05T07:00:00",
+        "2025-07-05T23:30:00",
+      
+    ]
+    },
+    PremiereLeague:{
+    ladoAImagens:[
+      "https://raw.githubusercontent.com/Savanty/AE/main/Peninsula power fc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Brisbane city fc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Hume city fc.png"
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Gold coast united fc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Wdsc wolves fc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Avondale fc.png"
+    ],
+    horarios: [
+     "2025-07-05T20:00:00",
+      "2025-07-05T22:00:00",
+      "2025-07-05T22:00:00",
+      "2025-07-05T22:00:00",
+  "2025-07-04T23:30:00",
+      "2025-07-04T23:30:00",
+      "2025-07-04T22:00:00",
+  "2025-07-04T23:30:00",
+      "2025-07-04T23:30:00",
+      "2025-07-04T22:00:00",
+    ]
+    },
+    UslEstadoUnidos:{
+        ladoAImagens:[
+      "https://raw.githubusercontent.com/Savanty/AE/main/Charlotte fc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Cf montreal.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Dc united.png",
+           "https://raw.githubusercontent.com/Savanty/AE/main/Fc cincinnati.png",
+       "https://raw.githubusercontent.com/Savanty/AE/main/Austin fc.png",
+       
+        "https://raw.githubusercontent.com/Savanty/AE/main/Nashville sc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Real salt lake.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/São jose earthquakes.png",
+           "https://raw.githubusercontent.com/Savanty/AE/main/Portland Timbers.png",
+       "https://raw.githubusercontent.com/Savanty/AE/main/San Diego FC.png",
+       "https://raw.githubusercontent.com/Savanty/AE/main/San Diego FC.jpeg",
+    ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Orlando city sc.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Inter miami cf.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Atlanta united fc.png",
+           "https://raw.githubusercontent.com/Savanty/AE/main/Chicago fire.png",
+       "https://raw.githubusercontent.com/Savanty/AE/main/Los angeles fc.png",
+       
+         "https://raw.githubusercontent.com/Savanty/AE/main/Philadelphia union.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/São luís city sc.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Red bulls.png",
+           "https://raw.githubusercontent.com/Savanty/AE/main/New england revolution.png",
+       "https://raw.githubusercontent.com/Savanty/AE/main/Houston dinamo.png",
+    ],
+    horarios: [
+      "2025-07-05T20:15:00",
+      "2025-07-05T20:30:00",
+      "2025-07-05T20:30:00",
+      "2025-07-05T20:30:00",
+      "2025-07-05T21:30:00",
+      "2025-07-05T21:30:00",
+      "2025-07-05T22:00:00",
+      "2025-07-05T23:30:00",
+      "2025-07-05T23:30:00",
+      "2025-07-05T23:30:00",
+       
+    ]
+    },
+    LigaUm:{
+        ladoAImagens:[
+      "https://raw.githubusercontent.com/Savanty/AE/main/Drogheda United FC.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Derry City FC.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/Saint Patrick´s Atlético FC.png",
+           "https://raw.githubusercontent.com/Savanty/AE/main/shelbourne.jpeg",
+         ],
+    ladoBImagens: [
+      "https://raw.githubusercontent.com/Savanty/AE/main/Galway United FC.png",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Waterford FC.png",
+        "https://raw.githubusercontent.com/Savanty/AE/main/bohemians dub.png",
+           "https://raw.githubusercontent.com/Savanty/AE/main/Cork City FC.jpeg",
+      
+      "https://raw.githubusercontent.com/Savanty/AE/main/Lexington.jpeg",
+    ],
+    horarios: [
+      "2025-07-04T15:45:00",
+      "2025-07-04T15:45:00",
+       "2025-07-04T15:45:00",
+        "2025-07-04T15:45:00",
+       "2025-07-04T15:45:00"
+    ]
+    }
+};
+function gerarCotacoesPadrao() {
+  return [
+    { casa: 1.60, empate: 3.2, fora: 2.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 3.0, fora: 2.4, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.4 },
+    { casa: 1.3, empate: 3.1, fora: 3.1, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 3.1 },
+  ];
+}
+
+cotacoesSeries.CopaArgentina = gerarCotacoesPadrao();
+const selects = [];
+
+function extrairNomeDoTime(url) {
+  const nome = url.split("/").pop().split(".")[0];
+  return nome.charAt(0).toUpperCase() + nome.slice(1).toLowerCase();
+}
+
+function atualizarTotal() {
+  const valorDigitado = parseFloat(document.getElementById("valorUnico").value);
+  if (isNaN(valorDigitado) || valorDigitado <= 0) {
+    document.getElementById("totalFinal").textContent = "Total: R$ 0,00";
+    return 0;
+  }
+
+  let totalCotacao = 0;
+  let totalSelecoes = 0;
+
+  selects.forEach(sel => {
+    if (sel.selecao.A) {
+      totalCotacao += sel.selecao.valorA;
+      totalSelecoes++;
+    } else if (sel.selecao.B) {
+      totalCotacao += sel.selecao.valorB;
+      totalSelecoes++;
+    }
+  });
+
+  // Define multiplicador extra
+  let multiplicador = 1;
+  if (totalSelecoes >= 2) {
+    multiplicador = totalSelecoes - 1; // Ex: 3 seleções = x2, 4 = x3, etc
+  }
+
+  const valorTotal = totalCotacao * valorDigitado * multiplicador;
+
+  document.getElementById("totalFinal").textContent = `Total: R$ ${valorTotal.toFixed(2)}`;
+  return valorTotal;
+}
+
+function resetarSelecoes() {
+  document.querySelectorAll(".selecionado").forEach(btn => btn.classList.remove("selecionado"));
+  selects.forEach(sel => {
+    sel.selecao.A = null;
+    sel.selecao.B = null;
+    sel.selecao.valorA = 0;
+    sel.selecao.valorB = 0;
+  });
+  atualizarTotal();
+}
+const nomesSeries = {
+
+  A: "Campeonato Brasileiro - Série A",
+  B: "Campeonato Brasileiro - Série B",
+  C: "Campeonato Brasileiro - Série C",
+  D: "EQUADOR-LigarPro Primeira A",
+  Mundial: "Mundial de Clubes FIFA",
+  Sub20: "COPA ARGENTINA",
+  Mundo: "CHILE Primeira Divisao",
+  
+    JogoAmistososClubs : "ARGENTINA PRIMEIRA NACIONAL ",
+  EuropeanChampionShip: "European Champion Ship",
+  CopaMundoClub: "Copa Mundo Club",
+  LigarPro: "PARAGUAI-Primeira divisao Encerramento",
+  
+  Queenland: "ACT Premier League",
+  NovaPaisGales: "NPL, Oeste da Austrália",
+  CopaOuroConcacaf:"Copa Ouro Concacaf",
+ CopaRioBrasil:"Copa Rio Brasil",
+ CopaArgentina:"Copa Argentina",
+ CopaPaulistaSub20:"Copa PaulistaSub20",
+ CopaPaulista:"Copa Paulista",
+ CampeonatoNoruegues:"Campeonato Noruegues",
+ CptUruguaio:"Campeonato Uruguaio",
+ CptChileno:"Campeonato Chileno",
+ CptCoreano2div:"Campeonato Coreano2div",
+
+ CptJapones:"Campeonato Japones",
+ CptParaguaio:"NPL, País de Gales",
+ PremiereLeague:"NPL, Queensland",
+ 
+ CptEquatoriano:"Bielorrússia-Liga Principal",
+ CptPeruano:"Campeonato Peruano",
+ CptLeagueSoccerUsa:"Campeonato League Soccer Usa",
+ CptFinlandes:"Campeonato Finlandes",
+ CptIrlandes:"Campeonato Irlandes",
+ CptSueco:"Campeonato Sueco",
+ 
+ AmistosoInternacionalClub:"Amistoso Internacional Club",
+ AmsFemininoSelecoes:"Amistoso Feminino Selecoes",
+ UslEstadoUnidos:"Estados Unidos-Major League Soccer ",
+ 
+ LigaUm:"Liga Um Irlanda",
+ 
+ PlnQueenLandAustralia:" AUSTRALIA NPL do Sul",
+ EurocopaFeminina:"Euro Copa Feminina", PrimeiraDivisaoIlhaFaroe:"Primeira Divisao Ilha Faroe",
+ 
+};
+Object.keys(nomesSeries).forEach(serie => {
+  const container = document.getElementById(`container${serie}`);
+  if (container) {
+    const h2 = container.parentElement.querySelector("h2");
+    if (h2) h2.textContent = nomesSeries[serie];
+  }
+  gerarJogos(serie, `container${serie}`);
+});
+function gerarJogos(serie, containerId) {
+  if (!series[serie]) {
+    // Se não existir dados para essa série, limpa container e retorna
+    const container = document.getElementById(containerId);
+    if (container) container.innerHTML = `<p>Sem jogos cadastrados para a série ${serie}</p>`;
+    return;
+  }
+
+  const { ladoAImagens, ladoBImagens, horarios } = series[serie];
+  const limite = limitePorSerie[serie] || ladoAImagens.length;
+
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  for (let i = 0; i < Math.min(ladoAImagens.length, limite); i++) {
+    
+  
+    const nomeA = extrairNomeDoTime(ladoAImagens[i]);
+    const nomeB = extrairNomeDoTime(ladoBImagens[i]);
+    const dataJogo = new Date(horarios[i]);
+
+    let cotacoesDuelo = {
+  casa: 2.0, empate: 3.0, fora: 3.5,
+  ambasMarcam: 2.5, acima2: 3.0, abaixo2: 3.8
+};
+if (cotacoesSeries[serie] && cotacoesSeries[serie][i]) {
+  cotacoesDuelo = cotacoesSeries[serie][i];
+}
+
+    const div = document.createElement("div");
+    div.className = "duelo";
+    div.innerHTML = `
+  <div class="linha-duelo">
+    <div class="time-nome-img">
+      <img src="${ladoAImagens[i]}" />
+      <div class="nome-time">${nomeA}</div>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnA" data-valor="${cotacoesDuelo.casa}">Casa</button>
+      <span class="valor-cotacao">${cotacoesDuelo.casa}</span>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnA" data-valor="${cotacoesDuelo.empate}">Empate</button>
+      <span class="valor-cotacao">${cotacoesDuelo.empate}</span>
+    </div>
+    <div class="coluna-botao">
+      <button class="btnB" data-valor="${cotacoesDuelo.fora}">Fora</button>
+      <span class="valor-cotacao">${cotacoesDuelo.fora}</span>
+    </div>
+    <div class="time-nome-img">
+      <img src="${ladoBImagens[i]}" />
+      <div class="nome-time">${nomeB}</div>
+    </div>
+    <button class="toggleExtras">+</button>
+  </div>
+  <div class="extras">
+    <button class="btnA" data-valor="${cotacoesDuelo.ambasMarcam}">Ambas Marcam</button>
+    <button class="btnB" data-valor="${cotacoesDuelo.acima2}">+2 Gols</button>
+    <button class="btnB" data-valor="${cotacoesDuelo.abaixo2}">-2 Gols</button>
+  </div>
+  <small><strong>Data/Hora:</strong> ${dataJogo.toLocaleString()}</small>
+`;
+// Verifica se o jogo já passou
+    const agora = new Date();
+    const jogoPassado = dataJogo < agora;
+
+    if (jogoPassado) {
+      // Desabilita todos os botões do duelo
+      div.querySelectorAll("button").forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.pointerEvents = "none";
+      });
+
+      // Adiciona um aviso
+      const aviso = document.createElement("p");
+      aviso.style.color = "red";
+      aviso.style.fontWeight = "bold";
+      aviso.textContent = "Encerrado";
+      div.appendChild(aviso);
+    }
+    container.appendChild(div);
+
+    const selecao = { A: null, B: null, valorA: 0, valorB: 0 };
+
+    div.querySelectorAll("img").forEach(img => {
+      img.onclick = () => alert(`Time: ${extrairNomeDoTime(img.src)}`);
+    });
+
+    const buttons = div.querySelectorAll("button.btnA, button.btnB");
+    const extrasToggle = div.querySelector(".toggleExtras");
+    const extrasBox = div.querySelector(".extras");
+
+    extrasToggle.onclick = () => {
+      extrasBox.style.display = extrasBox.style.display === "none" ? "flex" : "none";
+    };
+
+    buttons.forEach(btn => {
+      btn.onclick = () => {
+        const grupo = btn.classList.contains("btnA") ? "A" : "B";
+        const jaSelecionado = btn.classList.contains("selecionado");
+
+        // Remove todas as seleções do grupo atual (A ou B)
+        buttons.forEach(b => {
+          if (b.classList.contains("btn" + grupo)) {
+            b.classList.remove("selecionado");
+          }
+        });
+
+        if (jaSelecionado) {
+          // Se já estava selecionado, desmarca e limpa valores
+          selecao[grupo] = null;
+          selecao["valor" + grupo] = 0;
+        } else {
+          // Marca o novo botão
+          btn.classList.add("selecionado");
+          const valor = parseFloat(btn.dataset.valor);
+          selecao[grupo] = btn.innerText;
+          selecao["valor" + grupo] = valor;
+
+          // Desmarca o outro grupo se estava marcado (ex: A e B não podem juntos)
+          const outroGrupo = grupo === "A" ? "B" : "A";
+          selecao[outroGrupo] = null;
+          selecao["valor" + outroGrupo] = 0;
+
+          // Remove seleção do outro grupo
+          buttons.forEach(b => {
+            if (b.classList.contains("btn" + outroGrupo)) {
+              b.classList.remove("selecionado");
+            }
+          });
+        }
+        atualizarTotal();
+      };
+    });
+
+    selects.push({
+      selecao,
+      nomeTimeA: nomeA,
+      nomeTimeB: nomeB,
+      dataHora: horarios[i],
+      serie: serie
+    });
+  }
+}
+
+["A", "B", "C", "D", "Mundial", "Sub20"].forEach(serie => {
+  gerarJogos(serie, `container${serie}`);
+});
+
+const modal = document.getElementById("codigoModal");
+const codigoTexto = document.getElementById("codigoAposta");
+const btnCopiar = document.getElementById("btnCopiar");
+const btnWhatsapp = document.getElementById("btnWhatsapp");
+const btnFechar = document.getElementById("btnFechar");
+const pixArea = document.getElementById("qrPix");
+const chavePix = "71992290058";
+
+document.getElementById("apostarBtn").onclick = () => {
+  const valorUnico = parseFloat(document.getElementById("valorUnico").value);
+  if (isNaN(valorUnico) || valorUnico <= 0) return alert("Digite um valor válido!");
+
+  const codigoGerado = Math.floor(100000 + Math.random() * 900000).toString();
+  const valorTotal = atualizarTotal();
+
+  const apostaCompleta = {
+    codigo: codigoGerado,
+    valorDigitado: valorUnico,
+    valorTotal: valorTotal,
+    dataRegistro: new Date().toISOString(),
+    duelos: []
+  };
+
+  selects.forEach(sel => {
+    const selecaoFinal = sel.selecao.A || sel.selecao.B;
+    const cotacaoFinal = sel.selecao.valorA || sel.selecao.valorB;
+
+    if (selecaoFinal) {
+      apostaCompleta.duelos.push({
+        serie: sel.serie,
+        nomeTimeA: sel.nomeTimeA,
+        nomeTimeB: sel.nomeTimeB,
+        dataHora: new Date(sel.dataHora).toISOString(),
+        escolha: selecaoFinal,
+        cotacao: cotacaoFinal
+      });
+    }
+  });
+
+  if (apostaCompleta.duelos.length === 0) return alert("Marque pelo menos uma opção!");
+
+  // Salvar no Firebase
+  set(ref(db, "apostas/" + codigoGerado), apostaCompleta)
+    .then(() => {
+      codigoTexto.textContent = codigoGerado;
+      modal.style.display = "flex";
+
+      // Formatação do valor para o Pix (sem vírgula, só números)
+      const valorFormatado = valorTotal.toFixed(2).replace(".", "").replace(",", "");
+      const nomePix = "MULTIJOGO EA";
+      const cidade = "SALVADOR";
+
+      // Montagem do payload PIX (simplificado)
+      const payload = `00020126360014BR.GOV.BCB.PIX0111${chavePix}520400005303986540${valorFormatado.length}${valorFormatado}5802BR5914${nomePix.length}${nomePix}6009${cidade}62070503***6304`;
+      const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chl=${encodeURIComponent(payload)}&chs=200x200&chld=L|0`;
+
+      pixArea.innerHTML = `<img src="${qrUrl}" alt="QR Code Pix"><p>Total: R$ ${valorTotal.toFixed(2)}</p>`;
+
+      document.getElementById("valorUnico").value = "";
+      resetarSelecoes();
+    })
+    .catch(err => alert("Erro ao salvar aposta: " + err.message));
+};
+
+btnCopiar.onclick = () => {
+  const codigo = codigoTexto.textContent;
+  navigator.clipboard.writeText(codigo)
+    .then(() => alert("Código copiado!"))
+    .catch(() => alert("Falha ao copiar código."));
+};
+
+btnWhatsapp.onclick = () => {
+  const codigo = codigoTexto.textContent;
+  const valorTotal = document.getElementById("totalFinal").textContent;
+  const mensagem = encodeURIComponent(
+    `Olá, quero enviar a aposta com código: ${codigo}\n${valorTotal}\nObrigado!`
+  );
+  const urlWhatsapp = `https://wa.me/?text=${mensagem}`;
+  window.open(urlWhatsapp, '_blank');
+};
+
+btnFechar.onclick = () => {
+  modal.style.display = "none";
+};
+
+// ...
+
+// Fecha modal ao clicar fora do conteúdo
+window.onclick = (event) => {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+
+// Atualizar nomes dos <h2> dinamicamente
+
+Object.entries(nomesSeries).forEach(([serie, nomeCompleto]) => {
+  const container = document.getElementById(`container${serie}`);
+  if (container) {
+    const h2 = container.parentElement.querySelector("h2");
+    if (h2) h2.textContent = nomeCompleto;
+    gerarJogos(serie, `container${serie}`);
+  }
+});
+
+// Array com as séries que devem ser ocultadas
+const seriesOcultas = [
+"A", "", "", 
+"LigaUm","PremiereLeague","Mundial","CopaOuroConcacaf","CopaRioBrasil","CopaArgentina","CopaPaulistaSub20","CopaPaulista","CampeonatoNoruegues","CptUruguaio","CptChileno","CptCoreano2div",,"CptJapones","CptPeruano","CptLeagueSoccerUsa","CptFinlandes","CptIrlandes","CptSueco","AmistosoInternacionalClub","AmsFemininoSelecoes","EurocopaFeminina","PrimeiraDivisaoIlhaFaroe","CptIrlandes","CptSueco"]; // Sub20 continua visível
+  //EuropeanChampionShip "CopaMundoClub"
+  //"CptParaguaio""PlnQueenLandAustralia"
+// "NovaPaisGales""PremiereLeague""LigarPro",
+  //"UslEstadoUnidos","",Sub20 "Mundo",
+  
+seriesOcultas.forEach(serie => {
+  const container = document.getElementById(`container${serie}`);
+  if (container) {
+    container.parentElement.style.display = "none";
+  }
+});
+
+// Atualiza total ao digitar valor
+document.getElementById("valorUnico").addEventListener("input", atualizarTotal);
+
+// Fecha modal ao clicar fora
+window.onclick = (event) => {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+};
+// Função que atualiza os títulos e gera os jogos, para todos os containers visíveis
+function atualizarSeries() {
+  document.querySelectorAll(".serie-container").forEach(serieDiv => {
+    const containerDiv = serieDiv.querySelector("div[id^='container']");
+    if (!containerDiv) return; // pula se não achar o container com id
+
+    const containerId = containerDiv.id; // ex: containerCopaArgentina
+    const serie = containerId.replace("container", ""); // ex: CopaArgentina
+
+    const h2 = serieDiv.querySelector("h2");
+    if (h2 && nomesSeries[serie]) {
+      h2.textContent = nomesSeries[serie];
+    } else if (h2) {
+      h2.textContent = serie; // fallback para mostrar o nome da série direto
+    }
+
+    if (series[serie]) {
+      gerarJogos(serie, containerId);
+    } else {
+      // Se não existir a série, limpa o container só para garantir
+      containerDiv.innerHTML = `<p>Sem jogos cadastrados para a série ${serie}</p>`;
+    }
+  });
+}
+
+// Chama no carregamento para atualizar tudo
+atualizarSeries();
+</script>
+</body>
+</html>
