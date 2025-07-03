@@ -147,7 +147,7 @@
   </style>
 </head>
 <body>
-  <h1>MULTIJOGO SPORT</h1>
+  <h1>MULTISPORT.BET</h1>
 
 <div class="serie-container"><h2></h2><div id="containerA"></div></div>
 <div class="serie-container"><h2></h2><div id="containerB"></div></div>
@@ -238,7 +238,7 @@ const cotacoesSeries = {
     // ... continue para cada duelo da série A
   ],
   B: [
-    { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 3.2 },
+    { casa: 2.1, empate: 3.2, fora: 5.50, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 3.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },
     // ...
@@ -246,13 +246,13 @@ const cotacoesSeries = {
   C: [
     { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
-    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 },
     // ...
   ],
   Sub20: [
     { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
-    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
-     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 2.9 },
+     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.5 },
     // ...
   ],
   D: [
@@ -268,11 +268,26 @@ Mundial :[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, ab
   Mundo: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
-  JogoAmistososClubs:[ { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
-    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
-    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+    
+  JogoAmistososClubs:[ 
+  { casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+  
+    { casa: 1.9, empate: 3.50, fora: 4.0, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 2.70, empate: 3.1, fora: 2.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },
+    { casa: 5.30, empate: 4.2, fora: 1.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+  
+    { casa: 1.9, empate: 4.4, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 2.90, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },  
+      { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 1.70, empate: 4.5, fora: 5.9, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, 
+      { casa: 2.25, empate: 4.0, fora: 3.2, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 }, 
+    ],
+    
   LigarPro: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
-    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.8, fora: 3.0, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
   Queenland: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
@@ -318,7 +333,7 @@ Mundial :[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, ab
  CptParaguaio:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
- CptEuatoriano:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+ CptEquatoriano:[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
  CptPeruano: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
@@ -336,9 +351,12 @@ Mundial :[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, ab
  CptSueco: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
- AmistosoInternacionalClub: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
-    { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
-    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
+ AmistosoInternacionalClub: [{ casa: 2.1, empate: 3.2, fora: 4.1, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 3.2 },
+ 
+    { casa: 1.9, empate: 3.5, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 2.0 },],
+    
  AmsFemininoSelecoes: [{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 },],
@@ -358,9 +376,15 @@ Mundial :[{ casa: 2.1, empate: 3.2, fora: 3.5, ambasMarcam: 2.8, acima2: 3.1, ab
     { casa: 1.9, empate: 3.0, fora: 3.8, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
     
-EuropeanChampionShip:[{ casa: 5.1, empate: 3.2, fora: 1.40, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
-    { casa: 1.9, empate: 3.0, fora: 18.5, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+EuropeanChampionShip:[{ casa: 5.1, empate: 3.2, fora: 1.90, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 1.9, empate: 8.0, fora: 20.0, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
     { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
+    
+    CopaMundoClub:[{ casa: 3.1, empate: 3.2, fora: 2.0, ambasMarcam: 2.8, acima2: 3.1, abaixo2: 4.2 },
+    { casa: 4.1, empate: 3.0, fora: 2.2, ambasMarcam: 3.0, acima2: 3.2, abaixo2: 3.9 },
+    { casa: 2.2, empate: 3.1, fora: 3.6, ambasMarcam: 2.7, acima2: 3.0, abaixo2: 4.0 }, ],
+    
+    
 };
 
 const limitePorSerie = {
