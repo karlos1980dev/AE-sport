@@ -22,13 +22,18 @@
     button:hover { background: #1ebd5b; }
     #dataHora { margin-top: 10px; font-weight: bold; color: #444; }
     .codigoInput {
-        text-align:center;
-        display: flex;
-        height:30px;
-        background:black;
-        color:white;
-        border-radius:20px;
-        margin: 0 auto 10px;
+      text-align:center;
+      display: flex;
+      height:30px;
+      background:black;
+      color:white;
+      border-radius:20px;
+      margin: 0 auto 10px;
+      width: 150px;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
     }
     #menuHamburguer {
       position: fixed;
@@ -39,6 +44,8 @@
       padding: 10px;
       border-radius: 8px;
       cursor: pointer;
+      user-select: none;
+      z-index: 1000;
     }
     #agendaMenu {
       display: none;
@@ -49,12 +56,20 @@
       padding: 15px;
       border-radius: 10px;
       text-align: left;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      z-index: 999;
     }
     #agendaMenu input, #agendaMenu select {
       display: block;
       width: 100%;
       margin-bottom: 8px;
       padding: 6px;
+      box-sizing: border-box;
+      font-weight: normal;
+      font-size: 14px;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -66,13 +81,13 @@
     <select id="contatoSelect">
       <option value="">-- Selecione um contato --</option>
     </select>
-    <input type="text" id="novoNome" placeholder="Novo nome">
-    <input type="text" id="novoTelefone" placeholder="Telefone com DDD">
+    <input type="text" id="novoNome" placeholder="Novo nome" />
+    <input type="text" id="novoTelefone" placeholder="Telefone com DDD" />
     <button id="btnAdicionarContato">Adicionar Contato</button>
   </div>
 
   <h2>Buscar Aposta por Código</h2>
-  <input class="codigoInput" type="text" id="codigoBusca" placeholder="Ex: 123456" />
+  <input class="codigoInput" type="text" id="codigoBusca" placeholder="Ex: 123456" maxlength="6" />
   <button id="btnBuscar">Buscar</button>
 
   <div id="resultado"></div>
@@ -142,6 +157,8 @@ btnAdicionarContato.onclick = () => {
     novoNome.value = "";
     novoTelefone.value = "";
     alert("Contato adicionado!");
+  }).catch(err => {
+    alert("Erro ao adicionar contato: " + err.message);
   });
 };
 
@@ -160,37 +177,37 @@ btnBuscar.onclick = () => {
       const dados = snapshot.val();
       const data = new Date(dados.dataRegistro);
       const dataFormatada = data.toLocaleString("pt-BR");
-      const valorUnicoGlobal = dados.duelos?.[0]?.valorUnico?.toFixed(2) || "0,00";
-      const valorTotal = typeof dados.valorTotal === "number" ? dados.valorTotal.toFixed(2) : "0,00";
+
+      const valorUnicoGlobal = (typeof dados.valorDigitado === "number" ? dados.valorDigitado.toFixed(2) : "0,00");
+      const valorTotal = (typeof dados.valorTotal === "number" ? dados.valorTotal.toFixed(2) : "0,00");
 
       dataHoraEl.innerHTML = `
         📅 Data da aposta: ${dataFormatada}<br>
-        💸 VALOR A PAGAR: R$ ${valorUnicoGlobal}<br>
-        💰 TOTAL RECEBER: R$ ${valorTotal}
+        💸 VALOR POR APOSTA: R$ ${valorUnicoGlobal}<br>
+        💰 TOTAL A PAGAR: R$ ${valorTotal}
       `;
 
-      let mensagemWhatsapp = `📅 Data: ${dataFormatada}\n💸 VALOR A PAGAR: R$ ${valorUnicoGlobal}\n💰 TOTAL A RECEBER: R$ ${valorTotal}\n============================\n`;
+      let mensagemWhatsapp = `📅 Data: ${dataFormatada}\n💸 Valor por aposta: R$ ${valorUnicoGlobal}\n💰 Total a pagar: R$ ${valorTotal}\n============================\n`;
 
-      (dados.duelos || []).forEach((duelo) => {
-        const jogo = document.createElement("div");
-        jogo.className = "duelo";
-        const timeA = duelo.nomeTimeA || duelo.duelo?.split(" x ")[0] || "Time A";
-        const timeB = duelo.nomeTimeB || duelo.duelo?.split(" x ")[1] || "Time B";
-        const dataHoraJogo = new Date(duelo.dataHora).toLocaleString("pt-BR");
+    (dados.duelos || []).forEach((duelo) => {
+  const jogo = document.createElement("div");
+  jogo.className = "duelo";
 
-        let selecaoTexto = "Não selecionado";
-        if (duelo.selecaoA) selecaoTexto = typeof duelo.selecaoA === 'string' ? duelo.selecaoA : duelo.selecaoA.texto;
-        else if (duelo.selecaoB) selecaoTexto = typeof duelo.selecaoB === 'string' ? duelo.selecaoB : duelo.selecaoB.texto;
+  const timeA = duelo.nomeTimeA || (duelo.duelo?.split(" x ")[0]) || "Time A";
+  const timeB = duelo.nomeTimeB || (duelo.duelo?.split(" x ")[1]) || "Time B";
+  const dataHoraJogo = new Date(duelo.dataHora).toLocaleString("pt-BR");
 
-        jogo.innerHTML = `
-          <strong>Jogo:</strong> ${timeA} x ${timeB}<br>
-          <strong>Escolha:</strong> ${selecaoTexto}<br>
-          <strong>Data/Hora do Jogo:</strong> ${dataHoraJogo}
-        `;
-        resultado.appendChild(jogo);
+  const selecaoTexto = duelo.escolha || "Não selecionado";
 
-        mensagemWhatsapp += `\n⚽ ${timeA} x ${timeB}\n🎯 Escolha: ${selecaoTexto}\n🕒 ${dataHoraJogo}\n============================`;
-      });
+  jogo.innerHTML = `
+    <strong>Jogo:</strong> ${timeA} x ${timeB}<br>
+    <strong>Escolha:</strong> ${selecaoTexto}<br>
+    <strong>Data/Hora do Jogo:</strong> ${dataHoraJogo}
+  `;
+  resultado.appendChild(jogo);
+
+  mensagemWhatsapp += `\n⚽ ${timeA} x ${timeB}\n🎯 Escolha: ${selecaoTexto}\n🕒 ${dataHoraJogo}\n============================`;
+});
 
       whatsappBtn.style.display = "inline-block";
       btnGerarPDF.style.display = "inline-block";
@@ -202,7 +219,7 @@ btnBuscar.onclick = () => {
         const selectedOption = contatoSelect.options[contatoSelect.selectedIndex];
         const nomeContato = selectedOption.getAttribute("data-nome") || "Contato";
         const mensagemFinal = `JOGADOR: ${nomeContato}\n${mensagemWhatsapp}`;
-        const url = `https://wa.me/55${telefone}?text=${encodeURIComponent(mensagemFinal)}`;
+        const url = `https://wa.me/55${telefone.replace(/\D/g, "")}?text=${encodeURIComponent(mensagemFinal)}`;
         window.open(url, "_blank");
       };
 
@@ -213,32 +230,32 @@ btnBuscar.onclick = () => {
       };
 
       btnGerarLink.onclick = () => {
-  const selectedOption = contatoSelect.options[contatoSelect.selectedIndex];
-  const nomeContato = selectedOption?.getAttribute("data-nome") || "Desconhecido";
-  const telefoneContato = contatoSelect.value;
+        const selectedOption = contatoSelect.options[contatoSelect.selectedIndex];
+        const nomeContato = selectedOption?.getAttribute("data-nome") || "Desconhecido";
+        const telefoneContato = contatoSelect.value;
 
-  const dadosParaSalvar = {
-    nome: nomeContato,
-    telefone: telefoneContato,
-    dataHora: dataHoraEl.textContent,
-    jogos: Array.from(resultado.children).map(el => el.innerText)
-  };
+        const dadosParaSalvar = {
+          nome: nomeContato,
+          telefone: telefoneContato,
+          dataHora: dataHoraEl.textContent,
+          jogos: Array.from(resultado.children).map(el => el.innerText)
+        };
 
-  const dbRef = ref(db, "links_apostas");
-  const novoRef = push(dbRef);
+        const dbRef = ref(db, "links_apostas");
+        const novoRef = push(dbRef);
 
-  set(novoRef, dadosParaSalvar).then(() => {
-    const id = novoRef.key;
-    const linkFinal = `${location.origin}/aposta_viewer.html?id=${id}`;
-    navigator.clipboard.writeText(linkFinal).then(() => {
-      alert("🔗 Link gerado e copiado com sucesso!");
-    });
-  }).catch(error => {
-    alert("Erro ao salvar os dados no Firebase.");
-    console.log("Erro ao salvar:", error);
-  });
-};
-    
+        set(novoRef, dadosParaSalvar).then(() => {
+          const id = novoRef.key;
+          const linkFinal = `${location.origin}/aposta_viewer.html?id=${id}`;
+          navigator.clipboard.writeText(linkFinal).then(() => {
+            alert("🔗 Link gerado e copiado com sucesso!");
+          });
+        }).catch(error => {
+          alert("Erro ao salvar os dados no Firebase.");
+          console.log("Erro ao salvar:", error);
+        });
+      };
+
     } else {
       resultado.innerHTML = "<p><strong>Código não encontrado.</strong></p>";
     }
