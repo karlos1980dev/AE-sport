@@ -1,3 +1,4 @@
+Esse e meu viewier
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -7,6 +8,7 @@
   <style>
     body {
       font-family: sans-serif;
+      text-align: center;
       background: #47ff15;
       padding: 20px;
     }
@@ -14,33 +16,25 @@
       background: white;
       padding: 20px;
       border-radius: 15px;
-      max-width: 800px;
+      max-width: 600px;
       margin: 0 auto;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
-    .campeonato {
-      margin-top: 25px;
-      font-size: 18px;
-      font-weight: bold;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
-      color: #0b0b0b;
-    }
     .duelo {
       margin-top: 10px;
-      padding: 12px;
+      padding: 10px;
       border-radius: 8px;
       background: #f9f9f9;
       border: 1px solid #ddd;
+      text-align: left;
     }
-    .titulo { text-align: center; color: #25d366; }
-    .label { font-weight: bold; }
-    .espaco { margin-top: 15px; }
+    h2 { color: #25d366; }
+    hr { border: none; border-top: 1px solid #ccc; margin: 20px 0; }
   </style>
 </head>
 <body>
   <div class="container" id="visualizacao">
-    <h2 class="titulo">🔎 Carregando aposta...</h2>
+    <h2>🔎 Carregando aposta...</h2>
   </div>
 
   <script type="module">
@@ -65,60 +59,29 @@
     const container = document.getElementById("visualizacao");
 
     if (!id) {
-      container.innerHTML = "<h2 class='titulo'>❌ ID inválido ou ausente na URL.</h2>";
+      container.innerHTML = "<h2>❌ ID inválido ou ausente na URL.</h2>";
     } else {
       get(child(ref(db), `links_apostas/${id}`)).then(snapshot => {
         if (snapshot.exists()) {
           const dados = snapshot.val();
           const nome = dados.nome || "Desconhecido";
-          const dataAposta = dados.dataHora || "Data/Hora indisponível";
-          const valor = parseFloat(dados.valorDigitado || 0).toFixed(2);
-          const valorReceber = parseFloat(dados.valorReceber || 0).toFixed(2);
+          const dataHora = dados.dataHora || "Data/Hora indisponível";
           const jogos = dados.jogos || [];
 
-          let html = `
-            <h2 class="titulo">📄 Detalhes da Aposta</h2>
-            <p><span class="label">👤 Jogador:</span> ${nome}</p>
-            <p><span class="label">📅 Data da Aposta:</span> ${dataAposta}</p>
-            <p><span class="label">💸 Valor Apostado:</span> R$ ${valor}</p>
+          container.innerHTML = `
+            <h2>📄 Visualização da Aposta</h2>
+            <p><strong>👤 Jogador:</strong> ${nome}</p>
+            <p><strong>📅 Data:</strong> ${dataHora}</p>
             <hr />
+            <h3>🎮 Jogos:</h3>
+            ${jogos.map(j => `<div class="duelo">${j.replace(/\n/g, "<br>")}</div>`).join("")}
           `;
-
-          let serieAtual = "";
-          let count = 1;
-
-          jogos.forEach((jogo) => {
-            if (jogo.campeonato !== serieAtual) {
-              html += `<div class="campeonato">🏆 Campeonato: ${jogo.campeonato}</div>`;
-              serieAtual = jogo.campeonato;
-            }
-
-            html += `
-              <div class="duelo">
-                <p><span class="label">🎮 Jogo ${count++}:</span></p>
-                <p><span class="label">Duelo:</span> ${jogo.timeA} x ${jogo.timeB}</p>
-                <p><span class="label">Data e Hora do Jogo:</span> ${jogo.horario}</p>
-                <p><span class="label">Escolha:</span> ${jogo.escolha}</p>
-                <p><span class="label">Cotação:</span> ${parseFloat(jogo.cotacao || 1).toFixed(2)}</p>
-                <p><span class="label">Status:</span> ⏳ Aguardando resultado</p>
-              </div>
-            `;
-          });
-
-          html += `
-            <hr class="espaco"/>
-            <p><span class="label">💵 Valor a Pagar:</span> R$ ${valor}</p>
-            <p><span class="label">📈 Valor a Receber:</span> R$ ${valorReceber}</p>
-          `;
-
-          container.innerHTML = html;
-
         } else {
-          container.innerHTML = "<h2 class='titulo'>❌ Aposta não encontrada.</h2>";
+          container.innerHTML = "<h2>❌ Aposta não encontrada.</h2>";
         }
       }).catch(error => {
         console.error("Erro ao buscar aposta:", error);
-        container.innerHTML = "<h2 class='titulo'>⚠️ Erro ao carregar os dados da aposta.</h2>";
+        container.innerHTML = "<h2>⚠️ Erro ao carregar os dados da aposta.</h2>";
       });
     }
   </script>
