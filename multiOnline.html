@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,28 +5,16 @@
   <title>Visualizar Aposta</title>
   <style>
     body { background: #ff9e2a; font-family: Arial; padding: 20px; }
-    h1, h2, h3 { text-align: center; }
+    h1, h2 { text-align: center; }
     .duelo {
       background: white;
       padding: 15px;
       margin: 10px auto;
       border-radius: 10px;
-      width: 90%;
+      width: 80%;
       box-shadow: 0 0 8px rgba(0,0,0,0.1);
     }
     .duelo strong { display: block; margin-bottom: 4px; }
-    .acertou { background-color: #d4edda; }
-    .errou { background-color: #f8d7da; }
-    .sem-resultado { background-color: #fff3cd; }
-    .resumo-final {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      width: 90%;
-      margin: 20px auto;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    }
   </style>
 </head>
 <body>
@@ -50,7 +37,6 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-
     const conteudo = document.getElementById("conteudo");
     const urlParams = new URLSearchParams(location.search);
     const id = urlParams.get("id");
@@ -58,78 +44,36 @@
     if (!id) {
       conteudo.innerHTML = "<p>ID inválido</p>";
     } else {
-      Promise.all([
-        get(child(ref(db), `links_apostas/${id}`)),
-        get(child(ref(db), "resultados"))
-      ]).then(([apostaSnap, resultadosSnap]) => {
-        if (!apostaSnap.exists()) {
+      get(child(ref(db), `links_apostas/${id}`)).then(snapshot => {
+        if (snapshot.exists()) {
+          const dados = snapshot.val();
+          const titulo = document.createElement("h2");
+          titulo.innerHTML = `👤 Jogador: ${dados.nome}<br>📞 Telefone: ${dados.telefone}<br>🕒 ${dados.dataHora}`;
+          conteudo.appendChild(titulo);
+
+          (dados.duelos || []).forEach((duelo) => {
+            const box = document.createElement("div");
+            box.className = "duelo";
+            box.innerHTML = `
+              <strong>🏆 Campeonato:</strong> ${duelo.serie}
+              <strong>⚽ Duelo:</strong> ${duelo.nomeTimeA} x ${duelo.nomeTimeB}
+              <strong>🎯 Escolha:</strong> ${duelo.escolha}
+              <strong>🕒 Data/Hora:</strong> ${new Date(duelo.dataHora).toLocaleString()}
+            `;
+            conteudo.appendChild(box);
+          });
+        } else {
           conteudo.innerHTML = "<p>Aposta não encontrada.</p>";
-          return;
         }
-
-        const dados = apostaSnap.val();
-        const resultados = resultadosSnap.exists() ? resultadosSnap.val() : {};
-
-        const titulo = document.createElement("h2");
-        titulo.innerHTML = `👤 Jogador: ${dados.nome}<br>📞 Telefone: ${dados.telefone}<br>🕒 ${dados.dataHora}`;
-        conteudo.appendChild(titulo);
-
-        let acertos = 0;
-        let total = 0;
-        let todosAcertaram = true;
-
-        (dados.duelos || []).forEach((duelo) => {
-          const box = document.createElement("div");
-          box.className = "duelo";
-          const chave = `${duelo.nomeTimeA} x ${duelo.nomeTimeB}`;
-          const resultadoReal = resultados[chave]?.resultado;
-
-          let classe = "sem-resultado";
-          let icone = "🟡";
-          let acertou = false;
-
-          if (resultadoReal) {
-            if (resultadoReal === duelo.escolha) {
-              classe = "acertou";
-              icone = "✅";
-              acertou = true;
-              acertos++;
-            } else {
-              classe = "errou";
-              icone = "❌";
-              todosAcertaram = false;
-            }
-          } else {
-            todosAcertaram = false;
-          }
-
-          total++;
-          box.classList.add(classe);
-          box.innerHTML = `
-            <strong>🏆 Campeonato:</strong> ${duelo.serie}
-            <strong>⚽ Duelo:</strong> ${duelo.nomeTimeA} x ${duelo.nomeTimeB}
-            <strong>🎯 Escolha:</strong> ${duelo.escolha} ${icone}
-            <strong>📊 Resultado real:</strong> ${resultadoReal || "Sem resultado"}
-            <strong>🕒 Data/Hora:</strong> ${duelo.dataHora}
-          `;
-          conteudo.appendChild(box);
-        });
-
-        const resumo = document.createElement("div");
-        resumo.className = "resumo-final";
-        resumo.innerHTML = `
-          <p><strong>🎟️ Código da Aposta:</strong> ${id}</p>
-          <p><strong>💰 Valor Apostado:</strong> R$ ${dados.valorDigitado.toFixed(2)}</p>
-          <p><strong>🏆 Valor a Receber:</strong> R$ ${dados.valorTotal.toFixed(2)}</p>
-          <p><strong>🎯 Total de Acertos:</strong> ${acertos} de ${total}</p>
-          <p><strong>✅ Status Final:</strong> ${todosAcertaram ? "GANHOU ✅" : "NÃO GANHOU ❌"}</p>
-        `;
-        conteudo.appendChild(resumo);
       }).catch(err => {
-        conteudo.innerHTML = "<p>Erro ao carregar dados.</p>";
+        conteudo.innerHTML = "<p>Erro ao buscar dados.</p>";
         console.error(err);
       });
     }
   </script>
 </body>
 </html>
+
+
+Successfully created text document 'Verificador Aposta' which will be referenced in all future messages with the unique identifier textdoc_id: '686762ef56348191a52ab092b05fff33'
+
