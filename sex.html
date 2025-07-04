@@ -1224,6 +1224,25 @@ if (cotacoesSeries[serie] && cotacoesSeries[serie][i]) {
   <small><strong>Data/Hora:</strong> ${dataJogo.toLocaleString()}</small>
 `;
 
+    
+    const agora = new Date();
+    const jogoPassado = dataJogo < agora;
+
+    if (jogoPassado) {
+      // Desabilita todos os botões do duelo
+      div.querySelectorAll("button").forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+        btn.style.pointerEvents = "none";
+      });
+
+      // Adiciona um aviso
+      const aviso = document.createElement("p");
+      aviso.style.color = "red";
+      aviso.style.fontWeight = "bold";
+      aviso.textContent = "Encerrado";
+      div.appendChild(aviso);
+    }
     container.appendChild(div);
 
     const selecao = { A: null, B: null, valorA: 0, valorB: 0 };
