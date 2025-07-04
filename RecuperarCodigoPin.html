@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Consulta de Aposta</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: grey; margin-top:3%; font-weight:bold; }
+    .duelo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      margin: 10px auto;
+      max-width: 500px;
+      text-align: left;
+    }
+    #whatsappBtn, #btnGerarPDF, #btnGerarLink { display: none; margin-top: 10px; }
+    button { padding: 10px 15px; background: #25d366; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #1ebd5b; }
+    #dataHora { margin-top: 10px; font-weight: bold; color: #444; }
+    .codigoInput {
+      text-align:center;
+      display: flex;
+      height:30px;
+      background:black;
+      color:white;
+      border-radius:20px;
+      margin: 0 auto 10px;
+      width: 150px;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    #menuHamburguer {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: black;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      z-index: 1000;
+    }
+    #agendaMenu {
+      display: none;
+      position: fixed;
+      top: 60px;
+      left: 10px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: left;
+      width: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      z-index: 999;
+    }
+    #agendaMenu input, #agendaMenu select {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 6px;
+      box-sizing: border-box;
+      font-weight: normal;
+      font-size: 14px;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <div id="menuHamburguer">☰ Agenda</div>
+  <div id="agendaMenu">
+    <h3>Agenda de Contatos</h3>
+    <select id="contatoSelect">
+      <option value="">-- Selecione um contato --</option>
+    </select>
+    <input type="text" id="novoNome" placeholder="Novo nome" />
+    <input type="text" id="novoTelefone" placeholder="Telefone com DDD" />
+    <button id="btnAdicionarContato">Adicionar Contato</button>
+  </div>
+
+  <h2>Buscar Aposta por Código</h2>
+  <input class="codigoInput" type="text" id="codigoBusca" placeholder="Ex: 123456" maxlength="6" />
+  <button id="btnBuscar">Buscar</button>
+
+  <div id="resultado"></div>
+  <p id="dataHora"></p>
+  <button id="whatsappBtn">👉 Enviar no WhatsApp</button>
+  <button id="btnGerarPDF">📄 Gerar PDF</button>
+  <button id="btnGerarLink">🔗 Gerar Link</button>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+import { getDatabase, ref, get, child, push, set, onValue } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA5a-2HzvcljnAfXE7P3ThDnq6m6E568ZA",
+  authDomain: "jogo-60a9e.firebaseapp.com",
+  projectId: "jogo-60a9e",
+  storageBucket: "jogo-60a9e.appspot.com",
+  messagingSenderId: "352852303591",
+  appId: "1:352852303591:web:8083c950047c9026bd8c42",
+  databaseURL: "https://jogo-60a9e-default-rtdb.firebaseio.com/"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const btnBuscar = document.getElementById("btnBuscar");
+const resultado = document.getElementById("resultado");
+const dataHoraEl = document.getElementById("dataHora");
+const whatsappBtn = document.getElementById("whatsappBtn");
+const btnGerarPDF = document.getElementById("btnGerarPDF");
+const btnGerarLink = document.getElementById("btnGerarLink");
+
+const contatoSelect = document.getElementById("contatoSelect");
+const novoNome = document.getElementById("novoNome");
+const novoTelefone = document.getElementById("novoTelefone");
+const btnAdicionarContato = document.getElementById("btnAdicionarContato");
+
+const menuHamburguer = document.getElementById("menuHamburguer");
+const agendaMenu = document.getElementById("agendaMenu");
+
+menuHamburguer.onclick = () => {
+  agendaMenu.style.display = agendaMenu.style.display === "none" ? "block" : "none";
+};
+
+function carregarContatos() {
+  const contatosRef = ref(db, "contatos/");
+  onValue(contatosRef, (snapshot) => {
+    contatoSelect.innerHTML = '<option value="">-- Selecione um contato --</option>';
+    snapshot.forEach((child) => {
+      const contato = child.val();
+      const opt = document.createElement("option");
+      opt.value = contato.telefone;
+      opt.textContent = `${contato.nome} - ${contato.telefone}`;
+      opt.setAttribute("data-nome", contato.nome);
+      contatoSelect.appendChild(opt);
+    });
+  });
+}
+carregarContatos();
+
+btnAdicionarContato.onclick = () => {
+  const nome = novoNome.value.trim();
+  const tel = novoTelefone.value.trim();
+  if (!nome || !tel) return alert("Preencha nome e telefone!");
+  const novoRef = push(ref(db, "contatos/"));
+  set(novoRef, { nome, telefone: tel }).then(() => {
+    novoNome.value = "";
+    novoTelefone.value = "";
+    alert("Contato adicionado!");
+  }).catch(err => {
+    alert("Erro ao adicionar contato: " + err.message);
+  });
+};
+
+btnBuscar.onclick = () => {
+  const codigo = document.getElementById("codigoBusca").value.trim();
+  resultado.innerHTML = "";
+  dataHoraEl.textContent = "";
+  whatsappBtn.style.display = "none";
+  btnGerarPDF.style.display = "none";
+  btnGerarLink.style.display = "none";
+
+  if (!codigo) return alert("Digite o código!");
+
+  get(child(ref(db), `apostas/${codigo}`)).then(snapshot => {
+    if (snapshot.exists()) {
+      const dados = snapshot.val();
+      const data = new Date(dados.dataRegistro);
+      const dataFormatada = data.toLocaleString("pt-BR");
+
+      const valorUnicoGlobal = (typeof dados.valorDigitado === "number" ? dados.valorDigitado.toFixed(2) : "0,00");
+      const valorTotal = (typeof dados.valorTotal === "number" ? dados.valorTotal.toFixed(2) : "0,00");
+
+      dataHoraEl.innerHTML = `
+        📅 Data da aposta: ${dataFormatada}<br>
+        💸 VALOR POR APOSTA: R$ ${valorUnicoGlobal}<br>
+        💰 TOTAL A PAGAR: R$ ${valorTotal}
+      `;
+
+      let mensagemWhatsapp = `📅 Data: ${dataFormatada}\n💸 Valor por aposta: R$ ${valorUnicoGlobal}\n💰 Total a pagar: R$ ${valorTotal}\n============================\n`;
+
+      // Agrupar duelos por série (campeonato)
+      const duelosPorSerie = {};
+
+      (dados.duelos || []).forEach((duelo) => {
+        const serie = duelo.serie || "Campeonato Desconhecido";
+        if (!duelosPorSerie[serie]) duelosPorSerie[serie] = [];
+        duelosPorSerie[serie].push(duelo);
+      });
+
+      Object.entries(duelosPorSerie).forEach(([serie, duelos]) => {
+        const titulo = document.createElement("h2");
+        titulo.textContent = `🏆 ${serie}`;
+        titulo.style.marginTop = "30px";
+        resultado.appendChild(titulo);
+
+        duelos.forEach((duelo) => {
+          const jogo = document.createElement("div");
+          jogo.className = "duelo";
+
+          const timeA = duelo.nomeTimeA || (duelo.duelo?.split(" x ")[0]) || "Time A";
+          const timeB = duelo.nomeTimeB || (duelo.duelo?.split(" x ")[1]) || "Time B";
+          const dataHoraJogo = new Date(duelo.dataHora).toLocaleString("pt-BR");
+          const selecaoTexto = duelo.escolha || "Não selecionado";
+
+          jogo.innerHTML = `
+            ⚽ <strong>${timeA} x ${timeB}</strong><br>
+            🎯 <strong>Escolha:</strong> ${selecaoTexto}<br>
+            🕒 <strong>Data/Hora do Jogo:</strong> ${dataHoraJogo}<br>
+            ⏳ <strong>Aguardando:</strong> Resultado...
+          `;
+
+          resultado.appendChild(jogo);
+
+          mensagemWhatsapp += `🏆 ${serie}\n⚽ ${timeA} x ${timeB}\n🎯 Escolha: ${selecaoTexto}\n🕒 ${dataHoraJogo}\n⏳ Aguardando: Resultado...\n============================\n`;
+        });
+      });
+
+      whatsappBtn.style.display = "inline-block";
+      btnGerarPDF.style.display = "inline-block";
+      btnGerarLink.style.display = "inline-block";
+
+      whatsappBtn.onclick = () => {
+        const telefone = contatoSelect.value;
+        if (!telefone) return alert("Selecione um contato da agenda!");
+        const selectedOption = contatoSelect.options[contatoSelect.selectedIndex];
+        const nomeContato = selectedOption.getAttribute("data-nome") || "Contato";
+        const mensagemFinal = `JOGADOR: ${nomeContato}\n${mensagemWhatsapp}`;
+        const url = `https://wa.me/55${telefone.replace(/\D/g, "")}?text=${encodeURIComponent(mensagemFinal)}`;
+        window.open(url, "_blank");
+      };
+
+      btnGerarPDF.onclick = () => {
+        const element = document.createElement("div");
+        element.innerHTML = `<h2>Aposta #${codigo}</h2>` + resultado.innerHTML + "<br>" + dataHoraEl.innerHTML.replace(/\n/g, "<br>");
+        html2pdf().from(element).save(`Aposta-${codigo}.pdf`);
+      };
+
+      btnGerarLink.onclick = () => {
+        const selectedOption = contatoSelect.options[contatoSelect.selectedIndex];
+        const nomeContato = selectedOption?.getAttribute("data-nome") || "Desconhecido";
+        const telefoneContato = contatoSelect.value;
+
+        const dadosDueloFormatados = [];
+
+        Object.entries(duelosPorSerie).forEach(([serie, duelos]) => {
+          duelos.forEach(duelo => {
+            const timeA = duelo.nomeTimeA || (duelo.duelo?.split(" x ")[0]) || "Time A";
+            const timeB = duelo.nomeTimeB || (duelo.duelo?.split(" x ")[1]) || "Time B";
+            const selecao = duelo.escolha || "Não selecionado";
+            const dataHora = new Date(duelo.dataHora).toLocaleString("pt-BR");
+
+            dadosDueloFormatados.push({
+              serie,
+              duelo: `${timeA} x ${timeB}`,
+              escolha: selecao,
+              dataHora
+            });
+          });
+        });
+
+        const dadosParaSalvar = {
+          nome: nomeContato,
+          telefone: telefoneContato,
+          dataHora: dataHoraEl.textContent,
+          duelos: dadosDueloFormatados
+        };
+
+        const dbRef = ref(db, "links_apostas");
+        const novoRef = push(dbRef);
+
+        set(novoRef, dadosParaSalvar).then(() => {
+          const id = novoRef.key;
+          const linkFinal = `${location.origin}/multiOnline.html?id=${id}`;
+          navigator.clipboard.writeText(linkFinal).then(() => {
+            alert("🔗 Link gerado e copiado com sucesso!");
+          });
+        }).catch(error => {
+          alert("Erro ao salvar os dados no Firebase.");
+          console.log("Erro ao salvar:", error);
+        });
+      };
+
+    } else {
+      resultado.innerHTML = "<p><strong>Código não encontrado.</strong></p>";
+    }
+  }).catch(error => {
+    console.error("Erro ao buscar:", error);
+    alert("Erro ao buscar código.");
+  });
+};
+</script>
+</body>
+</html>
