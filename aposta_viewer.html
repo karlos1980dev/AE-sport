@@ -15,7 +15,7 @@
       background: white;
       padding: 20px;
       border-radius: 15px;
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
       box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
@@ -28,7 +28,9 @@
       text-align: left;
     }
     h2 { color: #25d366; }
-    hr { border: none; border-top: 1px solid #ccc; margin: 20px 0; }
+    .ganhou { color: green; font-weight: bold; }
+    .perdeu { color: red; font-weight: bold; }
+    .carregando { color: orange; }
   </style>
 </head>
 <body>
@@ -57,24 +59,83 @@
     const id = urlParams.get("id");
     const container = document.getElementById("visualizacao");
 
+    function fetchPlacar(timeA, timeB) {
+      const token = "5e66c06518f74e779bc07e73ef0266c5";
+      const url = `https://api.api-futebol.com.br/v1/partidas?search=${encodeURIComponent(timeA)}%20vs%20${encodeURIComponent(timeB)}`;
+
+      return fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(resp => resp.json()).catch(() => null);
+    }
+
+    function verificarResultado(placarA, placarB, escolha) {
+      if (escolha === "Casa" && placarA > placarB) return "Ganhou";
+      if (escolha === "Fora" && placarB > placarA) return "Ganhou";
+      if (escolha === "Empate" && placarA === placarB) return "Ganhou";
+      return "Perdeu";
+    }
+
     if (!id) {
       container.innerHTML = "<h2>❌ ID inválido ou ausente na URL.</h2>";
     } else {
-      get(child(ref(db), `links_apostas/${id}`)).then(snapshot => {
+      get(child(ref(db), `links_apostas/${id}`)).then(async snapshot => {
         if (snapshot.exists()) {
           const dados = snapshot.val();
           const nome = dados.nome || "Desconhecido";
           const dataHora = dados.dataHora || "Data/Hora indisponível";
           const jogos = dados.jogos || [];
 
-          container.innerHTML = `
+          let html = `
             <h2>📄 Visualização da Aposta</h2>
             <p><strong>👤 Jogador:</strong> ${nome}</p>
-            <p><strong>📅 Data:</strong> ${dataHora}</p>
+            <p><strong>📅 Data da Aposta:</strong> ${dataHora}</p>
             <hr />
             <h3>🎮 Jogos:</h3>
-            ${jogos.map(j => `<div class="duelo">${j.replace(/\n/g, "<br>")}</div>`).join("")}
           `;
+
+          let acertos = 0;
+
+          for (const j of jogos) {
+            const partes = j.split("|");
+            const campeonato = partes[0] || "Desconhecido";
+            const duelo = partes[1] || "?? x ??";
+            const escolha = partes[2] || "Nenhuma";
+            const horario = partes[3] || "Horário indefinido";
+            const [timeA, timeB] = duelo.split(" x ");
+
+            let placarA = "-", placarB = "-";
+            let status = "<span class='carregando'>Buscando placar...</span>";
+
+            try {
+              const placarAPI = await fetchPlacar(timeA, timeB);
+              if (placarAPI && placarAPI.length > 0) {
+                const partida = placarAPI[0];
+                placarA = partida.placar_oficial_mandante;
+                placarB = partida.placar_oficial_visitante;
+                status = verificarResultado(placarA, placarB, escolha);
+                if (status === "Ganhou") acertos++;
+              } else {
+                status = "<span class='carregando'>Sem dados da API</span>";
+              }
+            } catch (e) {
+              status = "<span class='perdeu'>Erro API</span>";
+            }
+
+            html += `
+              <div class="duelo">
+                <p><strong>🏆 Campeonato:</strong> ${campeonato}</p>
+                <p><strong>⚔️ Duelo:</strong> ${duelo}</p>
+                <p><strong>🕘 Horário:</strong> ${horario}</p>
+                <p><strong>🖲️ Escolha:</strong> ${escolha}</p>
+                <p><strong>📊 Placar:</strong> ${placarA} x ${placarB}</p>
+                <p><strong>📌 Status:</strong> <span class='${status === "Ganhou" ? "ganhou" : "perdeu"}'>${status}</span></p>
+              </div>
+            `;
+          }
+
+          html += `<hr /><h3>✅ Acertos: ${acertos} / ${jogos.length}</h3>`;
+          container.innerHTML = html;
+
         } else {
           container.innerHTML = "<h2>❌ Aposta não encontrada.</h2>";
         }
