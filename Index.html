@@ -114,6 +114,7 @@
     width: 30px;
     height: 30px;
   }
+    
   </style>
 </head>
 <body>
@@ -121,13 +122,9 @@
 <h1>RIFA ONLINE MP</h1>
 <a href="https://wa.me/5571992290058?text=Olá!%20Quero%20mais%20informações%20sobre%20a%20Rifa." target="_blank" class="whatsapp-float">
   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
-<a href="https://wa.me/5571992290058?text=Olá!%20Quero%20mais%20informações%20sobre%20a%20Rifa." target="_blank" class="whatsapp-float">
-  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
 </a>
 <input style="width:120px; margin:0px;"type="text" id="nome" placeholder="NOME">
-<input style="width:120px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
-
-<select id="horarios" size="6">
+<input style="width:120px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;"><select id="horarios" size="6">
   <option value="" disabled selected>HORÁRIO</option>
   <option value="10:00">10:00</option>
   <option value="12:00">12:00</option>
@@ -139,6 +136,7 @@
 
 
 
+
 <div id="numeros"></div>
 
 <h3>RESERVADOS</h3>
@@ -146,9 +144,7 @@
 
 <div>
   <strong>Total a pagar: R$ <span id="totalPagar">0,00</span></strong>
-</div>
-
-<button id="salvar">Salvar Escolhas</button>
+</div><button id="salvar">Salvar Escolhas</button>
 
 <!-- Container PIX atualizado com input readonly e botão copiar -->
 <div id="pixContainer">
@@ -202,23 +198,33 @@
   }
 
   function atualizarBloqueados() {
-    db.ref('numerosBloqueados').once('value').then(snapshot => {
-      bloqueados = new Set();
-      const dados = snapshot.val() || {};
-      for (let n in dados) {
-        if (dados[n] === true) bloqueados.add(n);
-      }
-      atualizarBotoes();
-    });
-  }
+  const dataHoje = new Date().toISOString().slice(0,10);
+  const agora = new Date();
 
-  function atualizarBotoes() {
+  db.ref(`compras-dia/${dataHoje}`).once('value').then(snapshot => {
+    const compras = snapshot.val() || {};
+    let bloqueadosSet = new Set();
+
+    for (let horario in compras) {
+      const [hora, minuto] = horario.split(':').map(Number);
+      let horarioDate = new Date();
+      horarioDate.setHours(hora, minuto, 0, 0);
+
+      // Só bloqueia números se o horário for maior que o horário atual
+      if (horarioDate > agora) {
+        for (let key in compras[horario]) {
+          const numeros = compras[horario][key].numeros || [];
+          numeros.forEach(n => bloqueadosSet.add(n));
+        }
+      }
+    }
+
     document.querySelectorAll('.numero').forEach(btn => {
       const n = btn.textContent;
-      if (bloqueados.has(n)) {
+      if (bloqueadosSet.has(n)) {
         btn.classList.add('bloqueado');
-        btn.classList.remove('marcado');
         btn.disabled = true;
+        btn.classList.remove('marcado');
         selecionados = selecionados.filter(x => x !== n);
       } else {
         btn.classList.remove('bloqueado');
@@ -226,8 +232,8 @@
       }
     });
     atualizarTotalPagar();
-  }
-
+  });
+}
   function atualizarTotalPagar() {
     let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
     if (isNaN(valorUnit) || valorUnit <= 0) valorUnit = 0;
@@ -287,19 +293,24 @@
   setInterval(atualizarHorarios, 60000);
 
   function atualizarTextareaReservas(dadosPorHorario) {
-    let texto = "";
-    for (let horario of Object.keys(dadosPorHorario).sort()) {
-      texto += `Horário: ${horario}\n`;
-      for (let key in dadosPorHorario[horario]) {
-        const d = dadosPorHorario[horario][key];
-        texto += `${d.nome}: ${d.numeros.join("-")}\n`;
-      }
+  let texto = "";
+  for (let horario of Object.keys(dadosPorHorario).sort()) {
+    // Formatar data atual para DD/MM
+    const hoje = new Date();
+    const dia = hoje.getDate().toString().padStart(2, '0');
+    const mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
+
+    texto += `Horário: ${horario} ${dia}/${mes}\n`;
+    for (let key in dadosPorHorario[horario]) {
+      const d = dadosPorHorario[horario][key];
       texto += "=========================\n";
+      texto += `${d.nome}: ${d.numeros.join("-")}\n`;
     }
-    codigoTextarea.value = texto;
     texto += "=========================\n";
   }
-
+  codigoTextarea.value = texto;
+  
+}
   let dataAtualReservas = new Date().toISOString().slice(0,10);
 
   function carregarReservasDoDia(data) {
@@ -476,10 +487,42 @@ function liberarBotoesManualmente() {
     btn.disabled = false;
   });
 }
+function bloquearHorariosPassados() {
+  const select = document.getElementById("horarios");
+  const agora = new Date();
+  const horaAtual = agora.getHours();
+  const minutoAtual = agora.getMinutes();
+
+  let proximoHorario = null;
+
+  for (let i = 0; i < select.options.length; i++) {
+    let opt = select.options[i];
+    let [hora, minuto] = opt.value.split(":").map(Number);
+
+    // Bloqueia se já passou
+    if (hora < horaAtual || (hora === horaAtual && minuto <= minutoAtual)) {
+      opt.disabled = true;
+      opt.style.color = "#aaa"; // cinza
+    } else {
+      // Se ainda não selecionou o próximo, pega o primeiro disponível
+      if (!proximoHorario) {
+        proximoHorario = opt;
+      }
+    }
+  }
+
+  // Marca o próximo horário disponível
+  if (proximoHorario) {
+    proximoHorario.selected = true;
+  }
+}
+
+// Executa ao carregar a página
+bloquearHorariosPassados();
   atualizarBloqueados();
 </script>
 
 </body>
     </html>
     
-   
+  
