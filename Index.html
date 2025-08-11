@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="shortcut icon" type="image/jpg" href="https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/download%20(1).jpeg">
+<link rel="icon" href="https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/download%20(1).jpeg" type="image/jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" media="screen" />
+  
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
@@ -85,7 +91,7 @@
 </head>
 <body>
 
-<h1>Rifa Online - 10 pra 600</h1>
+<h1>Rifa Online - 1 pra 60</h1>
 
 <input style="width:100px; margin:0px;"type="text" id="nome" placeholder="NOME">
 <input style="width:100px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
@@ -433,9 +439,14 @@ function gerarPixCodeReal(valorTotal) {
     });
   });
 });
-
+function liberarBotoesManualmente() {
+  document.querySelectorAll('.numero').forEach(btn => {
+    btn.classList.remove('bloqueado');
+    btn.disabled = false;
+  });
+}
   atualizarBloqueados();
 </script>
 
 </body>
-  </html>
+    </html>
