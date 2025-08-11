@@ -333,12 +333,36 @@ function gerarPixCodeReal(valorTotal) {
 }
   document.getElementById('salvar').addEventListener('click', () => {
   const nome = nomeInput.value.trim();
-  if (!nome) return alert("Digite seu nome!");
-  if (selecionados.length === 0) return alert("Selecione pelo menos um número!");
-  const horariosSelecionados = Array.from(horariosSelect.selectedOptions).map(o => o.value).filter(v => v !== "");
-  if (horariosSelecionados.length === 0) return alert("Selecione pelo menos um horário!");
+  if (!nome) {
+    alert("Digite seu nome!");
+    return;
+  }
+
+  // Validação: só letras e espaços (com acentos)
+  if (!/^[A-Za-zÀ-ú\s]+$/.test(nome)) {
+    alert("Digite um nome válido contendo apenas letras.");
+    return;
+  }
+
+  if (selecionados.length === 0) {
+    alert("Selecione pelo menos um número!");
+    return;
+  }
+
+  const horariosSelecionados = Array.from(horariosSelect.selectedOptions)
+    .map(o => o.value)
+    .filter(v => v !== "");
+
+  if (horariosSelecionados.length === 0) {
+    alert("Selecione pelo menos um horário!");
+    return;
+  }
+
   let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
-  if (isNaN(valorUnit) || valorUnit <= 0) return alert("Digite um valor válido maior que zero!");
+  if (isNaN(valorUnit) || valorUnit <= 0) {
+    alert("Digite um valor válido maior que zero!");
+    return;
+  }
 
   if (!confirm(`Confirma a reserva dos números ${selecionados.join(", ")} para ${horariosSelecionados.join(", ")} com valor unitário R$ ${valorUnit.toFixed(2)}?`)) {
     return;
@@ -358,12 +382,15 @@ function gerarPixCodeReal(valorTotal) {
     const dataHoje = new Date().toISOString().slice(0,10);
     const dataHora = new Date().toLocaleString();
 
+    const totalPagar = valorUnit * selecionados.length;
+
     const dadosBase = { 
       nome, 
       numeros: [...selecionados], 
       dataHora, 
       codigo: codigoSimples, 
-      valorUnitario: valorUnit 
+      valorUnitario: valorUnit,
+      valorPagar: totalPagar
     };
 
     let promessas = [];
@@ -377,15 +404,12 @@ function gerarPixCodeReal(valorTotal) {
       carregarReservasDoDia(dataHoje);
       atualizarBloqueados();
 
-      const totalPagar = valorUnit * selecionados.length;
-
       // Montar mensagem WhatsApp
       const telefoneDestino = "5571992290058"; // Coloque seu número real aqui
       const mensagem = 
         `.              🍀Rifa Online☘️\n\n Quero confirmar minha reserva\n` +
         `Horário(s): ${horariosSelecionados.join(", ")}\n` +
         `Total a pagar: R$ ${totalPagar.toFixed(2).replace('.', ',')}\n` +
-        
         `Chave Pix Telefone\n\n` +
         `71992290058\n\n` +
         `Carlos dos Santos Reis\n` +
@@ -403,7 +427,6 @@ function gerarPixCodeReal(valorTotal) {
       totalPagarSpan.textContent = "0,00";
       horariosSelect.selectedIndex = -1;
       document.querySelectorAll('.numero.marcado').forEach(b => b.classList.remove('marcado'));
-
     }).catch((error) => {
       console.error("Erro ao salvar:", error);
       alert("Erro ao salvar: " + error);
@@ -415,4 +438,4 @@ function gerarPixCodeReal(valorTotal) {
 </script>
 
 </body>
-    </html>
+  </html>
