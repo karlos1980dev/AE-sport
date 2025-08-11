@@ -13,7 +13,7 @@
       grid-template-columns: repeat(10, 1fr);
       gap: 2px;
       max-width: 520px;
-      margin: 10px auto;
+      margin: 0px auto;
     }
     .numero {
       width: 39px;
@@ -31,9 +31,10 @@
       cursor: not-allowed;
       color: #ccc;
     }
-    textarea { width: 90%; height: 180px; margin-top: 5px; white-space: pre-wrap; }
+    textarea { background:#000;color:#fff;width: 90%; height: 180px; white-space: pre-wrap; border-radius:10px; text-align: center;}
     input, select {
       padding: 5px;
+      
       margin: 10px;
       border-radius: 10px;
       text-align: center;
@@ -58,11 +59,27 @@
       margin-left: auto;
       margin-right: auto;
       word-break: break-word;
+      display: none; /* Começa oculto */
     }
     #qrcode {
       margin: 10px auto;
       width: 200px;
       height: 200px;
+    }
+    /* Input readonly para PIX */
+    #codigoPixInput {
+      width: 90%;
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #222;
+      color: #fff;
+      user-select: all;
+    }
+    h3{
+        margin:2px;
     }
   </style>
 </head>
@@ -70,7 +87,8 @@
 
 <h1>Rifa Online - 10 pra 600</h1>
 
-<input type="text" id="nome" placeholder="Seu nome">
+<input style="width:100px; margin:0px;"type="text" id="nome" placeholder="NOME">
+<input style="width:100px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
 
 <select id="horarios" size="6">
   <option value="" disabled selected>HORÁRIO</option>
@@ -81,9 +99,8 @@
   <option value="21:00">21:00</option>
 </select>
 
-<br>
 
-<input type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
+
 
 <div id="numeros"></div>
 
@@ -96,217 +113,234 @@
 
 <button id="salvar">Salvar Escolhas</button>
 
-<div id="pixContainer" style="display:none;">
+<!-- Container PIX atualizado com input readonly e botão copiar -->
+<div id="pixContainer">
   <h3>Código PIX para pagamento:</h3>
   <div id="qrcode"></div>
-  <textarea id="codigoPix" readonly style="width:90%; height:80px;"></textarea><br>
+  <input type="text" id="codigoPixInput" readonly placeholder="Código PIX aparecerá aqui...">
+  <br>
   <button id="copiarPix">Copiar Código PIX</button>
   <button id="enviarWhats">Enviar via WhatsApp</button>
 </div>
 
 <script>
   const firebaseConfig = {
-  apiKey: "AIzaSyCIDFHMmzGkN3HGLn-XA8ieC_5DDBvbJ7o",
-  authDomain: "rifa-782a3.firebaseapp.com",
-  databaseURL: "https://rifa-782a3-default-rtdb.firebaseio.com",
-  projectId: "rifa-782a3",
-  storageBucket: "rifa-782a3.firebasestorage.app",
-  messagingSenderId: "88068598855",
-  appId: "1:88068598855:web:a230a06db76a4bbc125562"
-};
+    apiKey: "AIzaSyCIDFHMmzGkN3HGLn-XA8ieC_5DDBvbJ7o",
+    authDomain: "rifa-782a3.firebaseapp.com",
+    databaseURL: "https://rifa-782a3-default-rtdb.firebaseio.com",
+    projectId: "rifa-782a3",
+    storageBucket: "rifa-782a3.firebasestorage.app",
+    messagingSenderId: "88068598855",
+    appId: "1:88068598855:web:a230a06db76a4bbc125562"
+  };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-const numerosDiv = document.getElementById('numeros');
-const nomeInput = document.getElementById('nome');
-const valorInput = document.getElementById('valor');
-const codigoTextarea = document.getElementById('codigo');
-const horariosSelect = document.getElementById('horarios');
-const pixContainer = document.getElementById('pixContainer');
-const codigoPixTextarea = document.getElementById('codigoPix');
-const btnCopiarPix = document.getElementById('copiarPix');
-const btnEnviarWhats = document.getElementById('enviarWhats');
-const qrcodeDiv = document.getElementById('qrcode');
-const totalPagarSpan = document.getElementById('totalPagar');
+  const numerosDiv = document.getElementById('numeros');
+  const nomeInput = document.getElementById('nome');
+  const valorInput = document.getElementById('valor');
+  const codigoTextarea = document.getElementById('codigo');
+  const horariosSelect = document.getElementById('horarios');
+  const pixContainer = document.getElementById('pixContainer');
+  const codigoPixInput = document.getElementById('codigoPixInput'); // Novo input PIX
+  const btnCopiarPix = document.getElementById('copiarPix');
+  const btnEnviarWhats = document.getElementById('enviarWhats');
+  const qrcodeDiv = document.getElementById('qrcode');
+  const totalPagarSpan = document.getElementById('totalPagar');
 
-let selecionados = [];
-let bloqueados = new Set();
-let ultimoPix = null;
-let ultimaReserva = null; // guardará dados para WhatsApp
+  let selecionados = [];
+  let bloqueados = new Set();
+  let ultimoPix = null;
+  let ultimaReserva = null;
 
-// Criar botões 00 a 99
-for (let i = 0; i < 100; i++) {
-  let num = i.toString().padStart(2, '0');
-  let btn = document.createElement('button');
-  btn.textContent = num;
-  btn.className = 'numero';
-  btn.addEventListener('click', () => toggleNumero(btn, num));
-  numerosDiv.appendChild(btn);
-}
+  // Criar botões 00 a 99
+  for (let i = 0; i < 100; i++) {
+    let num = i.toString().padStart(2, '0');
+    let btn = document.createElement('button');
+    btn.textContent = num;
+    btn.className = 'numero';
+    btn.addEventListener('click', () => toggleNumero(btn, num));
+    numerosDiv.appendChild(btn);
+  }
 
-// Atualiza lista de números bloqueados do Firebase
-function atualizarBloqueados() {
-  db.ref('numerosBloqueados').once('value').then(snapshot => {
-    bloqueados = new Set();
-    const dados = snapshot.val() || {};
-    for (let n in dados) {
-      if(dados[n] === true) bloqueados.add(n);
+  function atualizarBloqueados() {
+    db.ref('numerosBloqueados').once('value').then(snapshot => {
+      bloqueados = new Set();
+      const dados = snapshot.val() || {};
+      for (let n in dados) {
+        if (dados[n] === true) bloqueados.add(n);
+      }
+      atualizarBotoes();
+    });
+  }
+
+  function atualizarBotoes() {
+    document.querySelectorAll('.numero').forEach(btn => {
+      const n = btn.textContent;
+      if (bloqueados.has(n)) {
+        btn.classList.add('bloqueado');
+        btn.classList.remove('marcado');
+        btn.disabled = true;
+        selecionados = selecionados.filter(x => x !== n);
+      } else {
+        btn.classList.remove('bloqueado');
+        btn.disabled = false;
+      }
+    });
+    atualizarTotalPagar();
+  }
+
+  function atualizarTotalPagar() {
+    let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
+    if (isNaN(valorUnit) || valorUnit <= 0) valorUnit = 0;
+    const total = valorUnit * selecionados.length;
+    totalPagarSpan.textContent = total.toFixed(2).replace('.', ',');
+  }
+
+  function toggleNumero(botao, numero) {
+    if (botao.classList.contains('bloqueado')) {
+      alert(`Número ${numero} já está reservado!`);
+      return;
     }
-    atualizarBotoes();
-  });
-}
-
-// Atualiza estados dos botões e total a pagar
-function atualizarBotoes() {
-  document.querySelectorAll('.numero').forEach(btn => {
-    const n = btn.textContent;
-    if (bloqueados.has(n)) {
-      btn.classList.add('bloqueado');
-      btn.classList.remove('marcado');
-      btn.disabled = true;
-      selecionados = selecionados.filter(x => x !== n);
+    if (botao.classList.contains('marcado')) {
+      botao.classList.remove('marcado');
+      selecionados = selecionados.filter(n => n !== numero);
     } else {
-      btn.classList.remove('bloqueado');
-      btn.disabled = false;
+      botao.classList.add('marcado');
+      selecionados.push(numero);
     }
-  });
-  atualizarTotalPagar();
-}
-
-// Atualiza o total a pagar exibido
-function atualizarTotalPagar() {
-  let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
-  if (isNaN(valorUnit) || valorUnit <= 0) valorUnit = 0;
-  const total = valorUnit * selecionados.length;
-  totalPagarSpan.textContent = total.toFixed(2).replace('.', ',');
-}
-
-function toggleNumero(botao, numero) {
-  if (botao.classList.contains('bloqueado')) {
-    alert(`Número ${numero} já está reservado!`);
-    return;
-  }
-  if (botao.classList.contains('marcado')) {
-    botao.classList.remove('marcado');
-    selecionados = selecionados.filter(n => n !== numero);
-  } else {
-    botao.classList.add('marcado');
-    selecionados.push(numero);
-  }
-  atualizarTotalPagar();
-}
-
-function gerarCodigoSimples() {
-  const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  return `RIFA-${letras[Math.floor(Math.random() * letras.length)]}${letras[Math.floor(Math.random() * letras.length)]}${Math.floor(100 + Math.random() * 900)}`;
-}
-
-function getHoraAtual() {
-  const now = new Date();
-  let h = now.getHours();
-  let m = now.getMinutes();
-  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-}
-
-function atualizarHorarios() {
-  const horarios = Array.from(horariosSelect.options);
-  const horaAtual = getHoraAtual();
-
-  for (let opt of horarios) {
-    opt.disabled = false;
-    opt.selected = false;
+    atualizarTotalPagar();
   }
 
-  for (let opt of horarios) {
-    if (opt.value <= horaAtual) {
-      opt.disabled = true;
-    }
+  function gerarCodigoSimples() {
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return `RIFA-${letras[Math.floor(Math.random() * letras.length)]}${letras[Math.floor(Math.random() * letras.length)]}${Math.floor(100 + Math.random() * 900)}`;
   }
 
-  let marcado = false;
-  for (let opt of horarios) {
-    if (!opt.disabled && !marcado) {
-      opt.selected = true;
-      marcado = true;
-    }
+  function getHoraAtual() {
+    const now = new Date();
+    let h = now.getHours();
+    let m = now.getMinutes();
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
   }
-  if (!marcado) {
+
+  function atualizarHorarios() {
+    const horarios = Array.from(horariosSelect.options);
+    const horaAtual = getHoraAtual();
     for (let opt of horarios) {
+      opt.disabled = false;
       opt.selected = false;
     }
-  }
-}
-
-atualizarHorarios();
-setInterval(atualizarHorarios, 60000);
-
-function atualizarTextareaReservas(dadosPorHorario) {
-  let texto = "";
-  for (let horario of Object.keys(dadosPorHorario).sort()) {
-    texto += `Horário: ${horario}\n`;
-    for (let key in dadosPorHorario[horario]) {
-      const d = dadosPorHorario[horario][key];
-      const numerosFormatados = d.numeros.join("-");
-      texto += `${d.nome}: ${numerosFormatados}\n`;
+    for (let opt of horarios) {
+      if (opt.value <= horaAtual && opt.value !== "") {
+        opt.disabled = true;
+      }
     }
+    let marcado = false;
+    for (let opt of horarios) {
+      if (!opt.disabled && !marcado && opt.value !== "") {
+        opt.selected = true;
+        marcado = true;
+      }
+    }
+  }
+
+  atualizarHorarios();
+  setInterval(atualizarHorarios, 60000);
+
+  function atualizarTextareaReservas(dadosPorHorario) {
+    let texto = "";
+    for (let horario of Object.keys(dadosPorHorario).sort()) {
+      texto += `Horário: ${horario}\n`;
+      for (let key in dadosPorHorario[horario]) {
+        const d = dadosPorHorario[horario][key];
+        texto += `${d.nome}: ${d.numeros.join("-")}\n`;
+      }
+      texto += "=========================\n";
+    }
+    codigoTextarea.value = texto;
     texto += "=========================\n";
   }
-  codigoTextarea.value = texto;
-}
 
-// Variável que guarda o dia atual para controlar quando limpar o textarea
-let dataAtualReservas = new Date().toISOString().slice(0,10);
+  let dataAtualReservas = new Date().toISOString().slice(0,10);
 
-function carregarReservasDoDia(data) {
-  db.ref(`compras-dia/${data}`).once('value').then(snapshot => {
-    const dadosPorHorario = snapshot.val() || {};
-    atualizarTextareaReservas(dadosPorHorario);
-  });
-}
-
-function verificarDiaMudou() {
-  const dataHoje = new Date().toISOString().slice(0,10);
-  if (dataHoje !== dataAtualReservas) {
-    // Dia mudou: limpa textarea e variáveis
-    dataAtualReservas = dataHoje;
-    codigoTextarea.value = "";
-    selecionados = [];
-    nomeInput.value = "";
-    valorInput.value = "";
-    totalPagarSpan.textContent = "0,00";
-    horariosSelect.selectedIndex = -1;
-    document.querySelectorAll('.numero.marcado').forEach(b => b.classList.remove('marcado'));
-    atualizarBloqueados();
-    carregarReservasDoDia(dataHoje);
-    pixContainer.style.display = "none";
-    qrcodeDiv.innerHTML = "";
-    codigoPixTextarea.value = "";
+  function carregarReservasDoDia(data) {
+    db.ref(`compras-dia/${data}`).once('value').then(snapshot => {
+      const dadosPorHorario = snapshot.val() || {};
+      atualizarTextareaReservas(dadosPorHorario);
+    });
   }
-}
 
-carregarReservasDoDia(dataAtualReservas);
-setInterval(verificarDiaMudou, 60000);
+  function verificarDiaMudou() {
+    const dataHoje = new Date().toISOString().slice(0,10);
+    if (dataHoje !== dataAtualReservas) {
+      dataAtualReservas = dataHoje;
+      codigoTextarea.value = "";
+      selecionados = [];
+      nomeInput.value = "";
+      valorInput.value = "";
+      totalPagarSpan.textContent = "0,00";
+      horariosSelect.selectedIndex = -1;
+      document.querySelectorAll('.numero.marcado').forEach(b => b.classList.remove('marcado'));
+      atualizarBloqueados();
+      carregarReservasDoDia(dataHoje);
+      pixContainer.style.display = "none";
+      qrcodeDiv.innerHTML = "";
+      codigoPixInput.value = "";
+    }
+  }
 
-valorInput.addEventListener('input', atualizarTotalPagar);
+  carregarReservasDoDia(dataAtualReservas);
+  setInterval(verificarDiaMudou, 60000);
+  valorInput.addEventListener('input', atualizarTotalPagar);
 
-// Função para gerar um código PIX real simplificado (exemplo para testes)
+  // Função para gerar código PIX real simples (ajuste conforme sua necessidade)
+  function gerarPixCodeReal(valorTotal) {
+    // Valor formatado: 10 dígitos sem vírgula (ex: 15,00 => 1500)
+    let valorStr = (valorTotal.toFixed(2).replace('.', '')).padStart(10, '0');
+    // Exemplo simples de código PIX estático - ajuste seu código conforme padrão PIX para seu pagamento
+    const chavePix = "71992290058"; // SUA CHAVE PIX
+    return `00020126580014BR.GOV.BCB.PIX0136${chavePix}0208Pagamento520400005303986540${valorStr}5802BR5925Rifa Online - Reserva6009Sao Paulo61080540900062070503***6304ABCD`;
+  }
+
+  // Botão copiar código PIX
+  btnCopiarPix.addEventListener('click', () => {
+    if (!codigoPixInput.value) return alert("Código PIX vazio!");
+    codigoPixInput.select();
+    codigoPixInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+    document.execCommand('copy');
+    alert("Código PIX copiado!");
+  });
+
+  // Você pode implementar o botão enviarWhats aqui se quiser
+
+btnCopiarPix.addEventListener('click', () => {
+  if (!codigoPixInput.value) return alert("Código PIX vazio!");
+  codigoPixInput.select();
+  codigoPixInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+  document.execCommand('copy');
+  alert("Código PIX copiado!");
+});
+
 function gerarPixCodeReal(valorTotal) {
-  const chavePix = "12345678900"; // Troque para sua chave real
-  const valorFormatado = valorTotal.toFixed(2).replace('.', '');
-  return `00020126580014BR.GOV.BCB.PIX0136${chavePix}0208Pagamento520400005303986540${valorTotal.toFixed(2).replace('.', '')}5802BR5925Rifa Online - Reserva6009Sao Paulo61080540900062070503***6304ABCD`;
+  // Valor formatado: sem vírgula, 2 casas decimais, sem ponto
+  let valorStr = valorTotal.toFixed(2).replace('.', '');
+  // Exemplo de código PIX básico (ajuste conforme necessário)
+  const chavePix = "71992290058"; // SUA CHAVE PIX
+  // Aqui um código QR genérico para Pix (simplificado)
+  return `00020126580014BR.GOV.BCB.PIX0136${chavePix}0208Pagamento520400005303986540${valorStr}5802BR5925Rifa Online - Reserva6009Sao Paulo61080540900062070503***6304ABCD`;
 }
-
-document.getElementById('salvar').addEventListener('click', () => {
+  document.getElementById('salvar').addEventListener('click', () => {
   const nome = nomeInput.value.trim();
   if (!nome) return alert("Digite seu nome!");
   if (selecionados.length === 0) return alert("Selecione pelo menos um número!");
-  const horariosSelecionados = Array.from(horariosSelect.selectedOptions).map(o => o.value);
+  const horariosSelecionados = Array.from(horariosSelect.selectedOptions).map(o => o.value).filter(v => v !== "");
   if (horariosSelecionados.length === 0) return alert("Selecione pelo menos um horário!");
   let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
   if (isNaN(valorUnit) || valorUnit <= 0) return alert("Digite um valor válido maior que zero!");
 
-  if(!confirm(`Confirma a reserva dos números ${selecionados.join(", ")} para o(s) horário(s): ${horariosSelecionados.join(", ")} com valor unitário R$ ${valorUnit.toFixed(2)}?`)) {
+  if (!confirm(`Confirma a reserva dos números ${selecionados.join(", ")} para ${horariosSelecionados.join(", ")} com valor unitário R$ ${valorUnit.toFixed(2)}?`)) {
     return;
   }
 
@@ -314,120 +348,71 @@ document.getElementById('salvar').addEventListener('click', () => {
     const bloqueios = snapshot.val() || {};
     const conflito = selecionados.find(n => bloqueios[n] === true);
     if (conflito) {
-      alert(`O número ${conflito} já foi reservado por outro usuário. Atualizando lista.`);
+      alert(`O número ${conflito} já foi reservado. Lista atualizada.`);
       atualizarBloqueados();
       return;
     }
 
     const codigoSimples = gerarCodigoSimples();
     const codigoChave = "ID-" + Date.now();
-    const dataHoraCompleta = new Date();
-    const dataHoje = dataHoraCompleta.toISOString().slice(0,10);
-    const dataHora = dataHoraCompleta.toLocaleString();
+    const dataHoje = new Date().toISOString().slice(0,10);
+    const dataHora = new Date().toLocaleString();
 
-    const dadosBase = {
-      nome,
-      numeros: [...selecionados],
-      dataHora,
-      codigo: codigoSimples,
-      valorUnitario: valorUnit
+    const dadosBase = { 
+      nome, 
+      numeros: [...selecionados], 
+      dataHora, 
+      codigo: codigoSimples, 
+      valorUnitario: valorUnit 
     };
 
     let promessas = [];
-    for(let horario of horariosSelecionados) {
-      promessas.push(
-        db.ref(`compras-dia/${dataHoje}/${horario}/${codigoChave}`).set(dadosBase)
-      );
+    for (let horario of horariosSelecionados) {
+      promessas.push(db.ref(`compras-dia/${dataHoje}/${horario}/${codigoChave}`).set(dadosBase));
     }
-
-    selecionados.forEach(n => {
-      promessas.push(db.ref(`numerosBloqueados/${n}`).set(true));
-    });
+    selecionados.forEach(n => promessas.push(db.ref(`numerosBloqueados/${n}`).set(true)));
 
     Promise.all(promessas).then(() => {
       alert("Reserva feita com sucesso!");
-
       carregarReservasDoDia(dataHoje);
       atualizarBloqueados();
 
-      // Prepara código PIX, QR Code e dados para WhatsApp
       const totalPagar = valorUnit * selecionados.length;
-      ultimoPix = gerarPixCodeReal(totalPagar);
 
-      codigoPixTextarea.value = ultimoPix;
-      pixContainer.style.display = "block";
+      // Montar mensagem WhatsApp
+      const telefoneDestino = "5571992290058"; // Coloque seu número real aqui
+      const mensagem = 
+        `.              🍀Rifa Online☘️\n\n Quero confirmar minha reserva\n` +
+        `Horário(s): ${horariosSelecionados.join(", ")}\n` +
+        `Total a pagar: R$ ${totalPagar.toFixed(2).replace('.', ',')}\n` +
+        
+        `Chave Pix Telefone\n\n` +
+        `71992290058\n\n` +
+        `Carlos dos Santos Reis\n` +
+        `Código da reserva: ${codigoSimples}\n` +
+        `Obrigado!`;
 
-      qrcodeDiv.innerHTML = "";
-      QRCode.toCanvas(qrcodeDiv, ultimoPix, { width: 200 }, function (error) {
-        if (error) console.error(error);
-      });
+      // Abrir WhatsApp com a mensagem pronta
+      const urlWhats = `https://wa.me/${telefoneDestino}?text=${encodeURIComponent(mensagem)}`;
+      window.open(urlWhats, '_blank');
 
-      // Guarda dados para enviar WhatsApp (copia o estado antes de limpar)
-      ultimaReserva = {
-        nome,
-        numeros: [...selecionados],
-        horarios: horariosSelecionados,
-        valorUnitario: valorUnit,
-        totalPagar
-      };
-
-      // Limpar seleção e inputs
+      // Limpar seleção após salvar
       selecionados = [];
-      nomeInput.value = '';
-      valorInput.value = '';
+      nomeInput.value = "";
+      valorInput.value = "";
       totalPagarSpan.textContent = "0,00";
       horariosSelect.selectedIndex = -1;
-      
-  
-        document.querySelectorAll('.numero.marcado').forEach(b => b.classList.remove('marcado'));
-      }).catch(err => {
-        alert("Erro ao salvar no Firebase: " + err);
-      });
+      document.querySelectorAll('.numero.marcado').forEach(b => b.classList.remove('marcado'));
+
+    }).catch((error) => {
+      console.error("Erro ao salvar:", error);
+      alert("Erro ao salvar: " + error);
     });
   });
-
-  btnCopiarPix.addEventListener('click', () => {
-    if (!ultimoPix) return alert("Nenhum código PIX para copiar.");
-    codigoPixTextarea.select();
-    document.execCommand('copy');
-    alert("Código PIX copiado!");
-  });
-
-  btnEnviarWhats.addEventListener('click', () => {
-    const nome = nomeInput.value.trim();
-    const horariosSelecionados = Array.from(horariosSelect.selectedOptions).map(o => o.value);
-    const valorUnit = parseFloat(valorInput.value.replace(',', '.'));
-    if (!nome || selecionados.length === 0 || horariosSelecionados.length === 0 || !valorUnit || valorUnit <= 0) {
-      return alert("Para enviar via WhatsApp, preencha nome, selecione números, horários e informe o valor.");
-    }
-    const total = valorUnit * selecionados.length;
-    const numerosStr = selecionados.join(", ");
-    const msg = 
-      `Reserva de Rifa:\n` +
-      `Nome: ${nome}\n` +
-      `Horários: ${horariosSelecionados.join(", ")}\n` +
-      `Números: ${numerosStr}\n` +
-      `Valor unitário: R$ ${valorUnit.toFixed(2).replace('.', ',')}\n` +
-      `Total a pagar: R$ ${total.toFixed(2).replace('.', ',')}\n` +
-      `Código PIX para pagamento:\n${ultimoPix}`;
-
-    const urlWhats = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-    window.open(urlWhats, '_blank');
-  });
-
-  // Gera código PIX usando padrão simples (Exemplo básico, você pode adaptar para gerar QR real)
-  function gerarPixCodeReal(valorTotal) {
-    // Para um PIX real você deve gerar o payload oficial com CRC, mas aqui está uma versão simples:
-    // Troque pela sua chave Pix real!
-    const chavePix = "12345678900";
-    const valorFormatado = valorTotal.toFixed(2).replace('.', '');
-    // Exemplo simplificado, sem CRC real:
-    return `00020126580014BR.GOV.BCB.PIX0136${chavePix}0208Pagamento520400005303986540${valorTotal.toFixed(2).replace('.', '')}5802BR5925Rifa Online - Reserva6009Sao Paulo61080540900062070503***6304ABCD`;
-  }
+});
 
   atualizarBloqueados();
 </script>
 
 </body>
-  </html>
-  
+    </html>
