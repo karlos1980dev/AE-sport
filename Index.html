@@ -481,10 +481,7 @@ document.getElementById('salvar').addEventListener('click', () => {
     return;
   }
 
-  if (!confirm(`Confirma a reserva dos números ${selecionados.join(", ")} para ${horariosSelecionados.join(", ")} com valor unitário R$ ${valorUnit.toFixed(2)}?`)) {
-    return;
-  }
-
+ 
   db.ref('numerosBloqueados').once('value').then(snapshot => {
     const bloqueios = snapshot.val() || {};
     const conflito = selecionados.find(n => bloqueios[n] === true);
