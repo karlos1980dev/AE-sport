@@ -13,13 +13,23 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background: #232; color:#fff}
+    body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #232;
+  color: #fff;
+  padding-top: 50px; /* altura da barra fixa */
+}
     #numeros {
       display: grid;
       grid-template-columns: repeat(10, 1fr);
       gap: 2px;
+      
       max-width: 520px;
       margin: 0px auto;
+    }
+    #totalPagar{
+        color:#ff000a;
     }
     .numero {
       width: 39px;
@@ -37,7 +47,7 @@
       cursor: not-allowed;
       color: #ccc;
     }
-    textarea { background:#000;color:#fff;width: 90%; height: 180px; white-space: pre-wrap; border-radius:10px; text-align: center; padding:20px;}
+    textarea { background:#000;color:#fff;width: 90%; height: 140px; white-space: pre-wrap; border-radius:10px; text-align: center; padding:20px;}
     input, select {
       padding: 5px;
       
@@ -47,7 +57,7 @@
       font-size: 16px;
     }
     button#salvar, button#copiarPix, button#enviarWhats {
-      padding: 8px 15px;
+      padding: 8px 110px;
       background: #2ecc71;
       color: white;
       border: none;
@@ -84,6 +94,9 @@
       color: #fff;
       user-select: all;
     }
+ 
+
+
     h3{
         margin:2px;
     }
@@ -114,17 +127,53 @@
     width: 30px;
     height: 30px;
   }
-    
+   .topo-fixo {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+background: black;
+color:white;
+padding: 8px 12px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+z-index: 999;
+display: flex;
+align-items: center;
+gap: 10px;
+box-sizing: border-box;
+}
+
+.topo-fixo input#valorUnico {
+flex: 1;
+height: 40px;
+font-size: 14px;
+padding: 0 10px;
+margin-left:5px;
+border-radius: 6px;
+border: 1px solid #ccc;
+}
+.reservado{
+    display:flex;
+    margin-left:30px;
+    margin-top:2px;
+    color:white;
+    font-weight:bold;
+    text-align:center; justiça-content: center;
+}
+
   </style>
 </head>
 <body>
 
-<h1>RIFA ONLINE MP</h1>
+
 <a href="https://wa.me/5571992290058?text=Olá!%20Quero%20mais%20informações%20sobre%20a%20Rifa." target="_blank" class="whatsapp-float">
   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
 </a>
+<div class="topo-fixo">
 <input style="width:120px; margin:0px;"type="text" id="nome" placeholder="NOME">
-<input style="width:120px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;"><select id="horarios" size="6">
+
+<input style="width:120px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
+<select id="horarios" size="6">
   <option value="" disabled selected>HORÁRIO</option>
   <option value="10:00">10:00</option>
   <option value="12:00">12:00</option>
@@ -133,18 +182,18 @@
   <option value="21:00">21:00</option>
 </select>
 
+</div>
 
-
-
+<h1>RIFA ONLINE MP</h1>
 
 <div id="numeros"></div>
 
-<h3>RESERVADOS</h3>
+<div class="reservado">RESERVADOS = 
+TOTAL A PAGAR : R$    <span id="totalPagar">    0,00 </span>
+</div>
 <textarea id="codigo" readonly></textarea>
 
-<div>
-  <strong>Total a pagar: R$ <span id="totalPagar">0,00</span></strong>
-</div><button id="salvar">Salvar Escolhas</button>
+<button id="salvar">Salvar Escolhas</button>
 
 <!-- Container PIX atualizado com input readonly e botão copiar -->
 <div id="pixContainer">
@@ -233,6 +282,9 @@
     });
     atualizarTotalPagar();
   });
+
+  // Aqui garantimos que a viewer sempre tenha tudo do dia
+  carregarReservasDoDia(dataHoje);
 }
   function atualizarTotalPagar() {
     let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
@@ -303,10 +355,10 @@
     texto += `Horário: ${horario} ${dia}/${mes}\n`;
     for (let key in dadosPorHorario[horario]) {
       const d = dadosPorHorario[horario][key];
-      texto += "=========================\n";
+      texto += "✅=========================\n\n";
       texto += `${d.nome}: ${d.numeros.join("-")}\n`;
     }
-    texto += "=========================\n";
+    texto += "⏱️=========================⏱️\n";
   }
   codigoTextarea.value = texto;
   
