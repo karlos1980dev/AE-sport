@@ -505,6 +505,529 @@ function gerarPixCodeReal(valorTotal) {
       atualizarBloqueados();
 
       // Montar mensagem WhatsApp
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="shortcut icon" type="image/jpg" href="https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/download%20(1).jpeg">
+<link rel="icon" href="https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/download%20(1).jpeg" type="image/jpg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" media="screen" />
+  
+  <meta charset="UTF-8" />
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #232;
+  color: #fff;
+  padding-top: 50px; /* altura da barra fixa */
+}
+#numeros {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: 2px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* Ajuste de tamanho no celular */
+.numero {
+  min-width: 40px;
+  height: 40px;
+  font-size: 14px;
+}
+
+/* Para telas muito pequenas (menos de 400px) */
+@media (max-width: 400px) {
+  #numeros {
+    grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+  }
+  .numero {
+    height: 35px;
+    font-size: 12px;
+  }
+}
+    #totalPagar{
+        color:#ff000a;
+    }
+    .numero {
+      width: 39px;
+      height: 35px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #3498db;
+      color: white;
+      border: none;
+    }
+    .numero.marcado { background: #27ae60; }
+    .numero.bloqueado {
+      background: #888 !important;
+      cursor: not-allowed;
+      color: #ccc;
+    }
+    textarea { background:#000;color:#fff;width: 90%; height: 140px; white-space: pre-wrap; border-radius:10px; text-align: center; padding:20px;}
+    input, select {
+      padding: 5px;
+      
+      margin: 10px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 16px;
+    }
+    button#salvar, button#copiarPix, button#enviarWhats {
+      padding: 8px 110px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin: 5px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    #pixContainer {
+      margin-top: 10px;
+      background: #111;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+      word-break: break-word;
+      display: none; /* Começa oculto */
+    }
+    #qrcode {
+      margin: 10px auto;
+      width: 200px;
+      height: 200px;
+    }
+    /* Input readonly para PIX */
+    #codigoPixInput {
+      width: 90%;
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #222;
+      color: #fff;
+      user-select: all;
+    }
+ 
+
+
+    h3{
+        margin:2px;
+    }
+  
+      .whatsapp-float {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    bottom: 90%;
+    right: 5px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 30px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+  }
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+    background-color: #1ebe5c;
+  }
+  .whatsapp-icon {
+    width: 30px;
+    height: 30px;
+  }
+   .topo-fixo {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+background: black;
+color:white;
+padding: 8px 12px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+z-index: 999;
+display: flex;
+align-items: center;
+gap: 10px;
+box-sizing: border-box;
+}
+
+.topo-fixo input#valorUnico {
+flex: 1;
+height: 40px;
+font-size: 14px;
+padding: 0 10px;
+margin-left:5px;
+border-radius: 6px;
+border: 1px solid #ccc;
+}
+.reservado{
+    display:flex;
+    margin-left:30px;
+    margin-top:2px;
+    color:white;
+    font-weight:bold;
+    text-align:center; justiça-content: center;
+}
+
+  </style>
+</head>
+<body>
+
+
+<a href="https://wa.me/5571992290058?text=Olá!%20Quero%20mais%20informações%20sobre%20a%20Rifa." target="_blank" class="whatsapp-float">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
+</a>
+<div class="topo-fixo">
+<input style="width:120px; margin:0px;"type="text" id="nome" placeholder="NOME">
+
+<input style="width:120px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
+<select id="horarios" size="6">
+  <option value="" disabled selected>HORÁRIO</option>
+  <option value="10:00">10:00</option>
+  <option value="12:00">12:00</option>
+  <option value="15:00">15:00</option>
+  <option value="19:00">19:00</option>
+  <option value="21:00">21:00</option>
+</select>
+
+</div>
+
+<h1>RIFA ONLINE MP</h1>
+
+<div id="numeros"></div>
+
+<div class="reservado">RESERVADOS = 
+TOTAL A PAGAR : R$    <span id="totalPagar">    0,00 </span>
+</div>
+<textarea id="codigo" readonly></textarea>
+
+<button id="salvar">Salvar Escolhas</button>
+
+<!-- Container PIX atualizado com input readonly e botão copiar -->
+<div id="pixContainer">
+  <h3>Código PIX para pagamento:</h3>
+  <div id="qrcode"></div>
+  <input type="text" id="codigoPixInput" readonly placeholder="Código PIX aparecerá aqui...">
+  
+  <button id="copiarPix">Copiar Código PIX</button>
+  <button id="enviarWhats">Enviar via WhatsApp</button>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCIDFHMmzGkN3HGLn-XA8ieC_5DDBvbJ7o",
+    authDomain: "rifa-782a3.firebaseapp.com",
+    databaseURL: "https://rifa-782a3-default-rtdb.firebaseio.com",
+    projectId: "rifa-782a3",
+    storageBucket: "rifa-782a3.firebasestorage.app",
+    messagingSenderId: "88068598855",
+    appId: "1:88068598855:web:a230a06db76a4bbc125562"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const numerosDiv = document.getElementById('numeros');
+  const nomeInput = document.getElementById('nome');
+  const valorInput = document.getElementById('valor');
+  const codigoTextarea = document.getElementById('codigo');
+  const horariosSelect = document.getElementById('horarios');
+  const pixContainer = document.getElementById('pixContainer');
+  const codigoPixInput = document.getElementById('codigoPixInput'); // Novo input PIX
+  const btnCopiarPix = document.getElementById('copiarPix');
+  const btnEnviarWhats = document.getElementById('enviarWhats');
+  const qrcodeDiv = document.getElementById('qrcode');
+  const totalPagarSpan = document.getElementById('totalPagar');
+
+  let selecionados = [];
+  let bloqueados = new Set();
+  let ultimoPix = null;
+  let ultimaReserva = null;
+
+  // Criar botões 00 a 99
+  for (let i = 0; i < 100; i++) {
+    let num = i.toString().padStart(2, '0');
+    let btn = document.createElement('button');
+    btn.textContent = num;
+    btn.className = 'numero';
+    btn.addEventListener('click', () => toggleNumero(btn, num));
+    numerosDiv.appendChild(btn);
+  }
+
+  function atualizarBloqueados() {
+  const dataHoje = new Date().toISOString().slice(0,10);
+  const agora = new Date();
+
+  db.ref(`compras-dia/${dataHoje}`).once('value').then(snapshot => {
+    const compras = snapshot.val() || {};
+    let bloqueadosSet = new Set();
+
+    for (let horario in compras) {
+      const [hora, minuto] = horario.split(':').map(Number);
+      let horarioDate = new Date();
+      horarioDate.setHours(hora, minuto, 0, 0);
+
+      // Antes do horário -> bloqueia número
+      if (horarioDate > agora) {
+        for (let key in compras[horario]) {
+          const numeros = compras[horario][key].numeros || [];
+          numeros.forEach(n => bloqueadosSet.add(n));
+        }
+      }
+    }
+
+    document.querySelectorAll('.numero').forEach(btn => {
+      const n = btn.textContent;
+      if (bloqueadosSet.has(n)) {
+        btn.classList.add('bloqueado');
+        btn.disabled = true;
+      } else {
+        btn.classList.remove('bloqueado');
+        btn.disabled = false;
+      }
+    });
+
+    atualizarTotalPagar();
+  });
+
+  // Mantém no textarea TODAS as reservas do dia
+  carregarReservasDoDia(dataHoje);
+}
+  function atualizarTotalPagar() {
+    let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
+    if (isNaN(valorUnit) || valorUnit <= 0) valorUnit = 0;
+    const total = valorUnit * selecionados.length;
+    totalPagarSpan.textContent = total.toFixed(2).replace('.', ',');
+  }
+
+  function toggleNumero(botao, numero) {
+    if (botao.classList.contains('bloqueado')) {
+      alert(`Número ${numero} já está reservado!`);
+      return;
+    }
+    if (botao.classList.contains('marcado')) {
+      botao.classList.remove('marcado');
+      selecionados = selecionados.filter(n => n !== numero);
+    } else {
+      botao.classList.add('marcado');
+      selecionados.push(numero);
+    }
+    atualizarTotalPagar();
+  }
+
+  function gerarCodigoSimples() {
+    const letras = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return `RIFA-${letras[Math.floor(Math.random() * letras.length)]}${letras[Math.floor(Math.random() * letras.length)]}${Math.floor(100 + Math.random() * 900)}`;
+  }
+
+  function getHoraAtual() {
+    const now = new Date();
+    let h = now.getHours();
+    let m = now.getMinutes();
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+  }
+
+  function atualizarHorarios() {
+    const horarios = Array.from(horariosSelect.options);
+    const horaAtual = getHoraAtual();
+    for (let opt of horarios) {
+      opt.disabled = false;
+      opt.selected = false;
+    }
+    for (let opt of horarios) {
+      if (opt.value <= horaAtual && opt.value !== "") {
+        opt.disabled = true;
+      }
+    }
+    let marcado = false;
+    for (let opt of horarios) {
+      if (!opt.disabled && !marcado && opt.value !== "") {
+        opt.selected = true;
+        marcado = true;
+      }
+    }
+  }
+
+  atualizarHorarios();
+  setInterval(atualizarHorarios, 60000);
+
+  function atualizarTextareaReservas(dadosPorHorario) {
+  let texto = "";
+  for (let horario of Object.keys(dadosPorHorario).sort()) {
+    // Formatar data atual para DD/MM
+    const hoje = new Date();
+    const dia = hoje.getDate().toString().padStart(2, '0');
+    const mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
+
+    texto += `Horário: ${horario} ${dia}/${mes}\n`;
+    for (let key in dadosPorHorario[horario]) {
+      const d = dadosPorHorario[horario][key];
+      texto += "✅=========================\n\n";
+      texto += `${d.nome}: ${d.numeros.join("-")}\n`;
+    }
+    texto += "⏱️=========================⏱️\n";
+  }
+  codigoTextarea.value = texto;
+  
+}
+  let dataAtualReservas = new Date().toISOString().slice(0,10);
+
+  function carregarReservasDoDia(data) {
+    db.ref(`compras-dia/${data}`).once('value').then(snapshot => {
+      const dadosPorHorario = snapshot.val() || {};
+      atualizarTextareaReservas(dadosPorHorario);
+    });
+  }
+
+  function verificarDiaMudou() {
+    const dataHoje = new Date().toISOString().slice(0,10);
+    if (dataHoje !== dataAtualReservas) {
+      dataAtualReservas = dataHoje;
+      codigoTextarea.value = "";
+      selecionados = [];
+      nomeInput.value = "";
+      valorInput.value = "";
+      totalPagarSpan.textContent = "0,00";
+      horariosSelect.selectedIndex = -1;
+      document.querySelectorAll('.numero.marcado').forEach(b => b.classList.remove('marcado'));
+      atualizarBloqueados();
+      carregarReservasDoDia(dataHoje);
+      pixContainer.style.display = "none";
+      qrcodeDiv.innerHTML = "";
+      codigoPixInput.value = "";
+    }
+  }
+
+  carregarReservasDoDia(dataAtualReservas);
+  setInterval(verificarDiaMudou, 60000);
+  valorInput.addEventListener('input', atualizarTotalPagar);
+
+  // Função para gerar código PIX real simples (ajuste conforme sua necessidade)
+  function gerarPixCodeReal(valorTotal) {
+    // Valor formatado: 10 dígitos sem vírgula (ex: 15,00 => 1500)
+    let valorStr = (valorTotal.toFixed(2).replace('.', '')).padStart(10, '0');
+    // Exemplo simples de código PIX estático - ajuste seu código conforme padrão PIX para seu pagamento
+    const chavePix = "71992290058"; // SUA CHAVE PIX
+    return `00020126580014BR.GOV.BCB.PIX0136${chavePix}0208Pagamento520400005303986540${valorStr}5802BR5925Rifa Online - Reserva6009Sao Paulo61080540900062070503***6304ABCD`;
+  }
+
+  // Botão copiar código PIX
+  btnCopiarPix.addEventListener('click', () => {
+    if (!codigoPixInput.value) return alert("Código PIX vazio!");
+    codigoPixInput.select();
+    codigoPixInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+    document.execCommand('copy');
+    alert("Código PIX copiado!");
+  });
+
+  // Você pode implementar o botão enviarWhats aqui se quiser
+
+btnCopiarPix.addEventListener('click', () => {
+  if (!codigoPixInput.value) return alert("Código PIX vazio!");
+  codigoPixInput.select();
+  codigoPixInput.setSelectionRange(0, 99999); // Para dispositivos móveis
+  document.execCommand('copy');
+  alert("Código PIX copiado!");
+});
+
+function gerarPixCodeReal(valorTotal) {
+  // Valor formatado: sem vírgula, 2 casas decimais, sem ponto
+  let valorStr = valorTotal.toFixed(2).replace('.', '');
+  // Exemplo de código PIX básico (ajuste conforme necessário)
+  const chavePix = "71992290058"; // SUA CHAVE PIX
+  // Aqui um código QR genérico para Pix (simplificado)
+  return `00020126580014BR.GOV.BCB.PIX0136${chavePix}0208Pagamento520400005303986540${valorStr}5802BR5925Rifa Online - Reserva6009Sao Paulo61080540900062070503***6304ABCD`;
+}
+  document.getElementById('salvar').addEventListener('click', () => {
+  const nome = nomeInput.value.trim();
+  if (!nome) {
+    alert("Digite seu nome!");
+    return;
+  }
+
+  // Validação: só letras e espaços (com acentos)
+  if (!/^[A-Za-zÀ-ú\s]+$/.test(nome)) {
+    alert("Digite um nome válido contendo apenas letras.");
+    return;
+  }
+
+  if (selecionados.length === 0) {
+    alert("Selecione pelo menos um número!");
+    return;
+  }
+
+  const horariosSelecionados = Array.from(horariosSelect.selectedOptions)
+    .map(o => o.value)
+    .filter(v => v !== "");
+
+  if (horariosSelecionados.length === 0) {
+    alert("Selecione pelo menos um horário!");
+    return;
+  }
+
+  let valorUnit = parseFloat(valorInput.value.replace(',', '.'));
+  if (isNaN(valorUnit) || valorUnit <= 0) {
+    alert("Digite um valor válido maior que zero!");
+    return;
+  }
+
+  if (!confirm(`Confirma a reserva dos números ${selecionados.join(", ")} para ${horariosSelecionados.join(", ")} com valor unitário R$ ${valorUnit.toFixed(2)}?`)) {
+    return;
+  }
+
+  db.ref('numerosBloqueados').once('value').then(snapshot => {
+    const bloqueios = snapshot.val() || {};
+    const conflito = selecionados.find(n => bloqueios[n] === true);
+    if (conflito) {
+      alert(`O número ${conflito} já foi reservado. Lista atualizada.`);
+      atualizarBloqueados();
+      return;
+    }
+
+    const codigoSimples = gerarCodigoSimples();
+    const codigoChave = "ID-" + Date.now();
+    const dataHoje = new Date().toISOString().slice(0,10);
+    const dataHora = new Date().toLocaleString();
+
+    const totalPagar = valorUnit * selecionados.length;
+
+    const dadosBase = { 
+      nome, 
+      numeros: [...selecionados], 
+      dataHora, 
+      codigo: codigoSimples, 
+      valorUnitario: valorUnit,
+      valorPagar: totalPagar
+    };
+
+    let promessas = [];
+    for (let horario of horariosSelecionados) {
+      promessas.push(db.ref(`compras-dia/${dataHoje}/${horario}/${codigoChave}`).set(dadosBase));
+    }
+    selecionados.forEach(n => promessas.push(db.ref(`numerosBloqueados/${n}`).set(true)));
+
+    Promise.all(promessas).then(() => {
+      alert("Reserva feita com sucesso!");
+      carregarReservasDoDia(dataHoje);
+      atualizarBloqueados();
+
+      // Montar mensagem WhatsApp
       const telefoneDestino = "5571992290058"; // Coloque seu número real aqui
       const mensagem = 
         `.              🍀Rifa Online☘️\n\n Quero confirmar minha reserva\n` +
@@ -577,4 +1100,5 @@ bloquearHorariosPassados();
 </body>
     </html>
     
+  
   
