@@ -23,27 +23,43 @@
 #numeros {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
-  gap: 2px;
+  gap: 6px; /* espaço entre botões */
   max-width: 520px;
-  margin: 2 auto;
+  margin: 0 auto;
 }
 
-/* Ajuste de tamanho no celular */
 .numero {
-  min-width: 35px;
-  height: 35px;
-  margin:2px;
+  min-width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  background: #3498db;
+  color: white;
+  border: none;
   font-size: 14px;
 }
 
-/* Para telas muito pequenas (menos de 400px) */
-@media (max-width: 400px) {
+/* Telas menores que 480px */
+@media (max-width: 480px) {
   #numeros {
-    grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+    gap: 4px;
   }
   .numero {
-    height: 30px;
-    margin:3px;
+    height: 35px;
+    font-size: 13px;
+  }
+}
+
+/* Telas menores que 360px */
+@media (max-width: 360px) {
+  #numeros {
+    grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+    gap: 3px;
+  }
+  .numero {
+    height: 32px;
     font-size: 12px;
   }
 }
