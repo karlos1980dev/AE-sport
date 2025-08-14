@@ -195,7 +195,71 @@ border: 1px solid #ccc;
     font-weight:bold;
     text-align:center; justiça-content: center;
 }
+ /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        padding-top: 50px;
+    }
 
+    .modal-conteudo {
+        background-color: #fff;
+        margin: auto;
+        padding: 20px;
+        border-radius: 10px;
+        width: 320px;
+        text-align: center;
+    }
+
+    .fechar {
+        color: red;
+        font-weight: bold;
+        float: right;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .botoes {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .botoes button {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        color: white;
+    }
+
+    .tabelaBtn { background: #007bff; }
+    .sacar { background: red; }
+    .depositar { background: green; }
+
+    /* tabela oculta inicialmente */
+    .tabela-premios {
+        margin-top: 15px;
+        border-collapse: collapse;
+        width: 100%;
+        background: white;
+        color: black;
+        display: none;
+    }
+
+    .tabela-premios th, .tabela-premios td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -205,9 +269,10 @@ border: 1px solid #ccc;
   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="whatsapp-icon">
 </a>
 <div class="topo-fixo">
-<input style="width:120px; margin:0px;"type="text" id="nome" placeholder="NOME">
+    <div class="hamburger" id="hamburger">☰ <br>Menu</div>
+<input style="width:100px; margin:0px;"type="text" id="nome" placeholder="NOME">
 
-<input style="width:120px; margin:0px;" type="number" id="valor" placeholder="Valor unitário (R$)" min="0" step="0.01" style="width: 160px;">
+<input style="width:100px; margin:0px;" type="number" id="valor" placeholder="Valor unitário" min="0" step="0.01" style="width: 160px;">
 <select id="horarios" size="6">
   <option value="" disabled selected>HORÁRIO</option>
   <option value="10:00">10:00</option>
@@ -239,6 +304,32 @@ TOTAL A PAGAR : R$    <span id="totalPagar">    0,00 </span>
   <button id="copiarPix">Copiar Código PIX</button>
   <button id="enviarWhats">Enviar via WhatsApp</button>
 </div>
+<div id="meuModal" class="modal">
+    <div class="modal-conteudo">
+        <span class="fechar" id="fechar">&times;</span>
+        <h3>Menu</h3>
+        <div class="botoes">
+            <button class="tabelaBtn" id="btnTabela">Tabela</button>
+            <button class="sacar">Sacar</button>
+            <button class="depositar">Depositar</button>
+        </div>
+
+        <!-- Tabela escondida -->
+        <table class="tabela-premios" id="tabelaPremios">
+            <tr><td>R$ 1.00</td><td>R$ 70.00</td></tr>
+            <tr><td>R$ 2.00</td><td>R$ 140.00</td></tr>
+            <tr><td>R$ 3.00</td><td>R$ 210.00</td></tr>
+            <tr><td>R$ 4.00</td><td>R$ 280.00</td></tr>
+            <tr><td>R$ 5.00</td><td>R$ 350.00</td></tr>
+            <tr><td>R$ 6.00</td><td>R$ 420.00</td></tr>
+            <tr><td>R$ 7.00</td><td>R$ 490.00</td></tr>
+            <tr><td>R$ 8.00</td><td>R$ 560.00</td></tr>
+            <tr><td>R$ 9.00</td><td>R$ 630.00</td></tr>
+            <tr><td>R$ 10.00</td><td>R$ 700.00</td></tr>
+        </table>
+    </div>
+</div>
+
 <!-- Modal de confirmação -->
 <div id="modalConfirm" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);
   justify-content:center;align-items:center; z-index:2000;">
@@ -266,7 +357,32 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const modal = document.getElementById("meuModal");
+    const btnMenu = document.getElementById("hamburger");
+    const fechar = document.getElementById("fechar");
+    const btnTabela = document.getElementById("btnTabela");
+    const tabelaPremios = document.getElementById("tabelaPremios");
 
+    btnMenu.onclick = () => {
+        modal.style.display = "block";
+    }
+
+    fechar.onclick = () => {
+        modal.style.display = "none";
+        tabelaPremios.style.display = "none"; // fecha tabela ao sair
+    }
+
+    window.onclick = (event) => {
+        if (event.target == modal) {
+            modal.style.display = "none";
+            tabelaPremios.style.display = "none";
+        }
+    }
+
+    btnTabela.onclick = () => {
+        tabelaPremios.style.display = 
+            tabelaPremios.style.display === "none" ? "table" : "none";
+    };
 const numerosDiv = document.getElementById('numeros');
 const nomeInput = document.getElementById('nome');
 const valorInput = document.getElementById('valor');
@@ -578,5 +694,3 @@ setInterval(() => {
 </script>
 </body>
     </html>
-    
-  
