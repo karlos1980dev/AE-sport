@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jogo de Números</title>
+<link rel="stylesheet" href="stylewin.css">
+</head>
+<body>
+
+<div class="fundoCimar">
+    <button id="ganhoTotal">Ganho Total: R$0,00</button>
+    
+    <h2>JOGO 5 MARCOU GANHOU</h2>
+
+    <div>Digite um código para adicionar saldo:</div>
+    <input type="text" id="codigoRecarga" placeholder="Digite seu código">
+    <button id="usarCodigo">Usar Código</button>
+
+    <div id="saldo">Saldo: R$ 0,00</div>
+
+    <div id="numeros"></div>
+
+    <p id="contadorNumeros">Números selecionados: 0/15</p>
+    <p id="mensagem"></p>
+
+    <button id="verificar" disabled>JOGAR (R$2,00)</button>
+    <button id="enviar">RECEBER O PRÊMIO</button>
+
+</div>
+
+<!-- Modal -->
+<div id="modal">
+  <div class="modal-content">
+    <h3>Solicitar Ganho</h3>
+    <label>Nome:</label>
+    <input type="text" id="nomePix" placeholder="Seu nome">
+    <label>Chave Pix:</label>
+    <input type="text" id="chavePix" placeholder="Seu Pix">
+    <p id="valorGanhoModal"></p>
+    <button id="enviarWhats">Enviar para WhatsApp</button>
+  </div>
+</div>
+
+<script src="scriptwin.js"></script>
+</body>
+</html>

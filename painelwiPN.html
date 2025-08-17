@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel ADM de Códigos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f4f4f4;
+  }
+  .container {
+    max-width: 500px;
+    margin: auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #aaa;
+  }
+  input, button {
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  #mensagem {
+    margin-top: 20px;
+    padding: 10px;
+    background: #eee;
+    border-radius: 5px;
+    white-space: pre-line; /* Mantém quebras de linha */
+    word-break: break-word;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Painel ADM de Códigos</h2>
+  
+  <label for="nivel">Nível do código (2,3,4,...,50):</label>
+  <input type="number" id="nivel" placeholder="Digite o nível">
+  
+  <label for="quantidade">Quantidade de códigos:</label>
+  <input type="number" id="quantidade" placeholder="Digite a quantidade">
+  
+  <button id="buscar">Buscar Códigos</button>
+  
+  <div id="mensagem"></div>
+</div>
+
+<script>
+const codigos = {
+  50: ["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
+  40: ["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
+  30: ["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
+  20: ["446224299","394127635","812879695","960907900","491988844","249227980","956544658","349657657","840757998","217686049"],
+  10: ["691539989","811999998","108784815","313505598","806528891","366228474","716094153","592329854","846668855","504376967"],
+  9: ["874016500","621216610","336090028","485980154","635598519","286682713","732880862","195658863","653677587","129458884"],
+  8: ["956535448","003496557","840776998","217612049","739668764","466345912","189763211","112967891","904432227","595665575"],
+  7: ["673207856","209122885","487021874","337834017","596597699","387881987","978833854","699939985","767384775","560098454"],
+  6: ["673275056","209651885","487029814","337808817","596587999","367871987","309878265","317746673","507846877","999297604"],
+  5: ["986476585","443438755","978638854","699975985","767388775","005600454","647728865","878863674","441365795","965878854"],
+  4: ["109613223","899876852","755228448","960976264","216594314","919098432","284337447","101697666","702397611","229654597"],
+  3: ["309821965","317663273","507683477","929766404","446224552","394128835","887963495","960901270","491987744","249212270"],
+  2: ["647720985","878867472","441379895","987877854","691997689","811977998","108488515","313503398","806521291","366222274"]
+};
+
+// Função para pegar N códigos aleatórios de um array
+function pegarCodigosAleatorios(arr, n) {
+  const copia = [...arr];
+  const resultado = [];
+  n = Math.min(n, arr.length);
+  for (let i = 0; i < n; i++) {
+    const idx = Math.floor(Math.random() * copia.length);
+    resultado.push(copia[idx]);
+    copia.splice(idx, 1);
+  }
+  return resultado;
+}
+
+document.getElementById("buscar").addEventListener("click", () => {
+  const nivel = document.getElementById("nivel").value;
+  const quantidade = parseInt(document.getElementById("quantidade").value);
+  const mensagemDiv = document.getElementById("mensagem");
+  
+  if (!codigos[nivel]) {
+    mensagemDiv.textContent = "Nível inválido!";
+    return;
+  }
+  if (!quantidade || quantidade <= 0) {
+    mensagemDiv.textContent = "Quantidade inválida!";
+    return;
+  }
+  
+  const selecionados = pegarCodigosAleatorios(codigos[nivel], quantidade);
+  
+  // Formatar com numeração
+  let listaFormatada = selecionados.map((codigo, index) => `${index + 1}└──► ${codigo}`).join('\n');
+  
+  // Montar a mensagem completa
+  const mensagem = `*✨️✨️✨️CODIGO de ACESSO ✨️✨️✨️*\nCodigo Gerado com Sucesso!\n\n${listaFormatada}\n\n${quantidade} código(s) gerado(s)\n\nMATENHA PRESSIONADO OS NÚMERO AZUL ACIMA PARA COPIA DE MANEIRA AUTOMÁTICA.`;
+  
+  // Mostrar no painel
+  mensagemDiv.innerText = mensagem;
+  
+  // Abrir WhatsApp
+  const numero = '5571992290058';
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensagem)}`;
+  window.open(url, '_blank');
+});
+</script>
+
+</body>
+</html>
