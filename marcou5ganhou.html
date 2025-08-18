@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jogo de Números</title>
+<style>
+body { font-family: Arial, sans-serif; background:#222; color:white; text-align:center; margin-top:50px;}
+.fundoCimar { padding:15px; background: purple; border-radius: 15px; margin:10px auto; max-width: 400px; }
+#saldo { font-size:18px; color: gold; margin-bottom:10px; }
+#numeros { display:grid; grid-template-columns: repeat(5,1fr); gap:5px; margin:10px auto; max-width: 350px; }
+.btn { padding:8px; border-radius:5px; cursor:pointer; border:none; }
+.btn.selected { background:black; color:white; }
+.btn.blocked { background:red; color:white; font-weight:bold; }
+.btn.acertou { background:green; color:white; font-weight:bold; }
+#mensagem { margin:10px 0; font-weight:bold; color: gold; }
+#verificar, #enviar, #ganhoTotal { padding:10px 20px; margin:5px; border:none; border-radius:10px; cursor:pointer; }
+#verificar { background:#ff9800; color:white; }
+#enviar { background:green; color:white; display:none; }
+#ganhoTotal { background:gray; color:white; display:block; margin-bottom:10px; }
+#ganhoTotal.habilitado { background:green; }
+#modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; }
+#modal .modal-content { background:#fff; color:#000; padding:20px; border-radius:10px; max-width:300px; width:90%; text-align:left; }
+#modal input { width:100%; margin:5px 0; padding:8px; border-radius:5px; border:1px solid #ccc; }
+#modal button { background:green; color:white; padding:10px; border:none; border-radius:5px; cursor:pointer; width:100%; }.btn.ultimo {
+    background: blue;
+    color: white;
+    font-weight: bold;
+}
+corverder{
+    color:green
+}
+#usarCodigo{
+    border-radius:5px;
+    margin:5px;
+}
+
+#codigoRecarga{
+    border-radius:5px;
+    margin:5px;
+}
+</style>    
+</head>
+<body>
+
+<div class="fundoCimar">
+    <h2> MARCOU <span class="corverder"> 5 </span>GANHOU</h2>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <button id="ganhoTotal">Ganhou: R$0,00</button>
+    <div id="saldo">Saldo: R$ 0,00</div>
+</div>
+    
+    <div>Digite um código para adicionar saldo:</div>
+    <input type="text" id="codigoRecarga" placeholder="Digite seu código">
+    <button id="usarCodigo">Usar Código</button>
+
+  
+
+    <div id="numeros"></div>
+
+    <p id="contadorNumeros">Números selecionados: 0/15</p>
+    <p id="mensagem"></p>
+
+    <button id="verificar" disabled>JOGAR (R$2,00)</button>
+    <button id="enviar">RECEBER O PRÊMIO</button>
+
+</div>
+
+<!-- Modal -->
+<div id="modal">
+  <div class="modal-content">
+    <h3>Solicitar Ganho</h3>
+    <label>Nome:</label>
+    <input type="text" id="nomePix" placeholder="Seu nome">
+    <label>Chave Pix:</label>
+    <input type="text" id="chavePix" placeholder="Seu Pix">
+    <p id="valorGanhoModal"></p>
+    <button id="enviarWhats">Enviar para WhatsApp</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getDatabase, ref, onValue, runTransaction, update } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+// Config Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCqh1ZtEASGhNEK_8CbUiha9jPyqfwalA4",
+  authDomain: "winx5-f4bd2.firebaseapp.com",
+  databaseURL: "https://winx5-f4bd2-default-rtdb.firebaseio.com",
+  projectId: "winx5-f4bd2",
+  storageBucket: "winx5-f4bd2.firebasedastorage.app",
+  messagingSenderId: "539880532364",
+  appId: "1:539880532364:web:c75b0d6ac32fc6ce830ea9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// 🔹 Gerar ou pegar ID único do usuário
+let userId = localStorage.getItem("userId");
+if(!userId){
+    userId = "user_"+Date.now();
+    localStorage.setItem("userId", userId);
+}
+
+// Variáveis do jogo
+let saldo = 0;
+let ganhoTotal = 0;
+let numerosSelecionados = [];
+let numerosBloqueados = [];
+let bloqueado = false;
+
+const custoPorJogo = 2.00;
+const valorAcerto = 200;
+
+const codigosRecarga = {50: ["716412153", "592315254", "846882055",
+"14081980", "195668863","653096775","504350967","635551900", "286671413", "732888662"],
+    
+    40: ["217565914", "919970432", "284338877", "101696966", "702396411", "229654597", "874019900", "621211660", "336075928", "485986854",],
+    
+    30: ["739656664", "465396612", "189768711", "112988691", "966044327", "595658875", "109617523", "899800852", "755223288", "960909264",],
+    
+    20: ["446224299", "394127635", "812879695", "960907900", "491988844", "249227980", "956544658", "349657657", "840757998", "217686049",],
+    
+    10: ["691539989", "811999998", "108784815", "313505598", "806528891", "366228474", "716094153", "592329854", "846668855", "504376967",],
+    
+    9:["874016500", "621216610", "336090028", "485980154", "635598519", "286682713", "732880862", "195658863", "653677587", "129458884",],
+    
+    8:["956535448", "003496557", "840776998", "217612049", "739668764", "466345912", "189763211", "112967891", "904432227", "595665575",],
+    
+    
+    7:[ "673207856", "209122885", "487021874", "337834017", "596597699", "387881987", "978833854", "699939985", "767384775", "560098454",],
+    
+    
+    6:[
+
+"673275056", "209651885", "487029814", "337808817", "596587999", "367871987", "309878265", "317746673", "507846877", "999297604",],
+    
+    5: [
+"986476585", "443438755", "978638854", "699975985", "767388775", "005600454", "647728865", "878863674", "441365795", "965878854"],
+    
+    4:[
+"109613223", "899876852", "755228448", "960976264", "216594314", "919098432", "284337447", "101697666", "702397611", "229654597",],
+
+    3:[
+"309821965", "317663273", "507683477", "929766404", "446224552", "394128835", "887963495", "960901270", "491987744", "249212270"],
+    
+    2:[
+"647720985", "878867472", "441379895", "987877854", "691997689", "811977998", "108488515", "313503398", "806521291", "366222274"],
+     1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"
+  ]
+};
+
+const saldoRef = ref(db, `usuarios/${userId}`);
+
+// 🔹 Recupera dados do LocalStorage
+let localData = JSON.parse(localStorage.getItem("dadosUsuario")) || {};
+if(localData.saldo !== undefined) saldo = parseFloat(localData.saldo);
+if(localData.ganhoTotal !== undefined) ganhoTotal = parseFloat(localData.ganhoTotal);
+
+// 🔹 Sincroniza Firebase em tempo real
+onValue(saldoRef, (snapshot)=>{
+    const data = snapshot.val();
+    if(data){
+        saldo = parseFloat(data.saldo || 0);
+        ganhoTotal = parseFloat(data.ganhoTotal || 0);
+    } else {
+        update(saldoRef, { saldo:0, ganhoTotal:0 });
+        saldo = 0;
+        ganhoTotal = 0;
+    }
+    salvarLocalStorage();
+    atualizarPainel();
+    criarBotoes();
+});
+
+// 🔹 Salvar no LocalStorage
+function salvarLocalStorage(){
+    localStorage.setItem("dadosUsuario", JSON.stringify({
+        saldo: saldo,
+        ganhoTotal: ganhoTotal
+    }));
+}
+
+// 🔹 Atualiza painel
+function atualizarPainel(){
+    document.getElementById("saldo").innerText = `Saldo: R$ ${saldo.toFixed(2).replace('.',',')}`;
+    document.getElementById("ganhoTotal").innerText = `Ganho Total: R$${ganhoTotal}`;
+    document.getElementById("verificar").disabled = saldo < custoPorJogo || numerosSelecionados.length!==15;
+}
+
+// 🔹 Criar botões de números
+function criarBotoes(){
+    const container = document.getElementById("numeros");
+    container.innerHTML = '';
+    for(let i=1;i<=50;i++){
+        let btn = document.createElement("button");
+        btn.classList.add("btn");
+        btn.innerText = i;
+        btn.id = `num${i}`;
+        btn.onclick = () => selecionarNumero(i);
+
+        // Números bloqueados
+        if(numerosBloqueados.includes(i) && !numerosSelecionados.includes(i)) btn.classList.add("blocked");
+        // Números selecionados
+        if(numerosSelecionados.includes(i)) btn.classList.add("selected");
+        // Acertos
+        if(numerosSelecionados.includes(i) && numerosBloqueados.includes(i)) btn.classList.add("acertou");
+        // Último número (quando a seleção chega a 15)
+        if(numerosSelecionados.length === 15 && i === numerosSelecionados[numerosSelecionados.length - 1]){
+            btn.classList.add("ultimo");
+        }
+
+        container.appendChild(btn);
+    }
+}
+
+// 🔹 Selecionar número
+function selecionarNumero(num){
+    if(bloqueado) return;
+
+    if(numerosSelecionados.includes(num)){
+        numerosSelecionados = numerosSelecionados.filter(n => n!==num);
+    } else if(numerosSelecionados.length < 15){
+        numerosSelecionados.push(num);
+    }
+
+    // Atualizar classes
+    for(let i=1;i<=50;i++){
+        const btn = document.getElementById(`num${i}`);
+        btn.classList.remove("selected","ultimo");
+        if(numerosSelecionados.includes(i)) btn.classList.add("selected");
+    }
+
+    // Marcar o último número selecionado com classe 'ultimo'
+    if(numerosSelecionados.length === 15){
+        const ultimoNum = numerosSelecionados[numerosSelecionados.length - 1];
+        const btnUltimo = document.getElementById(`num${ultimoNum}`);
+        if(btnUltimo) btnUltimo.classList.add("ultimo");
+    }
+
+    document.getElementById("contadorNumeros").innerText = `Números selecionados: ${numerosSelecionados.length}/15`;
+    atualizarPainel();
+    
+    criarBotoes();
+}
+
+// 🔹 Usar código de recarga
+document.getElementById("usarCodigo").addEventListener("click", ()=>{
+    const codigo = document.getElementById("codigoRecarga").value.trim();
+    let codigoValido = false;
+
+    for(const valor in codigosRecarga){
+        if(codigosRecarga[valor].includes(codigo)){
+            runTransaction(saldoRef, (current)=>{
+                if(current){
+                    current.saldo = (parseFloat(current.saldo) || 0) + parseFloat(valor);
+                } else {
+                    current = { saldo: parseFloat(valor), ganhoTotal: 0 };
+                }
+                return current;
+            });
+            saldo += parseFloat(valor); // Atualiza localmente
+            salvarLocalStorage();
+            alert(`Código válido! Saldo adicionado: R$ ${valor}`);
+            document.getElementById("codigoRecarga").value="";
+            criarBotoes();
+            atualizarPainel();
+            codigoValido = true;
+            break;
+        }
+    }
+    if(!codigoValido) alert("Código inválido.");
+});
+
+// 🔹 Verificar jogada
+function verificar() {
+    if (saldo < custoPorJogo || numerosSelecionados.length !== 15) {
+        alert("Saldo insuficiente ou selecione 15 números!");
+        return;
+    }
+    bloqueado = true;
+
+    // Debitar saldo
+    runTransaction(saldoRef, (current) => {
+        if (current) {
+            current.saldo = (parseFloat(current.saldo) || 0) - custoPorJogo;
+        }
+        return current;
+    });
+
+    // Gerar números sorteados
+    numerosBloqueados = [];
+    while (numerosBloqueados.length < 5) {
+        let num = Math.floor(Math.random() * 50) + 1;
+        if (!numerosBloqueados.includes(num)) numerosBloqueados.push(num);
+    }
+
+    // Atualizar botões
+    for (let i = 1; i <= 50; i++) {
+        const btn = document.getElementById(`num${i}`);
+        btn.classList.remove("acertou", "blocked", "ultimo");
+        btn.style.background = "";
+        btn.style.color = "";
+
+        if (numerosBloqueados.includes(i)) {
+            if (numerosSelecionados.includes(i)) {
+                // Acerto
+                btn.style.background = "green";
+                btn.style.color = "white";
+            } else {
+                // Sorteado mas não selecionado
+                btn.style.background = "red";
+                btn.style.color = "white";
+            }
+        } else if (numerosSelecionados.includes(i)) {
+            // Selecionado mas não sorteado
+            btn.style.background = "black";
+            btn.style.color = "white";
+        }
+    }
+
+    // Último número selecionado (opcional, pode remover se não quiser)
+    if (numerosSelecionados.length > 0) {
+        const ultimo = numerosSelecionados[numerosSelecionados.length - 1];
+        const btnUltimo = document.getElementById(`num${ultimo}`);
+        if (btnUltimo && !numerosBloqueados.includes(ultimo)) {
+            btnUltimo.style.background = "blue";
+            btnUltimo.style.color = "white";
+        }
+    }
+
+    // Calcular acertos
+    // Calcular acertos
+let acertos = numerosSelecionados.filter(n => numerosBloqueados.includes(n)).length;
+
+if(acertos === 5){
+    let premio = acertos * valorAcerto; // R$200 x 5 = R$1000, por exemplo
+    // Atualiza ganhoTotal somente se acertou 5
+    runTransaction(saldoRef, (current) => {
+        if(current) current.ganhoTotal = premio;
+        return current;
+    });
+
+    document.getElementById("mensagem").innerText = "Parabéns, você ganhou!";
+    document.getElementById("enviar").style.display = "block";
+    document.getElementById("ganhoTotal").classList.add("habilitado");
+    document.getElementById("ganhoTotal").innerText = `Ganho Total: R$${premio.toFixed(2)}`;
+} else {
+    document.getElementById("mensagem").innerText = `Tente novamente. Acertos: ${acertos}`;
+    document.getElementById("enviar").style.display = "none";
+    document.getElementById("ganhoTotal").classList.remove("habilitado");
+    document.getElementById("ganhoTotal").innerText = `Ganho Total: R$0,00`;
+}
+    // Limpar após 30s
+    setTimeout(() => {
+        numerosSelecionados = [];
+        numerosBloqueados = [];
+        bloqueado = false;
+        criarBotoes();
+        document.getElementById("contadorNumeros").innerText = `Números selecionados: 0/15`;
+        document.getElementById("mensagem").innerText = "";
+        document.getElementById("enviar").style.display = "none";
+        runTransaction(saldoRef, (current) => { if (current) current.ganhoTotal = 0; return current; });
+    }, 10000);
+
+    atualizarPainel();
+}
+// 🔹 Modal e envio WhatsApp
+const modal = document.getElementById("modal");
+document.getElementById("ganhoTotal").addEventListener("click", ()=>{
+    if(ganhoTotal>0){
+        document.getElementById("valorGanhoModal").innerText = `Valor disponível: R$${ganhoTotal}`;
+        modal.style.display = "flex";
+    } else alert("Você precisa ganhar algum valor para sacar.");
+});
+
+document.getElementById("enviarWhats").addEventListener("click", ()=>{
+    const nome = document.getElementById("nomePix").value.trim();
+    const pix = document.getElementById("chavePix").value.trim();
+    if(nome==="" || pix==="") { alert("Preencha todos os campos."); return; }
+    const mensagem = `PIX: ${pix}\nNome: ${nome}\nValor Ganho: R$${ganhoTotal}`;
+    window.open("https://api.whatsapp.com/send?phone=5571992290058&text="+encodeURIComponent(mensagem), "_blank");
+    modal.style.display = "none";
+    ganhoTotal = 0;
+    runTransaction(saldoRef, (current)=>{ if(current) current.ganhoTotal=0; return current; });
+    salvarLocalStorage();
+    atualizarPainel();
+});
+
+// Envio WhatsApp do resultado
+function enviarViaWhatsApp(){
+    const msg = `Números Bloqueados: ${numerosBloqueados.join(", ")}\nNúmeros Selecionados: ${numerosSelecionados.join(", ")}\nPIX: 71992290058`;
+    window.open("https://api.whatsapp.com/send?phone=5571992290058&text="+encodeURIComponent(msg), "_blank");
+    numerosSelecionados = [];
+    numerosBloqueados = [];
+    criarBotoes();
+    document.getElementById("contadorNumeros").innerText = `Números selecionados: 0/15`;
+    document.getElementById("mensagem").innerText = "";
+    document.getElementById("enviar").style.display = "none";
+    ganhoTotal = 0;
+    runTransaction(saldoRef, (current)=>{ if(current) current.ganhoTotal=0; return current; });
+    salvarLocalStorage();
+    atualizarPainel();
+}
+
+// Eventos
+document.getElementById("verificar").addEventListener("click", verificar);
+document.getElementById("enviar").addEventListener("click", enviarViaWhatsApp);
+let codigosUsados = JSON.parse(localStorage.getItem("codigosUsados") || "[]");
+
+document.getElementById("usarCodigo").addEventListener("click", ()=>{
+    const codigo = document.getElementById("codigoRecarga").value.trim();
+    
+    if(codigosUsados.includes(codigo)){
+        alert("Este código já foi usado!");
+        return;
+    }
+
+    let codigoValido = false;
+    for(const valor in codigosRecarga){
+        if(codigosRecarga[valor].includes(codigo)){
+            saldo += parseFloat(valor); // ou runTransaction se usar Firebase
+            codigosUsados.push(codigo);
+            localStorage.setItem("codigosUsados", JSON.stringify(codigosUsados));
+            alert(`Código válido! Saldo adicionado: R$ ${valor}`);
+            document.getElementById("codigoRecarga").value="";
+            criarBotoes();
+            codigoValido = true;
+            break;
+        }
+    }
+    if(!codigoValido) alert("Código inválido.");
+    atualizarPainel();
+});
+
+criarBotoes();
+
+//localStorage.clear();
+//alert("LocalStorage resetado!");
+</script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<a href="https://wa.me/5571992290058?text=pagamento%20liberacao%20codigo%20de%20Acesso%0Achave%20pix:%20telefone%0A71992290058%0ACarlos Santos Reis%0Avalor%20por%20codigo%20R$%202.00%0AEnvia%20O%20Comprovante" style="position:fixed;width:35px;height:35px;bottom:20px;right:20px;color:#25d366;border-radius:50px;text-align:center;font-size:30px;
+  z-index:1000;" target="_blank">
+<i style="margin-top:16px" class="fa fa-whatsapp"></i></a>
+</body>
+</html>
