@@ -109,3 +109,18 @@ body {
     cursor:pointer; 
     width:100%; 
 }
+.corverder{
+    color:green
+}
+#usarCodigo{
+    border-radius:5px;
+    margin:5px;
+}
+
+#codigoRecarga{
+    border-radius:5px;
+    margin:5px;
+}
+
+
+
