@@ -42,7 +42,8 @@ const codigosRecarga = {
     
     2:[
 "647720985", "878867472", "441379895", "987877854", "691997689", "811977998", "108488515", "313503398", "806521291", "366222274"],
-    
+     1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"
+  ]
 };
 
 // Atualiza saldo e botão verificar
@@ -74,13 +75,28 @@ function criarBotoes(){
 // Seleciona ou desmarca números
 function selecionarNumero(num){
     if(numerosSelecionados.includes(num)){
+        // Se já estava marcado, desmarca
         numerosSelecionados = numerosSelecionados.filter(n => n!==num);
-        document.getElementById(`num${num}`).classList.remove("selected");
+        document.getElementById(`num${num}`).classList.remove("selected","limite");
     } else if(numerosSelecionados.length<15){
         numerosSelecionados.push(num);
         document.getElementById(`num${num}`).classList.add("selected");
     }
-    document.getElementById("contadorNumeros").innerText = `Números selecionados: ${numerosSelecionados.length}/15`;
+    
+    document.getElementById("contadorNumeros").innerText = 
+        `Números selecionados: ${numerosSelecionados.length}/15`;
+
+    // Remove azul de todos
+    numerosSelecionados.forEach(n=>{
+        document.getElementById(`num${n}`).classList.remove("limite");
+    });
+
+    // Se já tem 15, o último marcado fica azul
+    if(numerosSelecionados.length === 15){
+        let ultimo = numerosSelecionados[numerosSelecionados.length - 1];
+        document.getElementById(`num${ultimo}`).classList.add("limite");
+    }
+
     atualizarSaldo();
 }
 
@@ -175,7 +191,7 @@ function verificar(){
         document.getElementById("enviar").style.display = "none";
         document.getElementById("ganhoTotal").classList.remove("habilitado");
         document.getElementById("ganhoTotal").innerText = `Ganho Total: R$0,00`;
-    }, 30000);
+    }, 20000);
 }
 
 // Modal Ganho Total
