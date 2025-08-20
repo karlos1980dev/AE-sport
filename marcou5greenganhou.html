@@ -62,7 +62,7 @@ body { font-family: Arial, sans-serif; background:#222; color:white; text-align:
   position: fixed;
   z-index: 9999;
   left: 0; top: 0;
-  width: 100%; height: 100%;
+  width: 100%; height: 500px;
   background: rgba(0,0,0,0.6);
 }
 
@@ -132,6 +132,16 @@ body { font-family: Arial, sans-serif; background:#222; color:white; text-align:
             border-radius:10px;
             font-weight:bold      
      }
+     @keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.pulse-acerto {
+  animation: pulse 0.6s ease-in-out;
+}
+ 
 </style>    
 </head>
 <body>
@@ -193,7 +203,7 @@ body { font-family: Arial, sans-serif; background:#222; color:white; text-align:
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
 import { getDatabase, ref, onValue, runTransaction, update } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
-// Config Firebase
+// 🔹 Config Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCqh1ZtEASGhNEK_8CbUiha9jPyqfwalA4",
   authDomain: "winx5-f4bd2.firebaseapp.com",
@@ -209,149 +219,58 @@ const db = getDatabase(app);
 
 // 🔹 Gerar ou pegar ID único do usuário
 let userId = localStorage.getItem("userId");
-if(!userId){
-    userId = "user_"+Date.now();
+if (!userId) {
+    userId = "user_" + Date.now();
     localStorage.setItem("userId", userId);
 }
-document.addEventListener('DOMContentLoaded', function() {
-    // Modal PIX
-    const pixModal = document.getElementById("pixModal");
-    const refreshBtn = document.getElementById("refreshBtn"); // Botão "COMPRAR CODIGO"
-    const closePix = document.querySelector(".closePix");
-    const botoesValor = document.querySelectorAll(".valor-btn");
-    const totalEl = document.getElementById("total");
-    //const copyBtn = document.getElementById("copyPix"); // Removido pois não tem PIX code
-    //const pixCode = document.getElementById("pixCode"); // Removido pois não tem PIX code
-    let total = 0; // Inicializa o total
 
-    // Modal de Alerta (Automático)
-    var alertModal = document.getElementById("alertModal"); // Supondo que você tem um modal com este ID
-    //var closeBtn = document.getElementsByClassName("closeBtn")[0]; // Supondo que você tem um botão com esta classe - não usado
+const saldoRef = ref(db, `usuarios/${userId}`);
 
-    // Função para abrir o modal PIX
-    function openPixModal() {
-        pixModal.style.display = "block";
-    }
-
-    // Função para fechar o modal PIX
-    function fecharModal() {
-        pixModal.style.display = "none";
-        total = 0;
-        totalEl.textContent = "Total: R$ 0";
-    }
-
-    // *** MODAL DE ALERTA (AUTOMÁTICO) ***
-     function openModal() {
-            alertModal.style.display = "block";
-        }
-
-        // Função para fechar o modal
-        function closeModal() {
-            alertModal.style.display = "none";
-        }
-
-    // *** EVENT LISTENERS ***
-
-    // Ao clicar no botão "COMPRAR CODIGO", abre o modal PIX
-    refreshBtn.addEventListener("click", (e) => {
-        e.preventDefault(); // Evita o refresh padrão
-        openPixModal();
-    });
-
-    // Ao clicar no "X", fecha o modal PIX
-    closePix.addEventListener("click", () => {
-        fecharModal();
-    });
-
-    // Ao clicar fora do modal PIX, fecha-o
-    window.addEventListener("click", (e) => {
-        if (e.target === pixModal) {
-            fecharModal();
-        }
-    });
-
-    // Ao clicar em um botão de valor, atualiza o total e redireciona
-    botoesValor.forEach(btn => {
-        btn.addEventListener("click", () => {
-            total = parseFloat(btn.dataset.valor);
-            totalEl.textContent = `Total: R$ ${total.toFixed(2)}`; // Mostra com 2 casas decimais
-
-            // Redireciona para a página de pagamento
-            window.location.href = `https://pixplay.netlify.app/comprarcreditoautomatico?valor=${total}`;
-        });
-    });
-
-    // Modal de Alerta (Comentado - Necessário se quiser usar o modal automático)
-    window.onload = function() {
-        openModal();
-    }
-    
-
-});
-
-// Variáveis do jogo
+// 🔹 Variáveis do jogo
 let saldo = 0;
 let ganhoTotal = 0;
 let numerosSelecionados = [];
 let numerosBloqueados = [];
 let bloqueado = false;
-
 const custoPorJogo = 2.00;
 const valorAcerto = 200;
 
+// 🔹 Recupera LocalStorage
+let localData = JSON.parse(localStorage.getItem("dadosUsuario")) || {};
+if (localData.saldo !== undefined) saldo = parseFloat(localData.saldo);
+if (localData.ganhoTotal !== undefined) ganhoTotal = parseFloat(localData.ganhoTotal);
+
+// 🔹 Códigos de recarga
 const codigosRecarga = {
-  50: ["716412153", "592315254", "846882055","14081980","195668863","653096775","504350967","635551900", "286671413", "732888662"],
-    
-    40: ["217565914", "919970432", "284338877", "101696966", "702396411", "229654597", "874019900", "621211660", "336075928", "485986854",],
-    
-    30: ["739656664", "465396612", "189768711", "112988691", "966044327", "595658875", "109617523", "899800852", "755223288", "960909264",],
-    
-    20: ["446224299", "394127635", "812879695", "960907900", "491988844", "249227980", "956544658", "349657657", "840757998", "217686049",],
-    
-    10: ["691539989", "811999998", "108784815", "313505598", "806528891", "366228474", "716094153", "592329854", "846668855", "504376967",],
-    
-    9:["874016500", "621216610", "336090028", "485980154", "635598519", "286682713", "732880862", "195658863", "653677587", "129458884",],
-    
-    8:["956535448", "003496557", "840776998", "217612049", "739668764", "466345912", "189763211", "112967891", "904432227", "595665575",],
-    
-    
-    7:[ "673207856", "209122885", "487021874", "337834017", "596597699", "387881987", "978833854", "699939985", "767384775", "560098454",],
-    
-    
-    6:[
-
-"673275056", "209651885", "487029814", "337808817", "596587999", "367871987", "309878265", "317746673", "507846877", "999297604",],
-    
-    5: [
-"986476585", "443438755", "978638854", "699975985", "767388775", "005600454", "647728865", "878863674", "441365795", "965878854"],
-    
-    4:[
-"109613223", "899876852", "755228448", "960976264", "216594314", "919098432", "284337447", "101697666", "702397611", "229654597",],
-
-    3:[
-"309821965", "317663273", "507683477", "929766404", "446224552", "394128835", "887963495", "960901270", "491987744", "249212270"],
-    
-    2:[
-"647720985", "878867472", "441379895", "987877854", "691997689", "811977998", "108488515", "313503398", "806521291", "366222274"],
-     1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"
-  ]
+  
+  50: ["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671414","732888663"],
+  40: ["217565915","919970433","284338878","101696967","702396412","229654598","874019901","621211661","336075929","485986855"],
+  30: ["739656665","465396613","189768712","112988692","966044328","595658876","109617524","899800853","755223289","960909265"],
+  20: ["446224300","394127636","812879696","960907901","491988845","249227981","956544659","349657658","840757999","217686050"],
+  10: ["691539990","811999999","108784816","313505599","806528892","366228475","716094154","592329855","846668856","504376968"],
+  9:  ["874016501","621216611","336090029","485980155","635598520","286682714","732880863","195658864","653677588","129458885"],
+  8:  ["956535449","003496558","840776999","217612050","739668765","466345913","189763212","112967892","904432228","595665576"],
+  7:  ["673207857","209122886","487021875","337834018","596597700","387881988","978833855","699939986","767384776","560098455"],
+  6:  ["673275057","209651886","487029815","337808818","596588000","367871988","309878266","317746674","507846878","999297605"],
+  5:  ["986476586","443438756","978638855","699975986","767388776","005600455","647728866","878863675","441365796","965878855"],
+  4:  ["109613224","899876853","755228449","960976265","216594315","919098433","284337448","101697667","702397612","229654599"],
+  3:  ["309821966","317663274","507683478","929766405","446224553","394128836","887963496","960901271","491987745","249212271"],
+  2:  ["647720986","878867473","441379896","987877855","691997690","811977999","108488516","313503399","806521292","366222275"],
+  1:  ["teste1336263","teste00001123","teste0062526","teste97288863000","teste62527883","teste4425252517"]
 };
 
-const saldoRef = ref(db, `usuarios/${userId}`);
+// 🔹 Códigos usados
+let codigosUsados = JSON.parse(localStorage.getItem("codigosUsados") || "[]");
 
-// 🔹 Recupera dados do LocalStorage
-let localData = JSON.parse(localStorage.getItem("dadosUsuario")) || {};
-if(localData.saldo !== undefined) saldo = parseFloat(localData.saldo);
-if(localData.ganhoTotal !== undefined) ganhoTotal = parseFloat(localData.ganhoTotal);
-
-// 🔹 Sincroniza Firebase em tempo real
-onValue(saldoRef, (snapshot)=>{
+// 🔹 Sincroniza Firebase e LocalStorage
+onValue(saldoRef, snapshot => {
     const data = snapshot.val();
-    if(data){
+    if (data) {
         saldo = parseFloat(data.saldo || 0);
         ganhoTotal = parseFloat(data.ganhoTotal || 0);
+        codigosUsados = data.codigosUsados ? [...new Set(data.codigosUsados)] : codigosUsados;
     } else {
-        update(saldoRef, { saldo:0, ganhoTotal:0 });
+        update(saldoRef, { saldo:0, ganhoTotal:0, codigosUsados: [] });
         saldo = 0;
         ganhoTotal = 0;
     }
@@ -360,23 +279,21 @@ onValue(saldoRef, (snapshot)=>{
     criarBotoes();
 });
 
-// 🔹 Salvar no LocalStorage
-function salvarLocalStorage(){
-    localStorage.setItem("dadosUsuario", JSON.stringify({
-        saldo: saldo,
-        ganhoTotal: ganhoTotal
-    }));
+// 🔹 Salvar localStorage
+function salvarLocalStorage() {
+    localStorage.setItem("dadosUsuario", JSON.stringify({ saldo, ganhoTotal }));
+    localStorage.setItem("codigosUsados", JSON.stringify(codigosUsados));
 }
 
-// 🔹 Atualiza painel
-function atualizarPainel(){
+// 🔹 Atualizar painel
+function atualizarPainel() {
     document.getElementById("saldo").innerText = `Saldo: R$ ${saldo.toFixed(2).replace('.',',')}`;
     document.getElementById("ganhoTotal").innerText = `Ganho Total: R$${ganhoTotal}`;
-    document.getElementById("verificar").disabled = saldo < custoPorJogo || numerosSelecionados.length!==15;
+    document.getElementById("verificar").disabled = saldo < custoPorJogo || numerosSelecionados.length !== 15;
 }
 
 // 🔹 Criar botões de números
-function criarBotoes(){
+function criarBotoes() {
     const container = document.getElementById("numeros");
     container.innerHTML = '';
     for(let i=1;i<=50;i++){
@@ -386,175 +303,127 @@ function criarBotoes(){
         btn.id = `num${i}`;
         btn.onclick = () => selecionarNumero(i);
 
-        // Números bloqueados
         if(numerosBloqueados.includes(i) && !numerosSelecionados.includes(i)) btn.classList.add("blocked");
-        // Números selecionados
         if(numerosSelecionados.includes(i)) btn.classList.add("selected");
-        // Acertos
         if(numerosSelecionados.includes(i) && numerosBloqueados.includes(i)) btn.classList.add("acertou");
-        // Último número (quando a seleção chega a 15)
-        if(numerosSelecionados.length === 15 && i === numerosSelecionados[numerosSelecionados.length - 1]){
-            btn.classList.add("ultimo");
-        }
+        if(numerosSelecionados.length === 15 && i === numerosSelecionados[numerosSelecionados.length - 1]) btn.classList.add("ultimo");
 
         container.appendChild(btn);
     }
 }
 
 // 🔹 Selecionar número
-function selecionarNumero(num){
+function selecionarNumero(num) {
     if(bloqueado) return;
-
     if(numerosSelecionados.includes(num)){
         numerosSelecionados = numerosSelecionados.filter(n => n!==num);
     } else if(numerosSelecionados.length < 15){
         numerosSelecionados.push(num);
     }
-
-    // Atualizar classes
-    for(let i=1;i<=50;i++){
-        const btn = document.getElementById(`num${i}`);
-        btn.classList.remove("selected","ultimo");
-        if(numerosSelecionados.includes(i)) btn.classList.add("selected");
-    }
-
-    // Marcar o último número selecionado com classe 'ultimo'
-    if(numerosSelecionados.length === 15){
-        const ultimoNum = numerosSelecionados[numerosSelecionados.length - 1];
-        const btnUltimo = document.getElementById(`num${ultimoNum}`);
-        if(btnUltimo) btnUltimo.classList.add("ultimo");
-    }
-
     document.getElementById("contadorNumeros").innerText = `Números selecionados: ${numerosSelecionados.length}/15`;
-    atualizarPainel();
-    
     criarBotoes();
+    atualizarPainel();
 }
 
 // 🔹 Usar código de recarga
-document.getElementById("usarCodigo").addEventListener("click", ()=>{
+document.getElementById("usarCodigo").addEventListener("click", () => {
     const codigo = document.getElementById("codigoRecarga").value.trim();
+    if (!codigo) { alert("Digite um código."); return; }
+    if (codigosUsados.includes(codigo)) { alert("Este código já foi usado!"); return; }
+
     let codigoValido = false;
 
-    for(const valor in codigosRecarga){
-        if(codigosRecarga[valor].includes(codigo)){
-            runTransaction(saldoRef, (current)=>{
-                if(current){
-                    current.saldo = (parseFloat(current.saldo) || 0) + parseFloat(valor);
-                } else {
-                    current = { saldo: parseFloat(valor), ganhoTotal: 0 };
-                }
+    for (const valor in codigosRecarga) {
+        codigosRecarga[valor] = [...new Set(codigosRecarga[valor])]; // remove duplicidade
+        if (codigosRecarga[valor].includes(codigo)) {
+            runTransaction(ref(db, `usuarios/${userId}`), current => {
+                if (!current) current = { saldo:0, ganhoTotal:0, codigosUsados: [] };
+                current.saldo = (parseFloat(current.saldo) || 0) + parseFloat(valor);
+                if (!current.codigosUsados) current.codigosUsados = [];
+                current.codigosUsados.push(codigo);
                 return current;
-            });
-            saldo += parseFloat(valor); // Atualiza localmente
-            salvarLocalStorage();
-            alert(`Código válido! Saldo adicionado: R$ ${valor}`);
-            document.getElementById("codigoRecarga").value="";
-            criarBotoes();
-            atualizarPainel();
+            }).then(() => {
+                saldo += parseFloat(valor);
+                codigosUsados.push(codigo);
+                salvarLocalStorage();
+                atualizarPainel();
+                criarBotoes();
+                document.getElementById("codigoRecarga").value = "";
+                alert(`Código válido! Saldo adicionado: R$ ${valor}`);
+            }).catch(err => { console.error(err); alert("Erro ao usar o código."); });
+
             codigoValido = true;
             break;
         }
     }
+
     if(!codigoValido) alert("Código inválido.");
 });
 
 // 🔹 Verificar jogada
+// Função para aplicar animação pulse
+function pulsarElemento(element) {
+    element.classList.remove("pulse-acerto"); // remove caso já tenha
+    void element.offsetWidth; // força reflow
+    element.classList.add("pulse-acerto"); // adiciona novamente
+}
+
+// 🔹 Verificar jogada
 function verificar() {
-    if (saldo < custoPorJogo || numerosSelecionados.length !== 15) {
-        alert("Saldo insuficiente ou selecione 15 números!");
-        return;
-    }
+    if (saldo < custoPorJogo || numerosSelecionados.length !== 15) return;
     bloqueado = true;
 
-    // Debitar saldo
-    runTransaction(saldoRef, (current) => {
-        if (current) {
-            current.saldo = (parseFloat(current.saldo) || 0) - custoPorJogo;
-        }
-        return current;
-    });
+    runTransaction(saldoRef, current => { if(current) current.saldo -= custoPorJogo; return current; });
 
-    // Gerar números sorteados
     numerosBloqueados = [];
-    while (numerosBloqueados.length < 5) {
-        let num = Math.floor(Math.random() * 50) + 1;
-        if (!numerosBloqueados.includes(num)) numerosBloqueados.push(num);
+    while(numerosBloqueados.length<5){
+        let n = Math.floor(Math.random()*50)+1;
+        if(!numerosBloqueados.includes(n)) numerosBloqueados.push(n);
     }
 
-    // Atualizar botões
-    for (let i = 1; i <= 50; i++) {
-        const btn = document.getElementById(`num${i}`);
-        btn.classList.remove("acertou", "blocked", "ultimo");
-        btn.style.background = "";
-        btn.style.color = "";
+    let acertos = numerosSelecionados.filter(n => numerosBloqueados.includes(n)).length;
 
-        if (numerosBloqueados.includes(i)) {
-            if (numerosSelecionados.includes(i)) {
-                // Acerto
-                btn.style.background = "green";
-                btn.style.color = "white";
-            } else {
-                // Sorteado mas não selecionado
-                btn.style.background = "red";
-                btn.style.color = "white";
-            }
-        } else if (numerosSelecionados.includes(i)) {
-            // Selecionado mas não sorteado
-            btn.style.background = "black";
-            btn.style.color = "white";
+    // Marca os botões acertados
+    numerosSelecionados.forEach(num => {
+        const btn = document.getElementById(`num${num}`);
+        if(numerosBloqueados.includes(num)){
+            btn.classList.add("acertou"); // verde
+            pulsarElemento(btn); // animação sempre que tiver verde
         }
-    }
-
-    // Último número selecionado (opcional, pode remover se não quiser)
-    if (numerosSelecionados.length > 0) {
-        const ultimo = numerosSelecionados[numerosSelecionados.length - 1];
-        const btnUltimo = document.getElementById(`num${ultimo}`);
-        if (btnUltimo && !numerosBloqueados.includes(ultimo)) {
-            btnUltimo.style.background = "blue";
-            btnUltimo.style.color = "white";
-        }
-    }
-
-    // Calcular acertos
-    // Calcular acertos
-let acertos = numerosSelecionados.filter(n => numerosBloqueados.includes(n)).length;
-
-if(acertos === 5){
-    let premio = acertos * valorAcerto; // R$200 x 5 = R$1000, por exemplo
-    // Atualiza ganhoTotal somente se acertou 5
-    runTransaction(saldoRef, (current) => {
-        if(current) current.ganhoTotal = premio;
-        return current;
     });
 
-    document.getElementById("mensagem").innerText = "Parabéns, você ganhou!";
-    document.getElementById("enviar").style.display = "block";
-    document.getElementById("ganhoTotal").classList.add("habilitado");
-    document.getElementById("ganhoTotal").innerText = `Ganho Total: R$${premio.toFixed(2)}`;
-} else {
-    document.getElementById("mensagem").innerText = `Tente novamente. Acertos: ${acertos}`;
-    document.getElementById("enviar").style.display = "none";
-    document.getElementById("ganhoTotal").classList.remove("habilitado");
-    document.getElementById("ganhoTotal").innerText = `Ganho Total: R$0,00`;
-}
-    // Limpar após 30s
-    setTimeout(() => {
+    if(acertos > 0){
+        document.getElementById("mensagem").innerText = `Acertos: ${acertos}`;
+        ganhoTotal = acertos === 5 ? valorAcerto : 0;
+        if(acertos === 5){
+            document.getElementById("ganhoTotal").classList.add("habilitado");
+            pulsarElemento(document.getElementById("ganhoTotal")); // anima botão ganhou
+        }
+        document.getElementById("enviar").style.display = acertos === 5 ? "block" : "none";
+    } else {
+        document.getElementById("mensagem").innerText = "Tente novamente.";
+        document.getElementById("enviar").style.display = "none";
+    }
+
+    atualizarPainel();
+
+    // Reset após 5 segundos
+    setTimeout(()=>{
         numerosSelecionados = [];
         numerosBloqueados = [];
         bloqueado = false;
         criarBotoes();
-        document.getElementById("contadorNumeros").innerText = `Números selecionados: 0/15`;
+        document.getElementById("contadorNumeros").innerText = "Números selecionados: 0/15";
         document.getElementById("mensagem").innerText = "";
         document.getElementById("enviar").style.display = "none";
-        runTransaction(saldoRef, (current) => { if (current) current.ganhoTotal = 0; return current; });
-    }, 5000);
-
-    atualizarPainel();
+        runTransaction(saldoRef, current => { if(current) current.ganhoTotal = 0; return current; });
+        atualizarPainel();
+    },5000);
 }
 // 🔹 Modal e envio WhatsApp
 const modal = document.getElementById("modal");
-document.getElementById("ganhoTotal").addEventListener("click", ()=>{
+
+document.getElementById("ganhoTotal").addEventListener("click", () => {
     if(ganhoTotal>0){
         document.getElementById("valorGanhoModal").innerText = `Valor disponível: R$${ganhoTotal}`;
         modal.style.display = "flex";
@@ -564,65 +433,75 @@ document.getElementById("ganhoTotal").addEventListener("click", ()=>{
 document.getElementById("enviarWhats").addEventListener("click", ()=>{
     const nome = document.getElementById("nomePix").value.trim();
     const pix = document.getElementById("chavePix").value.trim();
-    if(nome==="" || pix==="") { alert("Preencha todos os campos."); return; }
+    if(nome==="" || pix===""){ alert("Preencha todos os campos."); return; }
+
     const mensagem = `PIX: ${pix}\nNome: ${nome}\nValor Ganho: R$${ganhoTotal}`;
     window.open("https://api.whatsapp.com/send?phone=5571992290058&text="+encodeURIComponent(mensagem), "_blank");
+
     modal.style.display = "none";
     ganhoTotal = 0;
-    runTransaction(saldoRef, (current)=>{ if(current) current.ganhoTotal=0; return current; });
+    runTransaction(saldoRef, current=>{ if(current) current.ganhoTotal=0; return current; });
     salvarLocalStorage();
     atualizarPainel();
 });
 
-// Envio WhatsApp do resultado
-function enviarViaWhatsApp(){
-    const msg = `Números Bloqueados: ${numerosBloqueados.join(", ")}\nNúmeros Selecionados: ${numerosSelecionados.join(", ")}\nPIX: 71992290058`;
-    window.open("https://api.whatsapp.com/send?phone=5571992290058&text="+encodeURIComponent(msg), "_blank");
+// 🔹 Eventos principais
+document.getElementById("verificar").addEventListener("click", verificar);
+document.getElementById("enviar").addEventListener("click", () => {
     numerosSelecionados = [];
     numerosBloqueados = [];
     criarBotoes();
-    document.getElementById("contadorNumeros").innerText = `Números selecionados: 0/15`;
-    document.getElementById("mensagem").innerText = "";
-    document.getElementById("enviar").style.display = "none";
-    ganhoTotal = 0;
-    runTransaction(saldoRef, (current)=>{ if(current) current.ganhoTotal=0; return current; });
-    salvarLocalStorage();
-    atualizarPainel();
-}
-
-// Eventos
-document.getElementById("verificar").addEventListener("click", verificar);
-document.getElementById("enviar").addEventListener("click", enviarViaWhatsApp);
-let codigosUsados = JSON.parse(localStorage.getItem("codigosUsados") || "[]");
-
-document.getElementById("usarCodigo").addEventListener("click", ()=>{
-    const codigo = document.getElementById("codigoRecarga").value.trim();
-    
-    if(codigosUsados.includes(codigo)){
-        alert("Este código já foi usado!");
-        return;
-    }
-
-    let codigoValido = false;
-    for(const valor in codigosRecarga){
-        if(codigosRecarga[valor].includes(codigo)){
-            saldo += parseFloat(valor); // ou runTransaction se usar Firebase
-            codigosUsados.push(codigo);
-            localStorage.setItem("codigosUsados", JSON.stringify(codigosUsados));
-            alert(`Código válido! Saldo adicionado: R$ ${valor}`);
-            document.getElementById("codigoRecarga").value="";
-            criarBotoes();
-            codigoValido = true;
-            break;
-        }
-    }
-    if(!codigoValido) alert("Código inválido.");
-    atualizarPainel();
 });
+document.addEventListener('DOMContentLoaded', function() {
+    const pixModal = document.getElementById("pixModal");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const closePix = document.querySelector(".closePix");
+    const botoesValor = document.querySelectorAll(".valor-btn");
+    let total = 0;
 
-criarBotoes();
+    // Função para abrir modal
+    function abrirPixModal() {
+        pixModal.style.display = "flex";
+    }
 
+    // Função para fechar modal
+    function fecharPixModal() {
+        pixModal.style.display = "none";
+        total = 0;
+        const totalEl = document.getElementById("total");
+        if(totalEl) totalEl.textContent = "Total: R$ 0";
+    }
 
+    // Abrir modal ao clicar no botão COMPRAR CODIGO
+    refreshBtn.addEventListener("click", (e)=>{
+        e.preventDefault();
+        abrirPixModal();
+    });
+
+    // Fechar modal ao clicar no X
+    closePix.addEventListener("click", ()=>{
+        fecharPixModal();
+    });
+
+    // Fechar modal ao clicar fora da modal
+    window.addEventListener("click", (e)=>{
+        if(e.target === pixModal) fecharPixModal();
+    });
+
+    // Ao clicar nos botões de valor, abrir link do Pix
+    botoesValor.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const valor = btn.getAttribute("data-valor");
+            total = parseInt(valor);
+            // Redireciona para link do Pix correspondente
+            const link = btn.parentElement.querySelector("a")?.href;
+            if(link) window.open(link, "_blank");
+            // Mostra o valor total (opcional)
+            const totalEl = document.getElementById("total");
+            if(totalEl) totalEl.textContent = `Total: R$ ${total}`;
+        });
+    });
+});
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <a href="https://wa.me/5571992290058?text=pagamento%20liberacao%20codigo%20de%20Acesso%0Achave%20pix:%20telefone%0A71992290058%0ACarlos Santos Reis%0Avalor%20por%20codigo%20R$%202.00%0AEnvia%20O%20Comprovante" style="position:fixed;width:35px;height:35px;bottom:20px;right:20px;color:#25d366;border-radius:50px;text-align:center;font-size:30px;
