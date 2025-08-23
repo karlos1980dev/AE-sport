@@ -28,7 +28,7 @@
     padding: 20px;
     margin: 10px 0;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     box-shadow: 0 0 10px #00ff7f33;
   }
 
@@ -82,6 +82,25 @@
     font-size: 0.95rem;
   }
 
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  th, td {
+    padding: 5px;
+    text-align: left;
+  }
+
+  th {
+    border-bottom: 1px solid #00ff7f;
+  }
+
+  td {
+    border-bottom: 1px solid #00ff7f33;
+  }
+
   /* Modal de saque */
   .modal {
     display: none; 
@@ -131,6 +150,7 @@
 
 <h1>Painel de Monitoramento</h1>
 
+<!-- Saldo -->
 <div class="card">
   <h2>Saldo</h2>
   <div class="saldo">
@@ -139,6 +159,7 @@
   </div>
 </div>
 
+<!-- Liberar Código -->
 <div class="card">
   <h2>Liberar Código</h2>
   <input type="text" id="codigoLiberar" placeholder="Digite o código">
@@ -147,16 +168,28 @@
   <ul id="listaCodigos"></ul>
 </div>
 
+<!-- Saque Pix -->
 <div class="card">
   <h2>Saque Pix</h2>
   <button id="btnSaque">Solicitar Saque</button>
-  <ul id="listaSaques"></ul>
+  <table id="tabelaSaques">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Pix</th>
+        <th>Valor</th>
+        <th>Data / Hora</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </div>
 
 <!-- Modal -->
 <div id="modalSaque" class="modal">
   <div class="modal-content">
     <h2>Solicitar Pix</h2>
+    <input type="text" id="nomeInput" placeholder="Digite seu Nome">
     <input type="text" id="pixInput" placeholder="Digite seu Pix">
     <input type="number" id="valorInput" placeholder="Digite o valor R$">
     <div class="modal-buttons">
@@ -240,7 +273,7 @@ function atualizarListaCodigos() {
     }
   });
 }
-
+  
 // Liberar código
 window.liberarCodigo = async function() {
   const codigoInput = document.getElementById("codigoLiberar").value.toUpperCase();
@@ -259,7 +292,9 @@ window.liberarCodigo = async function() {
   }
 
   saldoAtual += data.valor;
+  saldoGanho += data.valor;
   await set(saldoRef, saldoAtual);
+  await set(saldoGanhoRef, saldoGanho);
   await update(ref(db, "codigos/" + codigoInput), { usado: true });
 
   msg.textContent = `Crédito de R$${data.valor} liberado!`;
@@ -268,11 +303,12 @@ window.liberarCodigo = async function() {
 
 // Modal de saque
 const modal = document.getElementById('modalSaque');
+const nomeInput = document.getElementById('nomeInput');
 const pixInput = document.getElementById('pixInput');
 const valorInput = document.getElementById('valorInput');
 const cancelarBtn = document.getElementById('cancelarBtn');
 const enviarBtn = document.getElementById('enviarBtn');
-const listaSaques = document.getElementById('listaSaques');
+const tabelaSaques = document.getElementById('tabelaSaques').querySelector('tbody');
 
 document.getElementById('btnSaque').addEventListener('click', ()=>{
   if(saldoGanho <= 0){
@@ -285,16 +321,18 @@ document.getElementById('btnSaque').addEventListener('click', ()=>{
 
 cancelarBtn.addEventListener('click', ()=>{
   modal.style.display = 'none';
+  nomeInput.value = '';
   pixInput.value = '';
   valorInput.value = '';
 });
 
 enviarBtn.addEventListener('click', async ()=>{
+  const nome = nomeInput.value.trim();
   const pix = pixInput.value.trim();
   const valor = parseFloat(valorInput.value);
 
-  if(!pix || isNaN(valor) || valor <= 0){
-    alert('Preencha corretamente Pix e valor.');
+  if(!nome || !pix || isNaN(valor) || valor <= 0){
+    alert('Preencha corretamente Nome, Pix e valor.');
     return;
   }
 
@@ -304,6 +342,7 @@ enviarBtn.addEventListener('click', async ()=>{
   }
 
   const saque = {
+    nome: nome,
     pix: pix,
     valor: valor,
     data: new Date().toLocaleString()
@@ -316,19 +355,25 @@ enviarBtn.addEventListener('click', async ()=>{
   await set(saldoGanhoRef, saldoGanho);
 
   modal.style.display = 'none';
+  nomeInput.value = '';
   pixInput.value = '';
   valorInput.value = '';
 });
 
 // Atualiza lista de saques em tempo real
 onValue(saquesRef, snapshot=>{
-  listaSaques.innerHTML = '';
+  tabelaSaques.innerHTML = '';
   if(snapshot.exists()){
     const saques = snapshot.val();
     for(let key in saques){
-      const li = document.createElement('li');
-      li.textContent = `Pix: ${saques[key].pix} | Valor: R$${saques[key].valor.toFixed(2)} | Data: ${saques[key].data}`;
-      listaSaques.appendChild(li);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${saques[key].nome}</td>
+        <td>${saques[key].pix}</td>
+        <td>R$ ${saques[key].valor.toFixed(2)}</td>
+        <td>${saques[key].data}</td>
+      `;
+      tabelaSaques.appendChild(tr);
     }
   }
 });
