@@ -84,16 +84,18 @@ h1{
 /* Geladeiras */
 .geladeiras{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:4vw;
+  grid-template-columns:repeat(4,1fr); /* 4 geladeiras por linha */
+  gap:2vw;
   max-width:100%;
   margin-bottom:20px;
 }
 
 .geladeira{
+  width:20vw;
+  height:22vw;
+
   position:relative;
-  width:27vw;
-  height:30vw;
+  
   background:#a3d5ff;
   border:3px solid #333;
   border-radius:5%;
@@ -288,6 +290,15 @@ h1{
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 10</div></div>
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 11</div></div>
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 12</div></div>
+    <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 13</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 14</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 15</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 16</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 17</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 18</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 19</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 20</div></div>
+ 
 </div>
 
 <!-- Modal de saque -->
@@ -516,4 +527,4 @@ window.liberarCredito = liberarCredito;
 window.abrirGeladeira = abrirGeladeira;
 </script>
 </body>
-</html>
+  </html>
