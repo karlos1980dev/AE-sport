@@ -178,7 +178,7 @@ h1{
 }
 
 .modal-content input{
-  width: 80%;
+  width: 100%;
   padding: 10px;
   margin: 10px 0;
   font-size: 16px;
@@ -186,6 +186,7 @@ h1{
 
 .modal-buttons{
   display: flex;
+  width:100%;
   justify-content: space-between;
 }
 
@@ -199,8 +200,8 @@ h1{
   cursor:pointer;
 }
 
-#cancelarBtn{background:#ccc;}
-#enviarBtn{background:#28a745;color:white;}
+#cancelarBtn{background:#ccc; border-radius:20px;}
+#enviarBtn{background:#28a745;color:white;border-radius:20px;}
 
 /* Painel de saques */
 #painelSaques{
@@ -249,7 +250,7 @@ h1{
 </head>
 <body>
 
-<h1>ACHOU GANHOU</h1>
+
 
 <!-- Saldos -->
 <div class="saldos-container">
@@ -283,7 +284,7 @@ h1{
   <input type="text" id="codigo" placeholder="Digite seu código">
   <button onclick="liberarCredito()">Liberar Crédito</button>
 </div>
-<p id="mensagem"></p>
+<p id="mensagem" style="font-weight:bold; color:black;">ACHOU GANHOU</p>
 
 <!-- Geladeiras -->
 <div class="geladeiras">
@@ -355,11 +356,16 @@ const pixInput = document.getElementById("pixInput");
 const listaSaques = document.getElementById("painelSaques") || document.createElement("ul");
 
 // --- Saldos ---
+// --- Saldos ---
 let saldoAtual = Number(localStorage.getItem("saldoAtual")) || 0;
 let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
 
 // --- Atualiza interface ---
 function atualizarSaldos() {
+  // salva sempre que atualizar
+  localStorage.setItem("saldoAtual", saldoAtual.toString());
+  localStorage.setItem("saldoGanho", saldoGanho.toString());
+
   btnSaldo.textContent = "Saldo Atual: R$ " + saldoAtual.toFixed(2);
   btnSaldoGanho.textContent = "Saldo Ganhou: R$ " + saldoGanho.toFixed(2);
 
@@ -367,6 +373,7 @@ function atualizarSaldos() {
     if (saldoAtual >= 2) g.classList.remove("bloqueada");
     else g.classList.add("bloqueada");
   });
+
 }
 
 // --- Modal saque ---
