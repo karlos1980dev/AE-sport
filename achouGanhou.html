@@ -228,11 +228,13 @@ h1{
 </div>
 
 <!-- Modal de saque -->
+<!-- Modal de saque -->
 <div id="modalSaque" class="modal">
   <div class="modal-content">
     <h2>Solicitar Pix</h2>
+    <input type="text" id="nomeInput" placeholder="Digite seu nome">
     <input type="text" id="pixInput" placeholder="Digite seu Pix">
-    <input  type="number" id="valorInput" placeholder="Digite o valor R$" readonly>
+    <input type="number" id="valorInput" placeholder="Digite o valor R$" readonly>
     <div class="modal-buttons">
       <button id="cancelarBtn">Cancelar</button>
       <button id="enviarBtn">Enviar</button>
@@ -389,6 +391,7 @@ window.abrirGeladeira = function(geladeira){
 };
 
 // Modal de saque
+// Modal de saque
 btnSaldoGanho.addEventListener('click', () => {
   if(saldoGanho <= 0){
     alert("Você não tem saldo ganho para sacar!");
@@ -400,16 +403,18 @@ btnSaldoGanho.addEventListener('click', () => {
 
 cancelarBtn.addEventListener('click', ()=>{
   modal.style.display = 'none';
+  nomeInput.value = '';
   pixInput.value = '';
   valorInput.value = '';
 });
 
 enviarBtn.addEventListener('click', ()=>{
+  const nome = nomeInput.value.trim();
   const pix = pixInput.value.trim();
   const valor = parseFloat(valorInput.value);
 
-  if(!pix || isNaN(valor) || valor <= 0){
-    alert('Preencha corretamente o Pix e o valor.');
+  if(!nome || !pix || isNaN(valor) || valor <= 0){
+    alert('Preencha corretamente o nome, Pix e o valor.');
     return;
   }
 
@@ -420,13 +425,14 @@ enviarBtn.addEventListener('click', ()=>{
 
   // Adiciona saque no Firebase
   const dataAtual = new Date().toLocaleString("pt-BR");
-  push(saquesRef, { pix: pix, valor: valor, data: dataAtual });
+  push(saquesRef, { nome: nome, pix: pix, valor: valor, data: dataAtual });
 
   // Atualiza saldo ganho
   saldoGanho -= valor;
   set(saldoGanhoRef, saldoGanho);
 
   modal.style.display = 'none';
+  nomeInput.value = '';
   pixInput.value = '';
   valorInput.value = '';
 });
