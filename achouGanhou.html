@@ -10,13 +10,14 @@ body{
   flex-direction:column;
   align-items:center;
   font-family:Arial;
-  background:#f0f0f0;
+  transition: background-color 0.5s, color 0.5s;
   margin:0;
   padding:10px;
+  background:#f0f0f0;
 }
 
 h1{
-  color:#0077cc;
+  color:#000;
   text-align:center;
   font-size:6vw;
   margin-bottom:10px;
@@ -43,7 +44,8 @@ h1{
 }
 
 #btnSaldo{background:green;color:white;}
-#btnSaldoGanho{background:orange;color:white;}
+#btnSaldoGanho{background:orange;color:black;}
+#refreshBtn{background:blue;color:white;}
 
 /* Input e botão liberar crédito */
 .input-container{
@@ -97,7 +99,6 @@ h1{
   border-radius:5%;
   cursor:pointer;
   overflow:hidden;
-  perspective:600px;
   transition:0.3s;
 }
 
@@ -110,6 +111,9 @@ h1{
   transform-origin:left;
   transition:transform 0.6s ease;
   z-index:2;
+  backface-visibility:hidden;
+  transform-style: flat;
+  box-shadow:none;
 }
 
 .geladeira.aberta .porta{transform:rotateY(-120deg);}
@@ -127,7 +131,17 @@ h1{
   z-index:1;
   text-align:center;
   padding:5px;
+  backface-visibility:hidden;
+  box-shadow:none;
 }
+
+/* Animação pulsar */
+@keyframes pulsar {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.geladeira.premiada { animation: pulsar 0.6s ease-in-out 3; }
 
 /* Modal */
 .modal {
@@ -190,25 +204,75 @@ h1{
 #painelSaques h3{margin:0 0 10px 0;}
 #painelSaques ul{list-style:none; padding:0; margin:0;}
 #painelSaques li{padding:5px 0; border-bottom:1px solid #ddd;}
+
+/* Modal de compra */
+#pixModal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+#pixModal .modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  width: 300px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.valor-btn {
+  padding: 10px 15px;
+  margin: 5px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.valor-btn:hover { background: #45a049; }
 </style>
 </head>
 <body>
 
-<h1>Sorteio das Geladeiras</h1>
+<h1>Sorteio 2x10</h1>
 
 <!-- Saldos -->
 <div class="saldos-container">
-  <button id="btnSaldo">Saldo Atual: R$ 0</button>
-  <button id="btnSaldoGanho">Saldo Ganhou: R$ 0</button>
+    <button id="refreshBtn">COMPRAR CÓDIGO</button>
+    <button id="btnSaldo">Saldo Atual: R$ 0</button>
+    <button id="btnSaldoGanho">Saldo Ganhou: R$ 0</button>
 </div>
-
-
+<div id="pixModal" class="modal">
+  <div class="modal-content">
+    <span class="closePix" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
+    <h3 style="color:gold;">Selecione o valor</h3>
+    
+    <!-- Botões de valor -->
+    <div id="valoresContainer" style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center;">
+        <a href="https://pixplay.netlify.app/pagamento"><button class="valor-btn" data-valor="2">01 CRÉDITO</button></a>
+        <a href="https://pixplay.netlify.app/pagementos2codigo"><button class="valor-btn" data-valor="4">02 CRÉDITOS</button></a>
+        <a href="https://pixplay.netlify.app/pg3codigo"><button class="valor-btn" data-valor="6">03 CRÉDITOS</button></a>
+        <a href="https://pixplay.netlify.app/pg4codigo"><button class="valor-btn" data-valor="8">04 CRÉDITOS</button></a>
+        <a href="https://pixplay.netlify.app/pg5codigo"><button class="valor-btn" data-valor="10">05 CRÉDITOS</button></a>
+        <a href="https://mp-rif-online.netlify.app/codigo6"><button class="valor-btn" data-valor="12">06 CRÉDITOS</button></a>
+        <a href="https://mp-rif-online.netlify.app/codigo7"><button class="valor-btn" data-valor="14">07 CRÉDITOS</button></a>
+        <a href="https://mpago.la/1BAJDHP"><button class="valor-btn" data-valor="16">08 CRÉDITOS</button></a>
+        <a href="https://mpago.la/1crbp6X"><button class="valor-btn" data-valor="18">09 CRÉDITOS</button></a>
+        <a href="https://mpago.la/3417LdJ"><button class="valor-btn" data-valor="20">10 CRÉDITOS</button></a>
+    </div>    
+  </div>
+</div>
 
 <!-- Input de código -->
 <div class="input-container">
   <input type="text" id="codigo" placeholder="Digite seu código">
   <button onclick="liberarCredito()">Liberar Crédito</button>
-</div><p style="margin:0px;"id="mensagem"></p>
+</div>
+<p id="mensagem"></p>
 
 <!-- Geladeiras -->
 <div class="geladeiras">
@@ -221,13 +285,11 @@ h1{
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 7</div></div>
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 8</div></div>
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 9</div></div>
-   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 10</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 10</div></div>
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 11</div></div>
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 12</div></div>
 </div>
-</div>
 
-<!-- Modal de saque -->
 <!-- Modal de saque -->
 <div id="modalSaque" class="modal">
   <div class="modal-content">
@@ -241,18 +303,11 @@ h1{
     </div>
   </div>
 </div>
-
-<!-- Painel de saques -->
-<div id="painelSaques">
-  <h3>Últimos saques:</h3>
-  <ul id="listaSaques"></ul>
-</div>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// Configuração Firebase
+// --- Config Firebase ---
 const firebaseConfig = {
   apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
   authDomain: "geladeira-58de2.firebaseapp.com",
@@ -267,175 +322,228 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Referências Firebase
-const saldoRef = ref(db,"saldo");
-const saldoGanhoRef = ref(db,"saldoGanho");
-const saquesRef = ref(db,"saques");
-
-// Elementos do DOM
+// --- Elementos ---
+const msg = document.getElementById("mensagem");
 const btnSaldo = document.getElementById("btnSaldo");
 const btnSaldoGanho = document.getElementById("btnSaldoGanho");
-const msg = document.getElementById("mensagem");
-const pixInput = document.getElementById("pixInput");
-const valorInput = document.getElementById("valorInput");
-const modal = document.getElementById("modalSaque");
+const modalSaque = document.getElementById("modalSaque");
 const cancelarBtn = document.getElementById("cancelarBtn");
 const enviarBtn = document.getElementById("enviarBtn");
+const valorInput = document.getElementById("valorInput");
+const nomeInput = document.getElementById("nomeInput");
+const pixInput = document.getElementById("pixInput");
 const listaSaques = document.getElementById("listaSaques");
 
-// Variáveis locais
-let saldoAtual = 0;
-let saldoGanho = 0;
-let jogando = false; // apenas uma geladeira por vez
+// --- Saldos locais ---
+let saldoAtual = Number(localStorage.getItem("saldoAtual")) || 0;
+let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
 
-// Monitoramento em tempo real do saldo
-onValue(saldoRef, snapshot => {
-  saldoAtual = snapshot.val() || 0;
-  atualizarSaldoBotao();
-});
-
-onValue(saldoGanhoRef, snapshot => {
-  saldoGanho = snapshot.val() || 0;
-  btnSaldoGanho.textContent = "Saldo Ganhou: R$ " + saldoGanho.toFixed(2);
-});
-
-// Carrega últimos saques em tempo real
-onValue(saquesRef, snapshot => {
-  listaSaques.innerHTML = "";
-  if(snapshot.exists()){
-    const saques = snapshot.val();
-    Object.values(saques).forEach(saque=>{
-      const li = document.createElement("li");
-      li.textContent = `Pix: ${saque.pix} - Valor: R$ ${saque.valor.toFixed(2)} - Data: ${saque.data}`;
-      listaSaques.appendChild(li);
-    });
-  }
-});
-
-// Atualiza botão e desbloqueia geladeiras
-function atualizarSaldoBotao(){
+// --- Atualiza interface ---
+function atualizarSaldos() {
   btnSaldo.textContent = "Saldo Atual: R$ " + saldoAtual.toFixed(2);
-  document.querySelectorAll(".geladeira").forEach(g=>{
-    if(saldoAtual>=2 && !jogando) g.classList.remove("bloqueada");
+  btnSaldoGanho.textContent = "Saldo Ganhou: R$ " + saldoGanho.toFixed(2);
+
+  document.querySelectorAll(".geladeira").forEach(g => {
+    if (saldoAtual >= 2) g.classList.remove("bloqueada");
     else g.classList.add("bloqueada");
   });
 }
 
-// Códigos de crédito
-const codigosPremios = {
- 
-};
-
-// Liberar crédito
-window.liberarCredito = function(){
-  const input = document.getElementById("codigo").value.toUpperCase();
-  let usadosLocal = JSON.parse(localStorage.getItem("codigosUsados")) || [];
-
-  if(usadosLocal.includes(input)){ 
-    msg.textContent="Código já usado!"; 
-    return; 
-  }
-
-  let valor = null;
-  for(const key in codigosPremios){
-    if(codigosPremios[key].includes(input)){ valor = Number(key); break; }
-  }
-
-  if(valor===null){ 
-    msg.textContent="Código inválido!"; 
-    return; 
-  }
-
-  saldoAtual += valor;
-  usadosLocal.push(input);
-  localStorage.setItem("codigosUsados", JSON.stringify(usadosLocal));
-  set(saldoRef, saldoAtual);
-
-  msg.textContent=`Crédito de R$${valor} liberado! Agora você pode jogar (custa R$2 por geladeira).`;
-  atualizarSaldoBotao();
-};
-
-// Abrir geladeira
-window.abrirGeladeira = function(geladeira){
-  if(saldoAtual<2){ msg.textContent="Saldo insuficiente! Digite um código válido."; return; }
-  if(jogando){ msg.textContent="Aguarde antes de abrir outra geladeira."; return; }
-
-  saldoAtual -= 2; // custo por geladeira
-  jogando = true;
-  set(saldoRef, saldoAtual);
-  atualizarSaldoBotao();
-
-  const geladeiras = document.querySelectorAll(".geladeira");
-  geladeira.classList.add("aberta");
-  const index = Array.from(geladeiras).indexOf(geladeira);
-  const interior = geladeira.querySelector(".interior");
-
-  // Definir prêmio aleatório
-  let brindeIndex = Math.floor(Math.random()*geladeiras.length);
-
-  if(index === brindeIndex){
-    interior.textContent = "🎉 Parabéns! Você ganhou!";
-    saldoGanho += 10;
-    set(saldoGanhoRef, saldoGanho);
-  } else {
-    interior.textContent = "😢 Tente outra vez!";
-  }
-
-  setTimeout(()=>{
-    geladeira.classList.remove("aberta");
-    interior.textContent = `Geladeira ${index+1}`;
-    jogando=false;
-    msg.textContent = saldoAtual>=2 ? "Você pode jogar novamente!" : "Saldo insuficiente! Digite um código válido.";
-    atualizarSaldoBotao();
-  },1000);
-};
-
-// Modal de saque
-// Modal de saque
+// --- Modal de saque ---
 btnSaldoGanho.addEventListener('click', () => {
-  if(saldoGanho <= 0){
+  if (saldoGanho <= 0) {
     alert("Você não tem saldo ganho para sacar!");
     return;
   }
-  modal.style.display = 'flex';
+  modalSaque.style.display = 'flex';
   valorInput.value = saldoGanho.toFixed(2);
 });
 
-cancelarBtn.addEventListener('click', ()=>{
-  modal.style.display = 'none';
+// Cancelar saque
+cancelarBtn.addEventListener('click', () => {
+  modalSaque.style.display = 'none';
   nomeInput.value = '';
   pixInput.value = '';
   valorInput.value = '';
 });
 
-enviarBtn.addEventListener('click', ()=>{
+// Enviar saque para Firebase
+enviarBtn.addEventListener('click', () => {
   const nome = nomeInput.value.trim();
   const pix = pixInput.value.trim();
-  const valor = parseFloat(valorInput.value);
+  const valor = Number(valorInput.value);
 
-  if(!nome || !pix || isNaN(valor) || valor <= 0){
+  if (!nome || !pix || isNaN(valor) || valor <= 0) {
     alert('Preencha corretamente o nome, Pix e o valor.');
     return;
   }
 
-  if(valor > saldoGanho){
-    alert("Valor solicitado maior que o saldo ganho!");
-    return;
-  }
+  const novoSaque = push(ref(db, 'saques'));
+  set(novoSaque, {
+    nome,
+    pix,
+    valor,
+    data: Date.now()
+  });
 
-  // Adiciona saque no Firebase
-  const dataAtual = new Date().toLocaleString("pt-BR");
-  push(saquesRef, { nome: nome, pix: pix, valor: valor, data: dataAtual });
+  alert(`Pix solicitado para ${pix} no valor de R$${valor.toFixed(2)}`);
 
-  // Atualiza saldo ganho
-  saldoGanho -= valor;
-  set(saldoGanhoRef, saldoGanho);
+  saldoGanho = 0; // Zera saldo ganho local
+  localStorage.setItem("saldoGanho", saldoGanho);
+  atualizarSaldos();
 
-  modal.style.display = 'none';
+  modalSaque.style.display = 'none';
   nomeInput.value = '';
   pixInput.value = '';
   valorInput.value = '';
 });
+
+// --- Códigos de crédito ---
+const codigosPremios = {
+  500:["140819805"],
+ 50: ["716412153", "592315254", "846882055",
+"14081980", "195668863","653096775","504350967","635551900", "286671413", "732888662"],
+    
+    40: ["217565914", "919970432", "284338877", "101696966", "702396411", "229654597", "874019900", "621211660", "336075928", "485986854",],
+    
+    30: ["739656664", "465396612", "189768711", "112988691", "966044327", "595658875", "109617523", "899800852", "755223288", "960909264",],
+    
+    20: ["446224299", "394127635", "812879695", "960907900", "491988844", "249227980", "956544658", "349657657", "840757998", "217686049",],
+    
+    10: ["691539989", "811999998", "108784815", "313505598", "806528891", "366228474", "716094153", "592329854", "846668855", "504376967",],
+    
+    9:["874016500", "621216610", "336090028", "485980154", "635598519", "286682713", "732880862", "195658863", "653677587", "129458884",],
+    
+    8:["956535448", "003496557", "840776998", "217612049", "739668764", "466345912", "189763211", "112967891", "904432227", "595665575",],
+    
+    
+    7:[ "673207856", "209122885", "487021874", "337834017", "596597699", "387881987", "978833854", "699939985", "767384775", "560098454",],
+    
+    
+    6:[
+
+"673275056", "209651885", "487029814", "337808817", "596587999", "367871987", "309878265", "317746673", "507846877", "999297604",],
+    
+    5: [
+"986476585", "443438755", "978638854", "699975985", "767388775", "005600454", "647728865", "878863674", "441365795", "965878854"],
+    
+    4:[
+"109613223", "899876852", "755228448", "960976264", "216594314", "919098432", "284337447", "101697666", "702397611", "229654597",],
+
+    3:[
+"309821965", "317663273", "507683477", "929766404", "446224552", "394128835", "887963495", "960901270", "491987744", "249212270"],
+    
+    2:[
+"647720985", "878867472", "441379895", "987877854", "691997689", "811977998", "108488515", "313503398", "806521291", "366222274"],
+     1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"
+  ]
+};
+
+// --- Liberar crédito ---
+function liberarCredito() {
+  const input = document.getElementById("codigo").value.toUpperCase().trim();
+  let usados = JSON.parse(localStorage.getItem("codigosUsados")) || [];
+
+  if (!input) { msg.textContent = "Digite um código!"; return; }
+  if (usados.includes(input)) { msg.textContent = "Código já usado!"; return; }
+
+  let valor = null;
+  for (const key in codigosPremios) {
+    if (codigosPremios[key].includes(input)) {
+      valor = Number(key);
+      break;
+    }
+  }
+  if (valor === null) { msg.textContent = "Código inválido!"; return; }
+
+  saldoAtual += valor;
+  usados.push(input);
+  localStorage.setItem("codigosUsados", JSON.stringify(usados));
+  localStorage.setItem("saldoAtual", saldoAtual);
+
+  msg.textContent = `Crédito de R$${valor} liberado! Agora você pode jogar.`;
+  atualizarSaldos();
+  document.getElementById("codigo").value = '';
+  setTimeout(()=>{ msg.textContent = ''; }, 3000);
+}
+
+// --- Abrir geladeira ---
+let jogando = false;
+function abrirGeladeira(geladeira) {
+  if (saldoAtual < 2) { msg.textContent = "Saldo insuficiente! Digite um código válido."; return; }
+  if (jogando) { msg.textContent = "Aguarde antes de abrir outra geladeira."; return; }
+
+  saldoAtual -= 2;
+  localStorage.setItem("saldoAtual", saldoAtual);
+  jogando = true;
+  atualizarSaldos();
+
+  geladeira.classList.add("aberta");
+  const interior = geladeira.querySelector(".interior");
+  const geladeiras = document.querySelectorAll(".geladeira");
+  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+  const index = Array.from(geladeiras).indexOf(geladeira);
+
+  if (index === brindeIndex) {
+    interior.textContent = "🎉 Parabéns! Você ganhou!";
+    saldoGanho += 10;
+    localStorage.setItem("saldoGanho", saldoGanho);
+    geladeira.classList.add("premiada");
+  } else {
+    interior.textContent = "😢 Tente outra vez!";
+  }
+
+  const tempoFechar = (index === brindeIndex) ? 1900 : 1000;
+  setTimeout(()=>{
+    geladeira.classList.remove("aberta","premiada");
+    interior.textContent = `Geladeira ${index+1}`;
+    jogando = false;
+    msg.textContent = saldoAtual >= 2 ? "Você pode jogar novamente!" : "Saldo insuficiente! Digite um código válido.";
+    atualizarSaldos();
+  }, tempoFechar);
+}
+
+// --- Modal de compra de créditos ---
+const modalCompra = document.getElementById('pixModal');
+const btnCompra = document.getElementById('refreshBtn');
+const closePix = document.querySelector('.closePix');
+
+btnCompra.addEventListener('click', ()=>{ modalCompra.style.display = 'flex'; });
+closePix.addEventListener('click', ()=>{ modalCompra.style.display = 'none'; });
+window.addEventListener('click', (e)=>{ if(e.target === modalCompra) modalCompra.style.display = 'none'; });
+
+const valorBtns = document.querySelectorAll(".valor-btn");
+valorBtns.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const valor = Number(btn.dataset.valor);
+    saldoAtual += valor;
+    localStorage.setItem("saldoAtual", saldoAtual);
+    atualizarSaldos();
+    modalCompra.style.display = 'none';
+    alert(`Você comprou ${valor} crédito(s)!`);
+  });
+});
+
+// --- Monitoramento de saques no painel via Firebase ---
+const saquesRef = ref(db, 'saques');
+onValue(saquesRef, snapshot=>{
+  const dados = snapshot.val();
+  listaSaques.innerHTML = '';
+  if(dados){
+    Object.values(dados).forEach(item=>{
+      const li = document.createElement("li");
+      const dt = new Date(item.data).toLocaleString();
+      li.textContent = `${item.nome} solicitou R$${item.valor.toFixed(2)} em ${dt}`;
+      listaSaques.appendChild(li);
+    });
+  }
+});
+document.querySelectorAll(".geladeira").forEach(g => {
+  g.addEventListener("click", () => abrirGeladeira(g));
+});
+// --- Inicializa interface ---
+atualizarSaldos();
+window.abrirGeladeira = abrirGeladeira;
 </script>
 </body>
 </html>
