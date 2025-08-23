@@ -304,10 +304,10 @@ h1{
   </div>
 </div>
 <script type="module">
+// --- Inicialização Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-// --- Config Firebase ---
 const firebaseConfig = {
   apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
   authDomain: "geladeira-58de2.firebaseapp.com",
@@ -322,7 +322,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- Elementos ---
+// --- Elementos DOM ---
 const msg = document.getElementById("mensagem");
 const btnSaldo = document.getElementById("btnSaldo");
 const btnSaldoGanho = document.getElementById("btnSaldoGanho");
@@ -332,9 +332,9 @@ const enviarBtn = document.getElementById("enviarBtn");
 const valorInput = document.getElementById("valorInput");
 const nomeInput = document.getElementById("nomeInput");
 const pixInput = document.getElementById("pixInput");
-const listaSaques = document.getElementById("listaSaques");
+const listaSaques = document.getElementById("painelSaques") || document.createElement("ul");
 
-// --- Saldos locais ---
+// --- Saldos ---
 let saldoAtual = Number(localStorage.getItem("saldoAtual")) || 0;
 let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
 
@@ -349,7 +349,7 @@ function atualizarSaldos() {
   });
 }
 
-// --- Modal de saque ---
+// --- Modal saque ---
 btnSaldoGanho.addEventListener('click', () => {
   if (saldoGanho <= 0) {
     alert("Você não tem saldo ganho para sacar!");
@@ -359,7 +359,6 @@ btnSaldoGanho.addEventListener('click', () => {
   valorInput.value = saldoGanho.toFixed(2);
 });
 
-// Cancelar saque
 cancelarBtn.addEventListener('click', () => {
   modalSaque.style.display = 'none';
   nomeInput.value = '';
@@ -367,7 +366,6 @@ cancelarBtn.addEventListener('click', () => {
   valorInput.value = '';
 });
 
-// Enviar saque para Firebase
 enviarBtn.addEventListener('click', () => {
   const nome = nomeInput.value.trim();
   const pix = pixInput.value.trim();
@@ -379,16 +377,11 @@ enviarBtn.addEventListener('click', () => {
   }
 
   const novoSaque = push(ref(db, 'saques'));
-  set(novoSaque, {
-    nome,
-    pix,
-    valor,
-    data: Date.now()
-  });
+  set(novoSaque, { nome, pix, valor, data: Date.now() });
 
   alert(`Pix solicitado para ${pix} no valor de R$${valor.toFixed(2)}`);
 
-  saldoGanho = 0; // Zera saldo ganho local
+  saldoGanho = 0;
   localStorage.setItem("saldoGanho", saldoGanho);
   atualizarSaldos();
 
@@ -401,42 +394,20 @@ enviarBtn.addEventListener('click', () => {
 // --- Códigos de crédito ---
 const codigosPremios = {
   500:["140819805"],
- 50: ["716412153", "592315254", "846882055",
-"14081980", "195668863","653096775","504350967","635551900", "286671413", "732888662"],
-    
-    40: ["217565914", "919970432", "284338877", "101696966", "702396411", "229654597", "874019900", "621211660", "336075928", "485986854",],
-    
-    30: ["739656664", "465396612", "189768711", "112988691", "966044327", "595658875", "109617523", "899800852", "755223288", "960909264",],
-    
-    20: ["446224299", "394127635", "812879695", "960907900", "491988844", "249227980", "956544658", "349657657", "840757998", "217686049",],
-    
-    10: ["691539989", "811999998", "108784815", "313505598", "806528891", "366228474", "716094153", "592329854", "846668855", "504376967",],
-    
-    9:["874016500", "621216610", "336090028", "485980154", "635598519", "286682713", "732880862", "195658863", "653677587", "129458884",],
-    
-    8:["956535448", "003496557", "840776998", "217612049", "739668764", "466345912", "189763211", "112967891", "904432227", "595665575",],
-    
-    
-    7:[ "673207856", "209122885", "487021874", "337834017", "596597699", "387881987", "978833854", "699939985", "767384775", "560098454",],
-    
-    
-    6:[
-
-"673275056", "209651885", "487029814", "337808817", "596587999", "367871987", "309878265", "317746673", "507846877", "999297604",],
-    
-    5: [
-"986476585", "443438755", "978638854", "699975985", "767388775", "005600454", "647728865", "878863674", "441365795", "965878854"],
-    
-    4:[
-"109613223", "899876852", "755228448", "960976264", "216594314", "919098432", "284337447", "101697666", "702397611", "229654597",],
-
-    3:[
-"309821965", "317663273", "507683477", "929766404", "446224552", "394128835", "887963495", "960901270", "491987744", "249212270"],
-    
-    2:[
-"647720985", "878867472", "441379895", "987877854", "691997689", "811977998", "108488515", "313503398", "806521291", "366222274"],
-     1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"
-  ]
+  50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
+  40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
+  30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
+  20:["446224299","394127635","812879695","960907900","491988844","249227980","956544658","349657657","840757998","217686049"],
+  10:["691539989","811999998","108784815","313505598","806528891","366228474","716094153","592329854","846668855","504376967"],
+  9:["874016500","621216610","336090028","485980154","635598519","286682713","732880862","195658863","653677587","129458884"],
+  8:["956535448","003496557","840776998","217612049","739668764","466345912","189763211","112967891","904432227","595665575"],
+  7:["673207856","209122885","487021874","337834017","596597699","387881987","978833854","699939985","767384775","560098454"],
+  6:["673275056","209651885","487029814","337808817","596587999","367871987","309878265","317746673","507846877","999297604"],
+  5:["986476585","443438755","978638854","699975985","767388775","005600454","647728865","878863674","441365795","965878854"],
+  4:["109613223","899876852","755228448","960976264","216594314","919098432","284337447","101697666","702397611","229654597"],
+  3:["309821965","317663273","507683477","929766404","446224552","394128835","887963495","960901270","491987744","249212270"],
+  2:["647720985","878867472","441379895","987877854","691997689","811977998","108488515","313503398","806521291","366222274"],
+  1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"]
 };
 
 // --- Liberar crédito ---
@@ -470,7 +441,7 @@ function liberarCredito() {
 // --- Abrir geladeira ---
 let jogando = false;
 function abrirGeladeira(geladeira) {
-  if (saldoAtual < 2) { msg.textContent = "Saldo insuficiente! Digite um código válido."; return; }
+  if (saldoAtual < 2) { msg.textContent = "Saldo insuficiente! compre crédito para continua."; return; }
   if (jogando) { msg.textContent = "Aguarde antes de abrir outra geladeira."; return; }
 
   saldoAtual -= 2;
@@ -524,7 +495,7 @@ valorBtns.forEach(btn=>{
   });
 });
 
-// --- Monitoramento de saques no painel via Firebase ---
+// --- Monitoramento de saques ---
 const saquesRef = ref(db, 'saques');
 onValue(saquesRef, snapshot=>{
   const dados = snapshot.val();
@@ -538,11 +509,10 @@ onValue(saquesRef, snapshot=>{
     });
   }
 });
-document.querySelectorAll(".geladeira").forEach(g => {
-  g.addEventListener("click", () => abrirGeladeira(g));
-});
+
 // --- Inicializa interface ---
 atualizarSaldos();
+window.liberarCredito = liberarCredito;
 window.abrirGeladeira = abrirGeladeira;
 </script>
 </body>
