@@ -344,7 +344,43 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+// ----------------------------
+// Efeito automático sem saldo
+// ----------------------------
+let efeitoAutomatico = null;
 
+function iniciarEfeitoAutomatico() {
+  if (efeitoAutomatico) return; // evita rodar 2x
+
+  efeitoAutomatico = setInterval(() => {
+    // só roda se saldo ainda for zero
+    if (saldoAtual >= 2) return;
+
+    const geladeiras = document.querySelectorAll(".geladeira");
+    if (!geladeiras.length) return;
+
+    const randomIndex = Math.floor(Math.random() * geladeiras.length);
+    const geladeira = geladeiras[randomIndex];
+    const interior = geladeira.querySelector(".interior");
+
+    // anima só se não estiver aberta
+    if (!geladeira.classList.contains("aberta")) {
+      geladeira.classList.add("aberta");
+      interior.textContent = "👀";
+      setTimeout(() => {
+        geladeira.classList.remove("aberta");
+        interior.textContent = `Geladeira ${randomIndex + 1}`;
+      }, 800);
+    }
+  }, 1500); // tempo entre aberturas
+}
+
+function pararEfeitoAutomatico() {
+  if (efeitoAutomatico) {
+    clearInterval(efeitoAutomatico);
+    efeitoAutomatico = null;
+  }
+}
 // --- Elementos DOM ---
 const msg = document.getElementById("mensagem");
 const btnSaldo = document.getElementById("btnSaldo");
@@ -364,20 +400,25 @@ let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
 
 // --- Atualiza interface ---
 function atualizarSaldos() {
-  // salva sempre que atualizar
   localStorage.setItem("saldoAtual", saldoAtual.toString());
   localStorage.setItem("saldoGanho", saldoGanho.toString());
 
   btnSaldo.textContent = "Saldo Atual: R$ " + saldoAtual.toFixed(2);
   btnSaldoGanho.textContent = "Saldo Ganhou: R$ " + saldoGanho.toFixed(2);
 
+  // Bloqueia clique manual se não tiver saldo
   document.querySelectorAll(".geladeira").forEach(g => {
     if (saldoAtual >= 2) g.classList.remove("bloqueada");
     else g.classList.add("bloqueada");
   });
 
+  // Ativa ou desativa o efeito automático
+  if (saldoAtual < 2) {
+    iniciarEfeitoAutomatico();
+  } else {
+    pararEfeitoAutomatico();
+  }
 }
-
 // --- Modal saque ---
 btnSaldoGanho.addEventListener('click', () => {
   if (saldoGanho <= 0) {
@@ -433,7 +474,7 @@ const codigosPremios = {
   7:["673207856","209122885","487021874","337834017","596597699","387881987","978833854","699939985","767384775","560098454"],
   6:["673275056","209651885","487029814","337808817","596587999","367871987","309878265","317746673","507846877","999297604"],
   5:["986476585","443438755","978638854","699975985","767388775","005600454","647728865","878863674","441365795","965878854"],
-  4:["109613223","899876852","755228448","960976264","216594314","919098432","284337447","101697666","702397611","229654597"],
+  4:["109613223","899876852","755228448","960976264","216594314","919098432","284337447","101697666","702397611"],
   3:["309821965","317663273","507683477","929766404","446224552","394128835","887963495","960901270","491987744","249212270"],
   2:["647720985","878867472","441379895","987877854","691997689","811977998","108488515","313503398","806521291","366222274"],
   1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"]
@@ -578,6 +619,7 @@ function gerarCorAleatoria() {
 atualizarSaldos();
 window.liberarCredito = liberarCredito;
 window.abrirGeladeira = abrirGeladeira;
+
 </script>
 </body>
 </html>
