@@ -23,7 +23,9 @@
     <tr>
       <th>Nome</th>
       <th>Pix</th>
-      <th>Valor (R$)</th>
+      <th>Valor Saque (R$)</th>
+      <th>WhatsApp</th>
+      <th>Valor Compra (R$)</th>
       <th>Data/Hora</th>
     </tr>
   </thead>
@@ -67,9 +69,11 @@
         const tr = document.createElement('tr');
         const data = new Date(item.data).toLocaleString();
         tr.innerHTML = `
-          <td>${item.nome}</td>
-          <td>${item.pix}</td>
+          <td>${item.nome || '-'}</td>
+          <td>${item.pix || '-'}</td>
           <td>${Number(item.valor).toFixed(2)}</td>
+          <td>${item.whatsapp || '-'}</td>
+          <td>${item.valorCompra || '-'}</td>
           <td>${data}</td>
         `;
         tabela.appendChild(tr);
