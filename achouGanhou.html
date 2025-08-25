@@ -336,8 +336,33 @@ background:lime;
   padding: 6px 10px;
   font-size: 13px;
 }
+
+  #valoresContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 por linha */
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .valor-btn {
+    background: linear-gradient(135deg, #a5ff80, #ff9900);
+    border: none;
+    color: blue;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;
+    width: 100%;
+  }
+
+  .valor-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffaa00, #ff6600);
+  }
+
 </style></head><body>
-<!-- Saldos -->
 
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
@@ -347,8 +372,8 @@ background:lime;
     <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp">
     <input type="number" id="valorCompraInput" placeholder="Digite valor R$">
     <div class="modal-buttons">
-      <button id="cancelarInfoBtn">Cancelar</button>
-      <button id="confirmarInfoBtn">Confirmar</button>
+      <button style="background:red;"id="cancelarInfoBtn">Cancelar</button>
+      <button style="background:#55c1ff;"id="confirmarInfoBtn">Confirmar</button>
     </div>
   </div>
 </div>
@@ -360,17 +385,17 @@ background:lime;
     <h3 style="color:gold;">Selecione o valor</h3>
     
     <!-- Botões de valor -->
-    <div id="valoresContainer" style="display:flex; flex-wrap:wrap; gap:5px; justify-content:center;">
-        <a href="https://pixplay.netlify.app/pagamento"><button class="valor-btn" data-valor="2">01 CRÉDITO</button></a>
-        <a href="https://pixplay.netlify.app/pagementos2codigo"><button class="valor-btn" data-valor="4">02 CRÉDITOS</button></a>
-        <a href="https://pixplay.netlify.app/pg3codigo"><button class="valor-btn" data-valor="6">03 CRÉDITOS</button></a>
-        <a href="https://pixplay.netlify.app/pg4codigo"><button class="valor-btn" data-valor="8">04 CRÉDITOS</button></a>
-        <a href="https://pixplay.netlify.app/pg5codigo"><button class="valor-btn" data-valor="10">05 CRÉDITOS</button></a>
-        <a href="https://mp-rif-online.netlify.app/codigo6"><button class="valor-btn" data-valor="12">06 CRÉDITOS</button></a>
-        <a href="https://mp-rif-online.netlify.app/codigo7"><button class="valor-btn" data-valor="14">07 CRÉDITOS</button></a>
-        <a href="https://mpago.la/1BAJDHP"><button class="valor-btn" data-valor="16">08 CRÉDITOS</button></a>
-        <a href="https://mpago.la/1crbp6X"><button class="valor-btn" data-valor="18">09 CRÉDITOS</button></a>
-        <a href="https://mpago.la/3417LdJ"><button class="valor-btn" data-valor="20">10 CRÉDITOS</button></a>
+    <div id="valoresContainer">
+        <a href="https://pixplay.netlify.app/pagamento"><button class="valor-btn" data-valor="2">01 JOGADA R$ 2.00</button></a>
+        <a href="https://pixplay.netlify.app/pagementos2codigo"><button class="valor-btn" data-valor="4">02 JOGADA R$ 4.00</button></a>
+        <a href="https://pixplay.netlify.app/pg3codigo"><button class="valor-btn" data-valor="6">03 JOGADA R$ 6.00</button></a>
+        <a href="https://pixplay.netlify.app/pg4codigo"><button class="valor-btn" data-valor="8">04 JOGADA R$ 8.00</button></a>
+        <a href="https://pixplay.netlify.app/pg5codigo"><button class="valor-btn" data-valor="10">05 JOGADA R$ 10.00</button></a>
+        <a href="https://mp-rif-online.netlify.app/codigo6"><button class="valor-btn" data-valor="12">06 JOGADA R$ 12.00</button></a>
+        <a href="https://mp-rif-online.netlify.app/codigo7"><button class="valor-btn" data-valor="14">07 JOGADA R$ 14.00</button></a>
+        <a href="https://mpago.la/1BAJDHP"><button class="valor-btn" data-valor="16">08 JOGADA R$ 16.00</button></a>
+        <a href="https://mpago.la/1crbp6X"><button class="valor-btn" data-valor="18">09 JOGADA R$ 18.00</button></a>
+        <a href="https://mpago.la/3417LdJ"><button class="valor-btn" data-valor="20">10 JOGADA R$ 20.00</button></a>
     </div>    
   </div>
 </div>
