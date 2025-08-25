@@ -187,7 +187,8 @@ h3{
 }
 
 .modal-content input{
-  width: 100%;
+  width: 90%;
+  border-radius:10px;
   padding: 10px;
   margin: 10px 0;
   font-size: 16px;
@@ -195,7 +196,8 @@ h3{
 
 .modal-buttons{
   display: flex;
-  width:100%;
+  width:95%;
+  margin:10px;
   justify-content: space-between;
 }
 
@@ -304,16 +306,18 @@ button {
   color: white;
 }
 #refreshBtn:hover {
-  background: #005fa3;
+  background: #005lll;
   box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
 
 /* Botões de liberar crédito e modais */
 .input-container button, 
 .valor-btn, 
+background:lime;
 .modal-buttons button {
   padding: 8px 12px;
   font-size: 14px;
+  
   border-radius: 8px;
   font-weight: 600;
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23);
@@ -335,6 +339,7 @@ button {
 </style></head><body>
 <!-- Saldos -->
 
+<!-- Modal info usuário -->
 <div id="infoModal" class="modal">
   <div style="background:Black;color:white;" class="modal-content">
     <h3>INFORME<br>WHATSAPP e VALOR<br> PARA LIBERAR O ACESSO AO JOGO</h3>
@@ -347,6 +352,8 @@ button {
     </div>
   </div>
 </div>
+
+
 <div id="pixModal" class="modal">
   <div class="modal-content">
     <span class="closePix" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
@@ -488,7 +495,7 @@ let efeitoAutomatico = null;
 
 // --- Códigos de prêmio ---
 const codigosPremios = {
-  500:["14081920805"],
+  500:["14081920g805"],
   50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
   40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
   30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
