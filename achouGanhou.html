@@ -361,14 +361,20 @@ background:lime;
     transform: scale(1.05);
     background: linear-gradient(135deg, #ffaa00, #ff6600);
   }
-
+#valorCompraInput{
+    width:120px;
+    text-align:center;
+}
+#whatsappInput{
+    text-align:center;
+}
 </style></head><body>
 
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
   <div style="background:Black;color:white;" class="modal-content">
-    <h3>INFORME<br>WHATSAPP e VALOR<br> PARA LIBERAR O ACESSO AO JOGO</h3>
-    
+    <h3>INFORME<br>WHATSAPP e VALOR<br> PARA LIBERAR A MARCACAO DO JOGO</h3>
+    <label>WHATSAPP</label>
     <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp">
     <input type="number" id="valorCompraInput" placeholder="Digite valor R$">
     <div class="modal-buttons">
@@ -402,8 +408,8 @@ background:lime;
 
 <!-- Input de código -->
 <div class="input-container">
-  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite seu código">
-  <button onclick="liberarCredito()">Liberar Acesso</button>
+  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite seu codigo Saldo">
+  <button onclick="liberarCredito()">Liberar Marcação</button>
 </div>
 <div class="saldos-container">
     <button id="refreshBtn">COMPRAR CÓDIGO</button>
@@ -418,11 +424,11 @@ background:lime;
     <div style="display:flex; align-items:center; gap:5px;">
       <label>ONLINE</label>
       <span class="verde" id="valor" style="color:lime;">108</span>
-      <span class="vermelho" style="color:red;">/500</span>
+      <span class="vermelho" style="color:white;">/</span><span style="color:red;"> 500</span>
     </div>
 
     <!-- Direita -->
-    <p id="mensagem" style="margin:0; color:yellow;">ACHOU GANHOU</p>
+    <p id="mensagem" style="margin:0; color:yellow; display:flex; align-items:center;">ACHOU GANHOU</p>
 
   </div>
 </div>
@@ -668,7 +674,7 @@ confirmarInfoBtn.addEventListener('click', () => {
     data: Date.now()
   });
 
-  alert(`Compra registrada: WhatsApp ${whatsapp}, Valor R$${valor.toFixed(2)}`);
+  alert(`Compra registrada Com Sucesso:\n WhatsApp ${whatsapp}\n Valor R$${valor.toFixed(2)}`);
 
   infoModal.style.display = 'none';
   whatsappInput.value = '';
@@ -768,7 +774,43 @@ const DENOMINADOR = 500;
 
   // sorteia o valor verde
   const sorteado = randi(DENOMINADOR);
+  
   document.getElementById('valor').textContent = sorteado;
+  
+  const confirmarBtn = document.getElementById("confirmarInfoBtn");
+
+  // Máscara automática
+  // Máscara automática do WhatsApp
+whatsappInput.addEventListener("input", function (e) {
+  let valor = e.target.value.replace(/\D/g, ""); // mantém só números
+
+  if (valor.length > 11) {
+    valor = valor.substring(0, 11); // limita a 11 dígitos
+  }
+
+  if (valor.length <= 10) {
+    valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+  } else {
+    valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+  }
+
+  e.target.value = valor;
+});
+
+// Validação ao confirmar
+confirmarBtn.addEventListener("click", function () {
+  const numero = whatsappInput.value.replace(/\D/g, ""); // pega só os números
+
+  if (numero.length !== 11) {
+    alert("⚠️ PREENCHA 11 NUMEROS DO WHATSAPP");
+    whatsappInput.focus();
+    return;
+  }
+
+  // Se válido
+  alert("✅ O NUMERO TEVE SER WHATSAPP ");
+  // Aqui você pode liberar o jogo
+});
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <a href="https://wa.me/5571992290058?text=pagamento%20liberacao%20codigo%20de%20Acesso%0Achave%20pix:%20telefone%0A71992290058%0ACarlos Santos Reis%0Avalor%20por%20codigo%20R$%202.00%0AEnvia%20O%20Comprovante%20Aqui" style="position:fixed;width:35px;height:35px;bottom:20px;right:20px;color:#25d366;border-radius:50px;text-align:center;font-size:30px;
