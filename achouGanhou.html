@@ -567,7 +567,8 @@ function iniciarEfeitoAutomatico() {
       interior.textContent = "👀";
       setTimeout(() => {
         geladeira.classList.remove("aberta");
-        interior.textContent = `Geladeira ${randomIndex + 1}`;
+        
+        interior.textContent = `Hoje e Seu Dia De Sorte ${randomIndex + 1}`;
       }, 800);
     }
   }, 1500);
@@ -595,17 +596,17 @@ function abrirGeladeira(geladeira) {
   const index = Array.from(geladeiras).indexOf(geladeira);
 
   if (index === brindeIndex) {
-    interior.textContent = "🎁Parabéns! Você ganhou 10✅!";
+    interior.textContent = "🎁Parabéns!🎁 Você ganhou 10!";
     saldoGanho += 10;
     geladeira.classList.add("premiada");
   } else {
-    interior.textContent = "Tente outra vez!";
+    interior.textContent = "TA QUENTE";
   }
 
   const tempoFechar = (index === brindeIndex) ? 1900 : 1000;
   setTimeout(()=>{
     geladeira.classList.remove("aberta","premiada");
-    interior.textContent = `TA  QUENTE ${index+1}`;
+    interior.textContent = `Tenta Novamente ${index+1}`;
     jogando = false;
     msg.textContent = saldoAtual >= 2 ? "Você pode jogar novamente!" : "Saldo insuficiente! Digite um código válido.";
     atualizarSaldos();
@@ -665,7 +666,7 @@ confirmarInfoBtn.addEventListener('click', () => {
     data: Date.now()
   });
 
-  alert(`Compra registrada Com Sucesso:\n WhatsApp ${whatsapp}\n Valor R$${valor.toFixed(2)}`);
+  alert(`Compra registrada Com Sucesso:\n\n WhatsApp ${whatsapp}\n\n Valor R$${valor.toFixed(2)}`);
 
   infoModal.style.display = 'none';
   whatsappInput.value = '';
