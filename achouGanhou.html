@@ -282,36 +282,6 @@ button {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23); /* sombra leve realista */
 }
 
-/* Botão verde */
-#btnSaldo {
-  background: #18a558;
-  color: white;
-}
-#btnSaldo:hover {
-  background: #13a048;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-}
-
-/* Botão laranja */
-#btnSaldoGanho {
-  background: #ff9800;
-  color: white;
-}
-#btnSaldoGanho:hover {
-  background: #e68a00;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-}
-
-/* Botão azul */
-#refreshBtn {
-  background: #0077cc;
-  color: white;
-}
-#refreshBtn:hover {
-  background: #005lll;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-}
-
 /* Botões de liberar crédito e modais */
 .input-container button, 
 .valor-btn, 
@@ -355,7 +325,7 @@ background:lime;
     border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
-    font-size: 14px;
+    font-size: 14px;    
     width: 100%;
   }
 
@@ -364,11 +334,12 @@ background:lime;
     background: linear-gradient(135deg, #ffaa00, #ff6600);
   }
 #valorCompraInput{
-    width:120px;
+    width:50%;
     text-align:center;
 }
 #whatsappInput{
     text-align:center;
+    width:50%;
 }
 /* Botões Saldo e Comprar */
 .comoJoga,
@@ -403,7 +374,7 @@ background:lime;
 <div id="infoModal" class="modal">
   <div style="background:Black;color:white;" class="modal-content">
     <h3>INFORME<br>WHATSAPP e VALOR<br> PARA LIBERAR A MARCACAO DO JOGO</h3>
-    <label>WHATSAPP</label>
+    
     <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp">
     <input type="number" id="valorCompraInput" placeholder="Digite valor R$">
     <div class="modal-buttons">
@@ -420,21 +391,11 @@ background:lime;
     <h3 style="color:gold;">Selecione o valor</h3>
     
     <!-- Botões de valor -->
-    <div id="valoresContainer">
-        <a href="https://pixplay.netlify.app/pagamento"><button class="valor-btn" data-valor="2">01 JOGADA R$ 2.00</button></a>
-        <a href="https://pixplay.netlify.app/pagementos2codigo"><button class="valor-btn" data-valor="4">02 JOGADA R$ 4.00</button></a>
-        <a href="https://pixplay.netlify.app/pg3codigo"><button class="valor-btn" data-valor="6">03 JOGADA R$ 6.00</button></a>
-        <a href="https://pixplay.netlify.app/pg4codigo"><button class="valor-btn" data-valor="8">04 JOGADA R$ 8.00</button></a>
-        <a href="https://pixplay.netlify.app/pg5codigo"><button class="valor-btn" data-valor="10">05 JOGADA R$ 10.00</button></a>
-        <a href="https://mp-rif-online.netlify.app/codigo6"><button class="valor-btn" data-valor="12">06 JOGADA R$ 12.00</button></a>
-        <a href="https://mp-rif-online.netlify.app/codigo7"><button class="valor-btn" data-valor="14">07 JOGADA R$ 14.00</button></a>
-        <a href="https://mpago.la/1BAJDHP"><button class="valor-btn" data-valor="16">08 JOGADA R$ 16.00</button></a>
-        <a href="https://mpago.la/1crbp6X"><button class="valor-btn" data-valor="18">09 JOGADA R$ 18.00</button></a>
-        <a href="https://mpago.la/3417LdJ"><button class="valor-btn" data-valor="20">10 JOGADA R$ 20.00</button></a>
+    <div id="valoresContainer"><a href="https://pixplay.netlify.app/pagamento"><button class="valor-btn" data-valor="2">01 JOGADA R$ 2.00</button></a><a href="https://pixplay.netlify.app/pagementos2codigo"><button class="valor-btn" data-valor="4">02 JOGADA R$ 4.00</button></a><a href="https://pixplay.netlify.app/pg3codigo"><button class="valor-btn" data-valor="6">03 JOGADA R$ 6.00</button></a><a href="https://pixplay.netlify.app/pg4codigo"><button class="valor-btn" data-valor="8">04 JOGADA R$ 8.00</button></a><a href="https://pixplay.netlify.app/pg5codigo"><button class="valor-btn" data-valor="10">05 JOGADA R$ 10.00</button></a><a href="https://mp-rif-online.netlify.app/codigo6"><button class="valor-btn" data-valor="12">06 JOGADA R$ 12.00</button></a><a href="https://mp-rif-online.netlify.app/codigo7"><button class="valor-btn" data-valor="14">07 JOGADA R$ 14.00</button></a><a href="https://mpago.la/1BAJDHP"><button class="valor-btn" data-valor="16">08 JOGADA R$ 16.00</button></a><a href="https://mpago.la/1crbp6X"><button class="valor-btn" data-valor="18">09 JOGADA R$ 18.00</button></a><a href="https://mpago.la/3417LdJ"><button class="valor-btn" data-valor="20">10 JOGADA R$ 20.00</button></a><a style="width:90%;" href="link.mercadopago.com.br/newtechiptv"><button style="width:90%;" class="valor-btn" data-valor="20">OUTRO VALORES</button></a>
     </div>    
   </div>
 </div>
-
+ 
 <!-- Input de código -->
 <div class="input-container">
   <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite seu codigo Saldo">
@@ -544,6 +505,7 @@ const valorCompraInput = document.getElementById('valorCompraInput');
 const cancelarInfoBtn = document.getElementById('cancelarInfoBtn');
 const confirmarInfoBtn = document.getElementById('confirmarInfoBtn');
 
+
 const pixModal = document.getElementById('pixModal');
 const closePix = document.querySelector('.closePix');
 
@@ -620,7 +582,7 @@ function pararEfeitoAutomatico() {
 
 function abrirGeladeira(geladeira) {
   if (saldoAtual < 2) { msg.textContent = "Saldo insuficiente! compre saldo para continua."; return; }
-  if (jogando) { msg.textContent = "Aguarde antes de abrir outra."; return; }
+  if (jogando) { msg.textContent = ""; return; }
 
   saldoAtual -= 2;
   jogando = true;
@@ -633,17 +595,17 @@ function abrirGeladeira(geladeira) {
   const index = Array.from(geladeiras).indexOf(geladeira);
 
   if (index === brindeIndex) {
-    interior.textContent = "🎉 Parabéns! Você ganhou!";
+    interior.textContent = "🎁Parabéns! Você ganhou 10✅!";
     saldoGanho += 10;
     geladeira.classList.add("premiada");
   } else {
-    interior.textContent = "😢 Tente outra vez!";
+    interior.textContent = "Tente outra vez!";
   }
 
   const tempoFechar = (index === brindeIndex) ? 1900 : 1000;
   setTimeout(()=>{
     geladeira.classList.remove("aberta","premiada");
-    interior.textContent = `Geladeira ${index+1}`;
+    interior.textContent = `TA  QUENTE ${index+1}`;
     jogando = false;
     msg.textContent = saldoAtual >= 2 ? "Você pode jogar novamente!" : "Saldo insuficiente! Digite um código válido.";
     atualizarSaldos();
