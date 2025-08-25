@@ -5,13 +5,87 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel de Monitoramento - Saques</title>
 <style>
-  body { font-family: Arial; background: #f0f0f0; padding: 20px; }
-  h1 { text-align: center; color: #333; }
-  table { width: 100%; border-collapse: collapse; margin-top: 20px; background:white; }
-  th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-  th { background: #0077cc; color: white; }
-  tr:nth-child(even) { background: #f9f9f9; }
-  #status { margin-top: 10px; text-align:center; }
+  body { 
+    font-family: Arial, sans-serif; 
+    background: #f0f0f0; 
+    margin: 0; 
+    padding: 0; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh;
+  }
+
+  h1 { 
+    text-align: center; 
+    color: #333; 
+    margin: 20px 0; 
+  }
+
+  #status {
+    margin-top: 10px; 
+    text-align:center; 
+    font-size: 1rem;
+  }
+
+  table { 
+    width: 95%; 
+    max-width: 1200px;
+    border-collapse: collapse; 
+    margin: 20px 0; 
+    background: white; 
+    table-layout: fixed;
+    word-wrap: break-word;
+  }
+
+  th, td { 
+    border: 1px solid #ccc; 
+    padding: 8px; 
+    text-align: center; 
+    font-size: 0.9rem;
+  }
+
+  th { 
+    background: #0077cc; 
+    color: white; 
+  }
+
+  tr:nth-child(even) { 
+    background: #f9f9f9; 
+  }
+
+  .btn-delete { 
+    cursor: pointer; 
+    color: red; 
+    font-weight: bold; 
+    border: none; 
+    background: none; 
+    font-size: 16px; 
+  }
+
+  /* Para telas pequenas */
+  @media (max-width: 768px) {
+    th, td {
+      font-size: 0.75rem;
+      padding: 6px;
+    }
+    .btn-delete {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    table {
+      width: 100%;
+    }
+    th, td {
+      font-size: 0.7rem;
+      padding: 4px;
+    }
+    h1 {
+      font-size: 1.2rem;
+    }
+  }
 </style>
 </head>
 <body>
@@ -27,6 +101,7 @@
       <th>WhatsApp</th>
       <th>Valor Compra (R$)</th>
       <th>Data/Hora</th>
+      <th>Excluir</th>
     </tr>
   </thead>
   <tbody id="tabelaSaques">
@@ -36,9 +111,8 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-  // Config Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
     authDomain: "geladeira-58de2.firebaseapp.com",
@@ -50,22 +124,19 @@
     measurementId: "G-W547T81JCQ"
   };
 
-  // Inicializa Firebase
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
   const tabela = document.getElementById("tabelaSaques");
   const status = document.getElementById("status");
-
   const saquesRef = ref(db, 'saques');
 
-  // Recebe saques em tempo real
   onValue(saquesRef, snapshot => {
     const dados = snapshot.val();
     tabela.innerHTML = '';
 
     if (dados) {
-      Object.values(dados).forEach(item => {
+      Object.entries(dados).forEach(([key, item]) => {
         const tr = document.createElement('tr');
         const data = new Date(item.data).toLocaleString();
         tr.innerHTML = `
@@ -75,10 +146,23 @@
           <td>${item.whatsapp || '-'}</td>
           <td>${item.valorCompra || '-'}</td>
           <td>${data}</td>
+          <td><button class="btn-delete" data-key="${key}">X</button></td>
         `;
         tabela.appendChild(tr);
       });
       status.textContent = `Total de saques: ${Object.keys(dados).length}`;
+      
+      document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-key');
+          if(confirm('Deseja realmente excluir este saque?')) {
+            remove(ref(db, 'saques/' + key))
+              .then(() => alert('Saque excluído com sucesso!'))
+              .catch(err => alert('Erro ao excluir: ' + err));
+          }
+        });
+      });
+
     } else {
       status.textContent = 'Nenhum saque registrado ainda.';
     }
