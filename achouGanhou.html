@@ -9,6 +9,9 @@
 <title>ACHOU GANHOU </title>
 <style>
 body{
+margin:0; height:100dvh; display:grid; place-items:center;
+    font-family:system-ui, Arial;
+    background:#0b0b0b; color:#e6e6e6;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -16,7 +19,7 @@ body{
   transition: background-color 0.5s, color 0.5s;
   margin:0;
   padding:10px;
-  background:#f0f0f0;
+  
 }
 
 h1{
@@ -252,20 +255,92 @@ h3{
   cursor: pointer;
 }
 .valor-btn:hover { background: #45a049; }
+wrap{ display:flex; flex-direction:column; gap:18px; align-items:center; }
+  .painel{
+    width:100px; height:20px; gap:5px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:3px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.2);
+    font-size:12px; font-weight:700; text-align:center;
+    background:#1a1a1a;
+  }
+  .verde{ color:#18a558; }
+  .vermelho{ color:#e02b2b; }
+  /* Estilo geral para todos os botões */
+button {
+  padding: 8px 12px;           /* menor tamanho */
+  font-size: 14px;             /* fonte menor e legível */
+  font-weight: 600;            /* leve e elegante */
+  border: none;
+  border-radius: 8px;          /* bordas arredondadas suaves */
+  cursor: pointer;
+  transition: all 0.3s ease;   /* animação suave */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23); /* sombra leve realista */
+}
+
+/* Botão verde */
+#btnSaldo {
+  background: #18a558;
+  color: white;
+}
+#btnSaldo:hover {
+  background: #13a048;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* Botão laranja */
+#btnSaldoGanho {
+  background: #ff9800;
+  color: white;
+}
+#btnSaldoGanho:hover {
+  background: #e68a00;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* Botão azul */
+#refreshBtn {
+  background: #0077cc;
+  color: white;
+}
+#refreshBtn:hover {
+  background: #005fa3;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+}
+
+/* Botões de liberar crédito e modais */
+.input-container button, 
+.valor-btn, 
+.modal-buttons button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23);
+}
+.input-container button:hover,
+.valor-btn:hover,
+.modal-buttons button:hover {
+  transform: translateY(-2px);  /* leve efeito de “levantar” */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Links com botões dentro (ex: PIX) */
+#valoresContainer a button {
+  width: auto;
+  min-width: 70px; /* mais compacto */
+  padding: 6px 10px;
+  font-size: 13px;
+}
 </style></head><body>
 <!-- Saldos -->
-<div class="saldos-container">
-    <button id="refreshBtn">COMPRAR CÓDIGO</button>
-    <button id="btnSaldo">Saldo Atua 0</button>
-    <button id="btnSaldoGanho">Saldo Ganhou 0</button>
-    
-</div>
+
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
   <div style="background:Black;color:white;" class="modal-content">
     <h3>INFORME<br>WHATSAPP e VALOR<br>PARA RECEBIMENTO AUTOMÁTICO</h3>
     
-    <input type="text" id="whatsappInput" placeholder="Digite seu WhatsApp">
+    <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp">
     <input type="number" id="valorCompraInput" placeholder="Digite valor R$">
     <div class="modal-buttons">
       <button id="cancelarInfoBtn">Cancelar</button>
@@ -299,6 +374,16 @@ h3{
   <input type="text" id="codigo" placeholder="Digite seu código">
   <button onclick="liberarCredito()">Liberar Crédito</button>
 </div>
+<div class="saldos-container">
+    <button id="refreshBtn">COMPRAR CÓDIGO</button>
+    <button id="btnSaldo">Saldo Atua 0</button>
+    <button id="btnSaldoGanho">Saldo Ganhou 0</button>  
+</div>
+
+<div class="wrap">
+   <div class="painel" style="align-items:center;margin-left:40%;"><label style="color:white"> ONLINE </label> 
+      <span class="verde" id="valor"></span><span class="vermelho">/500</span>
+    </div>
 <p id="mensagem" style="font-weight:bold; color:black;">ACHOU GANHOU</p>
 
 <!-- Geladeiras -->
@@ -339,6 +424,7 @@ h3{
     </div>
   </div>
 </div>
+
 <script type="module">
 // --- Inicialização Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -388,8 +474,9 @@ let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
 let jogando = false;
 let efeitoAutomatico = null;
 
+// --- Códigos de prêmio ---
 const codigosPremios = {
-  500:["140819805"],
+  500:["14081920805"],
   50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
   40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
   30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
@@ -457,7 +544,6 @@ function abrirGeladeira(geladeira) {
   if (jogando) { msg.textContent = "Aguarde antes de abrir outra geladeira."; return; }
 
   saldoAtual -= 2;
-  localStorage.setItem("saldoAtual", saldoAtual);
   jogando = true;
   atualizarSaldos();
 
@@ -470,7 +556,6 @@ function abrirGeladeira(geladeira) {
   if (index === brindeIndex) {
     interior.textContent = "🎉 Parabéns! Você ganhou!";
     saldoGanho += 10;
-    localStorage.setItem("saldoGanho", saldoGanho);
     geladeira.classList.add("premiada");
   } else {
     interior.textContent = "😢 Tente outra vez!";
@@ -505,17 +590,20 @@ function liberarCredito() {
   saldoAtual += valor;
   usados.push(input);
   localStorage.setItem("codigosUsados", JSON.stringify(usados));
-  localStorage.setItem("saldoAtual", saldoAtual);
 
   msg.textContent = `Crédito de R$${valor} liberado! Agora você pode jogar.`;
-  atualizarSaldos();
   document.getElementById("codigo").value = '';
+  atualizarSaldos();
   setTimeout(()=>{ msg.textContent = ''; }, 3000);
 }
 
 // --- Modais de compra ---
 btnCompra.addEventListener('click', ()=>{ infoModal.style.display = 'flex'; });
-cancelarInfoBtn.addEventListener('click', ()=>{ infoModal.style.display = 'none'; whatsappInput.value=''; valorCompraInput.value=''; });
+cancelarInfoBtn.addEventListener('click', ()=>{ 
+  infoModal.style.display = 'none'; 
+  whatsappInput.value=''; 
+  valorCompraInput.value='';
+});
 
 confirmarInfoBtn.addEventListener('click', () => {
   const whatsapp = whatsappInput.value.trim();
@@ -526,7 +614,6 @@ confirmarInfoBtn.addEventListener('click', () => {
     return;
   }
 
-  // --- Envia para Firebase imediatamente ---
   const novoRef = push(saquesRef);
   set(novoRef, {
     nome: 'Compra',       
@@ -542,6 +629,7 @@ confirmarInfoBtn.addEventListener('click', () => {
   infoModal.style.display = 'none';
   whatsappInput.value = '';
   valorCompraInput.value = '';
+  pixModal.style.display = 'flex';
 });
 
 closePix.addEventListener('click', ()=>{ pixModal.style.display = 'none'; });
@@ -553,7 +641,10 @@ btnSaldoGanho.addEventListener('click', () => {
   modalSaque.style.display = 'flex';
   valorInput.value = saldoGanho.toFixed(2);
 });
-cancelarBtn.addEventListener('click', () => { modalSaque.style.display='none'; nomeInput.value=''; pixInput.value=''; valorInput.value=''; });
+cancelarBtn.addEventListener('click', () => { 
+  modalSaque.style.display='none'; 
+  nomeInput.value=''; pixInput.value=''; valorInput.value=''; 
+});
 enviarBtn.addEventListener('click', ()=>{
   const nome = nomeInput.value.trim();
   const pix = pixInput.value.trim();
@@ -573,35 +664,32 @@ enviarBtn.addEventListener('click', ()=>{
   alert(`Pix solicitado para ${pix} no valor de R$${valor.toFixed(2)}`);
   saldoGanho = 0;
   atualizarSaldos();
-  modalSaque.style.display='none';
-  nomeInput.value=''; pixInput.value=''; valorInput.value='';
+  modalSaque.style.display = 'none';
+  nomeInput.value = '';
+  pixInput.value = '';
+  valorInput.value = '';
+  atualizarSaldos();
 });
 
-// --- Monitoramento de saques e compras ---
-onValue(saquesRef, snapshot=>{
-  const dados = snapshot.val();
-  listaSaques.innerHTML='';
-  if(dados){
-    Object.values(dados).forEach(item=>{
-      const li = document.createElement("li");
-      const dt = new Date(item.data).toLocaleString();
-      li.innerHTML = `
-        <strong>Nome:</strong> ${item.nome} <br>
-        <strong>Pix:</strong> ${item.pix} <br>
-        <strong>WhatsApp:</strong> ${item.whatsapp || '-'} <br>
-        <strong>Valor Compra:</strong> R$ ${Number(item.valorCompra || 0).toFixed(2)} <br>
-        <strong>Valor Saque:</strong> R$ ${Number(item.valor).toFixed(2)} <br>
-        <strong>Data/Hora:</strong> ${dt}
-      `;
-      listaSaques.appendChild(li);
-    });
-  } else {
-    listaSaques.innerHTML = '<li>Nenhum saque registrado ainda.</li>';
-  }
+// --- Carregar saques do Firebase ---
+onValue(saquesRef, (snapshot) => {
+  listaSaques.innerHTML = '';
+  snapshot.forEach((childSnapshot) => {
+    const saque = childSnapshot.val();
+    const li = document.createElement('li');
+    li.textContent = `Nome: ${saque.nome} | Pix: ${saque.pix} | Valor: R$${Number(saque.valor).toFixed(2)}`;
+    listaSaques.appendChild(li);
+  });
 });
 
-// --- Funções visuais ---
-function gerarCorAleatoria() {
+// --- Inicializar geladeiras ---
+document.querySelectorAll(".geladeira").forEach(geladeira => {
+  geladeira.addEventListener("click", () => abrirGeladeira(geladeira));
+});
+
+// --- Inicializar saldos ---
+atualizarSaldos();
+  function gerarCorAleatoria() {
   const letras = '0123456789ABCDEF';
   let cor = '#';
   for (let i = 0; i < 6; i++) {
@@ -631,6 +719,12 @@ atualizarSaldos();
 aplicarCorFundo();
 window.liberarCredito = liberarCredito;
 window.abrirGeladeira = abrirGeladeira;
+const DENOMINADOR = 500;
+  const randi = (max) => Math.floor(Math.random() * (max + 1));
+
+  // sorteia o valor verde
+  const sorteado = randi(DENOMINADOR);
+  document.getElementById('valor').textContent = sorteado;
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 <a href="https://wa.me/5571992290058?text=pagamento%20liberacao%20codigo%20de%20Acesso%0Achave%20pix:%20telefone%0A71992290058%0ACarlos Santos Reis%0Avalor%20por%20codigo%20R$%202.00%0AEnvia%20O%20Comprovante" style="position:fixed;width:35px;height:35px;bottom:20px;right:20px;color:#25d366;border-radius:50px;text-align:center;font-size:30px;
