@@ -517,7 +517,7 @@ let efeitoAutomatico = null;
 
 // --- Códigos de prêmio ---
 const codigosPremios = {
-  500:["14081920g805"],
+  500:["1408192033805"],
   50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
   40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
   30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
@@ -582,7 +582,10 @@ function pararEfeitoAutomatico() {
 }
 
 function abrirGeladeira(geladeira) {
-  if (saldoAtual < 2) { msg.textContent = "Saldo insuficiente! compre saldo para continua."; return; }
+  if (saldoAtual < 2) { 
+    msg.textContent = "Saldo insuficiente! compre saldo para continua."; 
+    return; 
+  }
   if (jogando) { msg.textContent = ""; return; }
 
   saldoAtual -= 2;
@@ -600,10 +603,21 @@ function abrirGeladeira(geladeira) {
     saldoGanho += 10;
     geladeira.classList.add("premiada");
   } else {
-    interior.textContent = "TA QUENTE";
+    interior.textContent = "❌ Errou!";
+    // Mostra onde estava o brinde
+    const geladeiraPremiada = geladeiras[brindeIndex];
+    const interiorPremiada = geladeiraPremiada.querySelector(".interior");
+    setTimeout(() => {
+      geladeiraPremiada.classList.add("aberta", "premiada");
+      interiorPremiada.textContent = "🎁Aqui estava o brinde!";
+      setTimeout(() => {
+        geladeiraPremiada.classList.remove("aberta","premiada");
+        interiorPremiada.textContent = `Geladeira ${brindeIndex+1}`;
+      }, 1500);
+    }, 500);
   }
 
-  const tempoFechar = (index === brindeIndex) ? 1900 : 1000;
+  const tempoFechar = (index === brindeIndex) ? 1900 : 2000;
   setTimeout(()=>{
     geladeira.classList.remove("aberta","premiada");
     interior.textContent = `Tenta Novamente ${index+1}`;
@@ -612,7 +626,6 @@ function abrirGeladeira(geladeira) {
     atualizarSaldos();
   }, tempoFechar);
 }
-
 function liberarCredito() {
   const input = document.getElementById("codigo").value.toUpperCase().trim();
   let usados = JSON.parse(localStorage.getItem("codigosUsados")) || [];
