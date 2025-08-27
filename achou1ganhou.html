@@ -477,10 +477,10 @@ background:lime;
 
    .container-principal {
       border: 4px solid #fff; /* Borda branca */
-      box-shadow: 4px 4px 20px rgba(0,0,0,0.7); /* Sombra ao redor */
+      box-shadow: 4px 4px 20px rgba(0,0,0,0.7);
       width: 100%;
   overflow: hidden;
-      
+      animation: pulsarBorda 2s infinite ease-in-out;
       border-radius: 10px; /* Bordas arredondadas */
       padding: 10px 10px; /* Espaço interno */
       
@@ -510,8 +510,9 @@ background:lime;
 /* Ajuste para telas pequenas (celulares) */
 @media (max-width: 600px) {
   .container-principal {
-    padding: 5px;          /* reduz padding para não esmagar */
-    border-width: 2px;     /* borda mais fina */
+    padding: 20px 5px;
+    border-width: 2px;
+    max-height: none;  /* 🔥 evita esmagar as geladeiras */
   }
 
   .geladeiras {
@@ -524,6 +525,23 @@ background:lime;
     height: 22vw;
   }
 }
+/* animação da borda pulsante */
+@keyframes pulsarBorda {
+  0% {
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
+  }
+  50% {
+    border-color: #18a558;
+    box-shadow: 0 0 25px #18a558, 0 0 40px #18a558;
+  }
+  100% {
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
+  }
+}
+
+
 </style></head><body>
 <div class="container-principal">
 <!-- Modal info usuário -->
@@ -620,7 +638,7 @@ background:lime;
 <!-- Modal de saque -->
 <div id="modalSaque" class="modal">
   <div class="modal-content">
-    <h2>Solicitar Pix</h2>
+    <h2 style="color:Black;">SOLICITA SAQUE VIA PIX</h2>
     <input type="text" id="nomeInput" placeholder="Digite seu nome">
     <input type="text" id="pixInput" placeholder="Digite seu Pix">
     <input type="number" id="valorInput" placeholder="Digite o valor R$" readonly>
@@ -648,7 +666,7 @@ background:lime;
 <!-- Modal de Transferência -->
 <div id="modalTransferir" class="modal">
   <div class="modal-content">
-    <h2>Transferir para Saldo Atual</h2>
+    <h2>Transferir </br>SALDO ganhou para SALDO Atual</h2>
     <p>Saldo disponível: <b id="saldoDisponivel">0</b></p>
     <input type="number" id="valorTransferir" placeholder="Digite valor R$" min="1">
     <div class="modal-buttons">
@@ -1116,6 +1134,6 @@ confirmarTransferencia.addEventListener("click", () => {
 });
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-<a href="https://wa.me/5571992290058?text=🎟️%20Seu%20ticket%20tá%20quase%20liberado!%0A%0A👉%20Depois%20do%20pagamento,%20manda%20o%20comprovante%20aqui.%0A%0A💳%20Para%20pagar%20use%20o%20Mercado%20Pago:%0A🌐%20link.mercadopago.com.br/newtechiptv%0A👤%20Carlos%20dos%20Santos" style="position:fixed;width:35px;height:35px;bottom:20px;right:20px;color:#ffffff;border-radius:50px; background:#11ff00;text-align:center;font-size:30px;z-index:1000;" target="_blank"><i style="margin-top:10%" class="fa fa-whatsapp"></i></a>
+<a href="https://wa.me/5571992290058?text=🎟️%20Seu%20ticket%20tá%20quase%20liberado!%0A%0A👉%20Depois%20do%20pagamento,%20manda%20o%20comprovante%20aqui.%0A%0A💳%20Para%20pagar%20use%20o%20Mercado%20Pago:%0A🌐%20link.mercadopago.com.br/newtechiptv" style="position:fixed;width:35px;height:35px;bottom:20px;right:20px;color:#ffffff;border-radius:50px; background:#11ff00;text-align:center;font-size:30px;z-index:1000;" target="_blank"><i style="margin-top:10%" class="fa fa-whatsapp"></i></a>
 </body>
 </html>
