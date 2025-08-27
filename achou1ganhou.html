@@ -98,12 +98,12 @@ h3{
   gap:2vw;
   
   max-width:100%;
-  margin-bottom:20px;
+  margin-bottom:5px;
 }
 
 .geladeira{
   width:20vw;
-  height:24vw;
+  height:22vw;
 
   position:relative;
   
@@ -344,6 +344,7 @@ background:lime;
 /* Botões Saldo e Comprar */
 .comoJoga,
 #btnSaldo,
+#transferi,
 #btnSaldoGanho,
 #refreshBtn {
   padding: 5px 8px;              /* bem menores */
@@ -356,12 +357,13 @@ background:lime;
   color: white;
   transition: all 0.25s ease;
   box-shadow: 0 3px 6px rgba(0,0,0,0.25); /* sombra realista */
-  min-width: 90px;               /* garante largura mínima */
+  min-width: 10%;               /* garante largura mínima */
 }
 
 /* Efeito hover */
 .hamburger,
 #btnSaldo:hover,
+
 #btnSaldoGanho:hover,
 #refreshBtn:hover {
   background: #18a558;   /* fica verde ao passar o mouse */
@@ -467,9 +469,39 @@ background:lime;
   text-decoration: none;
   color: #fff;
 }
-
+   .container-principal {
+      border: 4px solid #fff; /* Borda branca */
+      box-shadow: 4px 4px 20px rgba(0,0,0,0.7); /* Sombra ao redor */
+      
+      
+      border-radius: 10px; /* Bordas arredondadas */
+      padding: 10px 10px; /* Espaço interno */
+      
+       /* Centraliza na tela */
+      background-color: #111; /* Fundo escuro para destacar */
+      max-width: 900px; /* Limita a largura */
+      max-height:100%;
+    }
+    #modalTransferir .modal-content {
+  background: #fff;
+  color: #000;
+  width: 90%;
+  max-width: 350px;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+#valorTransferir {
+  width: 80%;
+  padding: 8px;
+  font-size: 16px;
+  margin: 10px 0;
+  border: 2px solid #18a558;
+  border-radius: 6px;
+  text-align: center;
+}
 </style></head><body>
-
+<div class="container-principal">
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
   <div style="background:Black;color:white;" class="modal-content">
@@ -505,7 +537,8 @@ background:lime;
     <div class="hamburger" id="hamburger">☰ <br>Menu</div>
     <button id="refreshBtn">COMPRAR ACESSO</button>
     <button id="btnSaldo">Saldo Atua 0</button>
-    <button id="btnSaldoGanho">Saldo Ganhou 0</button>  
+  <button id="transferi"> <i class="fa fa-exchange"></i></button>
+    <button id="btnSaldoGanho">Saldo/Saque Ganhou 0</button>  
 </div>
 
 <div class="wrap" style="width:100%;">
@@ -587,7 +620,19 @@ background:lime;
     </ul>
   </div>
 </div>
-
+</div>
+<!-- Modal de Transferência -->
+<div id="modalTransferir" class="modal">
+  <div class="modal-content">
+    <h2>Transferir para Saldo Atual</h2>
+    <p>Saldo disponível: <b id="saldoDisponivel">0</b></p>
+    <input type="number" id="valorTransferir" placeholder="Digite valor R$" min="1">
+    <div class="modal-buttons">
+      <button id="cancelarTransferencia">Cancelar</button>
+      <button id="confirmarTransferencia">Transferir</button>
+    </div>
+  </div>
+</div>
 <script type="module">
 // --- Inicialização Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -709,6 +754,7 @@ function pararEfeitoAutomatico() {
 let escolhas = []; // armazena índices escolhidos
 
 function abrirGeladeira(geladeira) {
+
   const geladeiras = document.querySelectorAll(".geladeira");
   const index = Array.from(geladeiras).indexOf(geladeira);
 
@@ -735,7 +781,8 @@ function abrirGeladeira(geladeira) {
   escolhas.push(index);
   geladeira.classList.add("aberta");
   geladeira.querySelector(".interior").textContent = "✅ Marcada";
-
+// Trava os rádios ao marcar a primeira geladeira
+document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
   // Só continua quando atingir o limite do modo
   if (escolhas.length < modo) return;
 
@@ -773,20 +820,23 @@ function abrirGeladeira(geladeira) {
       }, 1500);
     }, 800);
   }
+// Resetar rodada
+setTimeout(() => {
+  escolhas.forEach(idx => {
+    const g = geladeiras[idx];
+    g.classList.remove("aberta", "premiada");
+    g.querySelector(".interior").textContent = `Geladeira ${idx+1}`;
+  });
+  escolhas = [];
+  jogando = false;
 
-  // Resetar rodada
-  setTimeout(() => {
-    escolhas.forEach(idx => {
-      const g = geladeiras[idx];
-      g.classList.remove("aberta", "premiada");
-      g.querySelector(".interior").textContent = `Geladeira ${idx+1}`;
-    });
-    escolhas = [];
-    jogando = false;
-    msg.textContent = saldoAtual >= 2 ? "Pode jogar de novo!" : "Saldo insuficiente!";
-    atualizarSaldos();
-  }, 2200);
-}
+  // Reabilita os rádios
+  document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
+
+  msg.textContent = saldoAtual >= 2 ? "Pode jogar de novo!" : "Saldo insuficiente!";
+  atualizarSaldos();
+}, 2200);
+}  
 function liberarCredito() {
   const input = document.getElementById("codigo").value.toUpperCase().trim();
   let usados = JSON.parse(localStorage.getItem("codigosUsados")) || [];
@@ -995,6 +1045,51 @@ closeMenu.addEventListener('click', () => {
 // Fechar menu ao clicar fora
 window.addEventListener('click', (e) => {
   if(e.target === menuModal) menuModal.style.display = 'none';
+});
+// --- Elementos do modal de transferência ---
+const transferirBtn = document.querySelector(".saldos-container button:nth-child(4)");
+const modalTransferir = document.getElementById("modalTransferir");
+const cancelarTransferencia = document.getElementById("cancelarTransferencia");
+const confirmarTransferencia = document.getElementById("confirmarTransferencia");
+const valorTransferirInput = document.getElementById("valorTransferir");
+const saldoDisponivel = document.getElementById("saldoDisponivel");
+
+// Abrir modal ao clicar no botão 🔛
+transferirBtn.addEventListener("click", () => {
+  if (saldoGanho <= 0) {
+    alert("⚠️ Você não tem ganhos para transferir!");
+    return;
+  }
+  saldoDisponivel.textContent = "R$ " + saldoGanho.toFixed(2);
+  valorTransferirInput.value = "";
+  modalTransferir.style.display = "flex";
+});
+
+// Cancelar
+cancelarTransferencia.addEventListener("click", () => {
+  modalTransferir.style.display = "none";
+});
+
+// Confirmar transferência
+confirmarTransferencia.addEventListener("click", () => {
+  let valor = Number(valorTransferirInput.value);
+  if (isNaN(valor) || valor <= 0) {
+    alert("⚠️ Digite um valor válido!");
+    return;
+  }
+  if (valor > saldoGanho) {
+    alert("⚠️ Você não pode transferir mais do que tem disponível!");
+    return;
+  }
+
+  saldoAtual += valor;
+  saldoGanho -= valor;
+  atualizarSaldos();
+
+  msg.textContent = `✅ Transferido R$${valor.toFixed(2)} para o saldo atual!`;
+  setTimeout(()=> msg.textContent = "", 3000);
+
+  modalTransferir.style.display = "none";
 });
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
