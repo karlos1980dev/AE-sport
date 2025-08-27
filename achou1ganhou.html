@@ -500,6 +500,23 @@ background:lime;
   border-radius: 6px;
   text-align: center;
 }
+/* Ajuste para telas pequenas (celulares) */
+@media (max-width: 600px) {
+  .container-principal {
+    padding: 5px;          /* reduz padding para não esmagar */
+    border-width: 2px;     /* borda mais fina */
+  }
+
+  .geladeiras {
+    grid-template-columns: repeat(4, 1fr); /* só 2 por linha no celular */
+    gap: 2px;
+  }
+
+  .geladeira {
+    width: 20vw;
+    height: 22vw;
+  }
+}
 </style></head><body>
 <div class="container-principal">
 <!-- Modal info usuário -->
@@ -530,7 +547,7 @@ background:lime;
  
 <!-- Input de código -->
 <div class="input-container">
-  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite seu codigo Saldo">
+  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
   <button onclick="liberarCredito()">Liberar Marcação</button>
 </div>
 <div class="saldos-container">
@@ -841,8 +858,8 @@ function liberarCredito() {
   const input = document.getElementById("codigo").value.toUpperCase().trim();
   let usados = JSON.parse(localStorage.getItem("codigosUsados")) || [];
 
-  if (!input) { msg.textContent = "Digite um código!"; return; }
-  if (usados.includes(input)) { msg.textContent = "Código já usado!"; return; }
+  if (!input) { msg.textContent = "Digite um ticket!"; return; }
+  if (usados.includes(input)) { msg.textContent = "ticket já usado!"; return; }
 
   let valor = null;
   for (const key in codigosPremios) {
@@ -851,7 +868,7 @@ function liberarCredito() {
       break;
     }
   }
-  if (valor === null) { msg.textContent = "Código inválido!"; return; }
+  if (valor === null) { msg.textContent = "ticket inválido!"; return; }
 
   saldoAtual += valor;
   usados.push(input);
@@ -1017,11 +1034,10 @@ whatsappInput.addEventListener("input", function (e) {
 confirmarBtn.addEventListener("click", function () {
   const numero = whatsappInput.value.replace(/\D/g, ""); // pega só os números
 
-  if (numero.length !== 11) {
-    alert("⚠️ PREENCHA 11 NUMEROS DO WHATSAPP");
+  //if (numero.length !== 11) {
+   // alert("⚠️ SEU PAINEL LIBERADO DIGITA O TICKET");
     whatsappInput.focus();
-    return;
-  }
+  //  return;}
 
   // Se válido
   alert("✅ O NUMERO TEVE SER WHATSAPP ");
