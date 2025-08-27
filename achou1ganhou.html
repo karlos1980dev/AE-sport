@@ -485,7 +485,7 @@ background:lime;
       padding: 10px 10px; /* Espaço interno */
       
        /* Centraliza na tela */
-      background-color: #111; /* Fundo escuro para destacar */
+      background-color: #525252f9; /* Fundo escuro para destacar */
       max-width: 900px; /* Limita a largura */
       max-height:100%;
     }
@@ -493,7 +493,7 @@ background:lime;
   background: #fff;
   color: #000;
   width: 90%;
-  max-width: 350px;
+  max-width: 300px;
   border-radius: 10px;
   padding: 20px;
   text-align: center;
@@ -508,7 +508,7 @@ background:lime;
   text-align: center;
 }
 /* Ajuste para telas pequenas (celulares) */
-@media (max-width: 600px) {
+@media (max-width: 500px) {
   .container-principal {
     padding: 20px 5px;
     border-width: 2px;
@@ -517,7 +517,7 @@ background:lime;
 
   .geladeiras {
     grid-template-columns: repeat(4, 1fr); /* só 2 por linha no celular */
-    gap: 2px;
+    gap: 4px;
   }
 
   .geladeira {
@@ -654,7 +654,9 @@ background:lime;
     <span class="closeMenu" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
     <h3>MENU</h3>
     <ul style="list-style:none; padding:0; text-align:left;">
-        <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">TABELA DE VALORES</li>
+        <li style="margin:10px 0;">
+  <a href="#" id="abrirTabela" style="color:white; text-decoration:none;">📊 TABELA DE PRÊMIOS</a>
+</li>
       <li style="margin:10px 0;"><a href="https://mp-rif-online.netlify.app/comojoga" style="color:white; text-decoration:none;">Como Jogar</a></li>
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Ver Saldo</a></li>
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Comprar Créditos</a></li>
@@ -673,6 +675,18 @@ background:lime;
       <button id="cancelarTransferencia">Cancelar</button>
       <button id="confirmarTransferencia">Transferir</button>
     </div>
+  </div>
+</div>
+<!-- Modal Tabela de Prêmios -->
+<div id="tabelaModal" class="modal">
+  <div class="modal-content" style="background:#111; color:white; border-radius:12px; padding:20px; text-align:center;">
+    <span class="closeTabela" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
+    <h3 style="color:gold;">📊 TABELA DE PRÊMIOS</h3>
+    <ul style="list-style:none; padding:0; font-size:16px; text-align:left; line-height:1.8;">
+      <li>✅ Marque 2 → Ganha <b>R$10</b></li>
+      <li>✅ Marque 3 → Ganha <b>R$20</b></li>
+      <li>✅ Marque 4 → Ganha <b>R$30</b></li>
+    </ul>
   </div>
 </div>
 <script type="module">
@@ -806,8 +820,8 @@ function abrirGeladeira(geladeira) {
   let premio = 0;
 
   if (modo === 2) { custo = 2; premio = 10; }
-  if (modo === 3) { custo = 5; premio = 15; }
-  if (modo === 4) { custo = 10; premio = 20; }
+  if (modo === 3) { custo = 5; premio = 20; }
+  if (modo === 4) { custo = 10; premio = 30; }
 
   // precisa ter saldo suficiente
   if (saldoAtual < custo) {
@@ -1131,6 +1145,23 @@ confirmarTransferencia.addEventListener("click", () => {
   setTimeout(()=> msg.textContent = "", 3000);
 
   modalTransferir.style.display = "none";
+});
+// --- Modal da Tabela ---
+const tabelaModal = document.getElementById("tabelaModal");
+const abrirTabela = document.getElementById("abrirTabela");
+const closeTabela = document.querySelector(".closeTabela");
+
+abrirTabela.addEventListener("click", (e) => {
+  e.preventDefault();
+  tabelaModal.style.display = "flex";
+});
+
+closeTabela.addEventListener("click", () => {
+  tabelaModal.style.display = "none";
+});
+
+window.addEventListener("click", (e) => {
+  if (e.target === tabelaModal) tabelaModal.style.display = "none";
 });
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
