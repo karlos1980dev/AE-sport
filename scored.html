@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link rel="shortcut icon" type="image/jpg" href="https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/IMG-20250825-WA0013.jpg">
+    <link rel="icon" href="https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/IMG-20250825-WA0013.jpg" type="image/jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="stylesheet.css" media="screen" />
+<title>ACHOU 1 GANHOU </title>
+<style>
+body{
+margin:0; height:100dvh; display:grid; place-items:center;
+    font-family:system-ui, Arial;
+    background:#0b0b0b; color:#e6e6e6;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  font-family:Arial;
+  
+  transition: background-color 0.5s, color 0.5s;
+  margin:0;
+  padding:10px;
+  
+}
+
+h1{
+  color:#000;
+  text-align:center;
+  font-size:6vw;
+  margin-bottom:10px;
+}
+h3{
+    color:black;
+}
+
+/* Container dos saldos */
+.saldos-container{
+  display:flex;
+  justify-content:space-between;
+  width:90%;
+  width:100%;
+  margin-bottom:10px;
+}
+
+.saldos-container button{
+  flex:1;
+  margin:0 5px;
+  padding:10px;
+  font-size:4vw;
+  font-weight:bold;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+#btnSaldo{background:green;color:white;}
+#btnSaldoGanho{background:orange;color:black;}
+#refreshBtn{background:blue;color:white;}
+
+/* Input e botão liberar crédito */
+.input-container{
+  display:flex;
+  justify-content:center;
+  gap:5px;
+  margin-bottom:10px;
+  flex-wrap:wrap;
+  width:95%;
+  max-width:400px;
+}
+
+.input-container input{
+  flex:1;
+  min-width:150px;
+  padding:10px;
+  font-size:4vw;
+  box-sizing:border-box;
+}
+
+.input-container button{
+  padding:10px;
+  font-size:4vw;
+  min-width:120px;
+}
+
+/* Mensagem */
+#mensagem{
+  font-size:4vw;
+  text-align:center;
+  color:red;
+  min-height:30px;
+  margin-bottom:10px;
+}
+
+/* Geladeiras */
+.geladeiras{
+  display:grid;
+  grid-template-columns:repeat(4,1fr); /* 4 geladeiras por linha */
+  gap:2vw;
+  
+  max-width:100%;
+  margin-bottom:5px;
+}
+.geladeira {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+.geladeira{
+  width:20vw;
+  height:22vw;
+
+  position:relative;
+  
+  background:#a3d5ff;
+  border:3px solid #333;
+  border-radius:5%;
+  cursor:pointer;
+  overflow:hidden;
+  transition:0.3s;
+}
+
+.geladeira.bloqueada{opacity:0.5;pointer-events:none;}
+.porta {
+  position:absolute;
+  width:100%;
+  height:100%;
+  background: #0077cc; /* Cor de fundo da porta */
+  background-image: url("https://raw.githubusercontent.com/karlos1980dev/AE-sport/refs/heads/main/IMG-20250825-WA0026.jpg"); /* Caminho da imagem */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 120%; /* ajusta o tamanho da imagem */
+  
+  transform-origin:left;
+  transition:transform 0.6s ease;
+  z-index:2;
+  backface-visibility:hidden;
+  box-shadow:none;
+}
+
+/* Quando abre, a porta gira e a imagem some junto */
+.geladeira.aberta .porta {
+  transform: rotateY(-120deg);
+  background-image: none; /* esconde a imagem */
+}
+.geladeira.aberta .porta{transform:rotateY(-120deg);}
+.interior{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:#d0f0d0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#333;
+  font-weight:bold;
+  font-size:3.5vw;
+  z-index:1;
+  text-align:center;
+  padding:5px;
+  backface-visibility:hidden;
+  box-shadow:none;
+}
+
+/* Animação pulsar */
+@keyframes pulsar {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.geladeira.premiada { animation: pulsar 0.6s ease-in-out 3; }
+
+/* Modal */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1000; 
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.modal-content input{
+  width: 90%;
+  border-radius:10px;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.modal-buttons{
+  display: flex;
+  width:60%;
+  margin-left:80px;
+  text-align:center;
+  text-item:center;
+  justify-content: space-between;
+}
+
+.modal-buttons button{
+  flex:1;
+  margin:5px;
+  padding:10px;
+  font-size:16px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+#cancelarBtn{background:#ccc; border-radius:20px;}
+#enviarBtn{background:#28a745;color:white;border-radius:20px;}
+
+/* Painel de saques */
+#painelSaques{
+  width:90%;
+  max-width:400px;
+  margin-top:20px;
+  background:white;
+  padding:10px;
+  border-radius:8px;
+}
+
+#painelSaques h3{margin:0 0 10px 0;}
+#painelSaques ul{list-style:none; padding:0; margin:0;}
+#painelSaques li{padding:5px 0; border-bottom:1px solid #ddd;}
+
+/* Modal de compra */
+#pixModal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+#pixModal .modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  width: 300px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.valor-btn {
+  padding: 10px 15px;
+  margin: 5px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.valor-btn:hover { background: #45a049; }
+wrap{ display:flex; flex-direction:column; gap:18px; align-items:center; }
+  .painel{
+    width:100px; height:20px; gap:5px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:3px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.2);
+    font-size:12px; font-weight:700; text-align:center;
+    background:#1a1a1a;
+  }
+  .verde{ color:#18a558; }
+  .vermelho{ color:#e02b2b; }
+  /* Estilo geral para todos os botões */
+button {
+  padding: 10px 14px;           /* menor tamanho */
+  font-size: 14px;             /* fonte menor e legível */
+  font-weight: 600;            /* leve e elegante */
+  border: none;
+  border-radius: 8px;          /* bordas arredondadas suaves */
+  cursor: pointer;
+  transition: all 0.3s ease;   /* animação suave */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23); /* sombra leve realista */
+}
+
+/* Botões de liberar crédito e modais */
+.input-container button, 
+.valor-btn, 
+background:lime;
+.modal-buttons button {
+  padding: 8px 12px;
+  font-size: 14px;
+  
+  border-radius: 8px;
+  font-weight: 600;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23);
+}
+.input-container button:hover,
+.valor-btn:hover,
+.modal-buttons button:hover {
+  transform: translateY(-2px);  /* leve efeito de “levantar” */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+/* Links com botões dentro (ex: PIX) */
+#valoresContainer a button {
+  width: auto;
+  min-width: 80px; /* mais compacto */
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+  #valoresContainer {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 2 por linha */
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .valor-btn {
+    background: linear-gradient(135deg, #a5ff80, #ff9900);
+    border: none;
+    color: blue;
+    font-weight: bold;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 14px;    
+    width: 100%;
+  }
+
+  .valor-btn:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffaa00, #ff6600);
+  }
+#valorCompraInput{
+    width:50%;
+    text-align:center;
+}
+#whatsappInput{
+    text-align:center;
+    width:50%;
+}
+/* Botões Saldo e Comprar */
+.comoJoga,
+#btnSaldo,
+#transferi,
+#btnSaldoGanho,
+#refreshBtn {
+  padding: 5px 8px;              /* bem menores */
+  font-size: 12px;               /* fonte menor */
+  font-weight: 600;
+  border: 2px solid #18a558;     /* borda verde */
+  border-radius: 6px;
+  cursor: pointer;
+  background: #1e1e1e;           /* fundo escuro elegante */
+  color: white;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25); /* sombra realista */
+  min-width: 10%;               /* garante largura mínima */
+}
+
+/* Efeito hover */
+.hamburger,
+#btnSaldo:hover,
+
+#btnSaldoGanho:hover,
+#refreshBtn:hover {
+  background: #18a558;   /* fica verde ao passar o mouse */
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.35);
+}
+#modosJogo {
+  margin: 15px auto;
+  display: flex;
+  justify-content: center;
+  gap: 8px; /* espaço entre botões */
+}
+
+#modosJogo div {
+  display: inline-block;
+}
+
+#modosJogo input[type="radio"] {
+  display: none; /* esconde o padrão */
+}
+
+#modosJogo label {
+  display: inline-block;
+  width: 100px;         /* largura menor */
+  padding: 8px 10px;   /* menos altura */
+  font-size: 13px;     /* texto menor */
+  border: 2px solid #4caf50;
+  border-radius: 15px; /* cantos mais suaves */
+  background: #fff;
+  color: #4caf50;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+#modosJogo input[type="radio"]:checked + label {
+  background: #4caf50;
+  color: #fff;
+  box-shadow: 0 0 6px rgba(76, 175, 80, 0.7);
+}
+.hamburger {
+      padding: 5px 8px;              /* bem menores */
+  font-size: 12px;               /* fonte menor */
+  font-weight: 600;
+  border: 2px solid #18a558;     /* borda verde */
+  border-radius: 6px;
+  cursor: pointer;
+  background: #1e1e1e;           /* fundo escuro elegante */
+  color: white;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25); /* sombra realista */
+  
+    }
+    #menuModal .modal-content {
+  width: 80%;
+  max-width: 300px;
+  border-radius: 12px;
+  padding: 20px;
+  text-align:;
+}
+#menuModal ul li a:hover {
+  color: #18a558;
+}
+/* Menu lateral oculto inicialmente */
+.side-menu {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0; /* começa escondido na esquerda */
+  background-color: #111;
+  overflow-x: hidden;
+  transition: width 0.3s ease; /* transição suave */
+  padding-top: 60px;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.5); /* sombra sutil */
+}
+
+/* Links do menu */
+.side-menu a {
+  padding: 15px 30px;
+  text-decoration: none;
+  font-size: 22px;
+  color: #fff;
+  display: block;
+  transition: color 0.2s;
+}
+
+.side-menu a:hover {
+  color: #18a558;
+}
+
+/* Botão de fechar */
+.side-menu .closeBtn {
+--  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 35px;
+  text-decoration: none;
+  color: #fff;
+}
+
+   .container-principal {
+      border: 4px solid #fff; /* Borda branca */
+      box-shadow: 4px 4px 20px rgba(0,0,0,0.7);
+      width: 100%;
+  
+      animation: pulsarBorda 2s infinite ease-in-out;
+      border-radius: 10px; /* Bordas arredondadas */
+      padding: 10px 10px; /* Espaço interno */
+      
+       /* Centraliza na tela */
+      background-color: #525252f9; /* Fundo escuro para destacar */
+      max-width: 900px; /* Limita a largura */
+      max-height:none;
+    }
+    #modalTransferir .modal-content {
+  background: #fff;
+  color: #000;
+  width: 90%;
+  max-width: 300px;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+#valorTransferir {
+  width: 80%;
+  padding: 8px;
+  font-size: 16px;
+  margin: 10px 0;
+  border: 2px solid #18a558;
+  border-radius: 6px;
+  text-align: center;
+}
+/* Ajuste para telas pequenas (celulares) */
+@media (max-width: 500px) {
+  .container-principal {
+    padding: 10px 5px;
+    border-width: 2px;
+    max-height: none;  /* 🔥 evita esmagar as geladeiras */
+  }
+
+  .geladeiras {
+    grid-template-columns: repeat(4, 1fr); /* só 2 por linha no celular */
+    gap: 4px;
+  }
+
+  .geladeira {
+    width: 20vw;
+    height: 22vw;
+    
+  }
+}
+/* animação da borda pulsante */
+@keyframes pulsarBorda {
+  0% {
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
+  }
+  50% {
+    border-color: #18a558;
+    box-shadow: 0 0 25px #18a558, 0 0 40px #18a558;
+  }
+  100% {
+    border-color: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
+  }
+}
+/* Botões de liberar crédito e modais */
+.input-container button, 
+.valor-btn, 
+.modal-buttons button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  background: lime;   /* aqui sim */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23);
+}
+
+</style></head><body>
+<div class="container-principal">
+<!-- Modal info usuário -->
+<div id="infoModal" class="modal">
+  <div style="background:grey;color:white;" class="modal-content">
+    <h3>INFORME WHATSAPP </h3>
+    <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp">
+    <div class="modal-buttons">
+      <button style="background:red;width:10px;" id="cancelarInfoBtn">Cancelar</button>
+      <button style="background:#55c1ff;" id="confirmarInfoBtn">Confirmar</button>
+      
+    </div>
+  </div>
+</div>
+
+
+<div id="pixModal" class="modal">
+  <div class="modal-content">
+    <span class="closePix" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
+    <h3 style="color:gold;">Selecione o valor</h3>
+    
+    <!-- Botões de valor -->
+    
+    <div id="valoresContainer"><a href="https://pixplay.netlify.app/pagamento"><button class="valor-btn" data-valor="2">01 JOGADA R$ 2.00</button></a><a href="https://pixplay.netlify.app/pagementos2codigo"><button class="valor-btn" data-valor="4">02 JOGADA R$ 4.00</button></a><a href="https://pixplay.netlify.app/pg3codigo"><button class="valor-btn" data-valor="6">03 JOGADA R$ 6.00</button></a><a href="https://pixplay.netlify.app/pg4codigo"><button class="valor-btn" data-valor="8">04 JOGADA R$ 8.00</button></a><a href="https://pixplay.netlify.app/pg5codigo"><button class="valor-btn" data-valor="10">05 JOGADA R$ 10.00</button></a><a href="https://mp-rif-online.netlify.app/codigo6"><button class="valor-btn" data-valor="12">06 JOGADA R$ 12.00</button></a><a href="https://mp-rif-online.netlify.app/codigo7"><button class="valor-btn" data-valor="14">07 JOGADA R$ 14.00</button></a><a href="https://mpago.la/1BAJDHP"><button class="valor-btn" data-valor="16">08 JOGADA R$ 16.00</button></a><a href="https://mpago.la/1crbp6X"><button class="valor-btn" data-valor="18">09 JOGADA R$ 18.00</button></a><a href="https://mpago.la/3417LdJ"><button class="valor-btn" data-valor="20">10 JOGADA R$ 20.00</button></a><a style="width:90%;" href="link.mercadopago.com.br/newtechiptv"><button style="width:90%;" class="valor-btn" data-valor="20">OUTRO VALORES</button></a>
+    </div>    
+  </div>
+</div>
+ 
+<!-- Input de código -->
+<div class="input-container">
+  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
+  <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button><div id="compartilharIndicacao" style="display:none; margin-top: 10px;">
+  <input type="hidden" id="linkIndicacaoInput" readonly style="width:100%; padding:5px;" />
+  <button id="btnCompartilharWhats">COMPARTILHAR e GANHAR ATE R$ 100 POR INDICACAO</button>
+</div>
+</div>
+
+<div class="saldos-container">
+    <div class="hamburger" id="hamburger">☰ <br>Menu</div>
+    <button id="refreshBtn">COMPRAR ACESSO</button>
+    <button id="btnSaldo">Saldo Atua 0</button>
+  <button id="transferi"> <i class="fa fa-exchange"></i></button>
+    <button id="btnSaldoGanho">Saldo/Saque Ganhou 0</button>  
+</div>
+
+<div class="wrap" style="width:100%;">
+  <div class="painel" style="display:flex; align-items:center; justify-content:space-between;background:#222;padding:10px; border-radius:5px;color:white; font-weight:bold; width:90%; margin:5px;">
+    
+    <!-- Esquerda -->
+    <div style="display:flex; align-items:center; gap:5px;">
+      <label>ONLINE</label>
+      <span class="verde" id="valor" style="color:lime;">108</span>
+      <span class="vermelho" style="color:white;">/</span><span style="color:red;"> 500</span>
+    </div>
+
+    <!-- Direita -->
+    <p id="mensagem" style="margin:0; color:yellow; display:flex; align-items:center;">ACHOU GANHOU</p>
+
+  </div>
+</div>
+
+
+<div id="modosJogo">
+  <input type="radio" name="modo" id="modo2" value="2" checked>
+  <label for="modo2">Marcar 2 custa 2</label>
+
+  <input type="radio" name="modo" id="modo3" value="3">
+  <label for="modo3">Marcar 3 (R$5)</label>
+
+  <input type="radio" name="modo" id="modo4" value="4">
+  <label for="modo4">Marcar 4 (R$10)</label>
+</div>
+<!-- Geladeiras -->
+<div class="geladeiras">
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 1</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 2</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 3</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 4</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 5</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 6</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 7</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 8</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 9</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 10</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 11</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 12</div></div>
+    <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 13</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 14</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 15</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 16</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 17</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 18</div></div>
+  <div class="geladeira" onclick="abrirGeladeira(this)">
+  <div class="porta"></div>
+  <div class="interior">Geladeira 19</div>
+</div>
+  <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 20</div></div>
+ 
+</div>
+
+<!-- Modal de saque -->
+<div id="modalSaque" class="modal">
+  <div class="modal-content">
+    <h2 style="color:Black;">SOLICITA SAQUE VIA PIX</h2>
+    <input type="text" id="nomeInput" placeholder="Digite seu nome">
+    <input type="text" id="pixInput" placeholder="Digite seu Pix">
+    <input type="number" id="valorInput" placeholder="Digite o valor R$" readonly>
+    <div class="modal-buttons">
+      <button id="cancelarBtn">Cancelar</button>
+      <button id="enviarBtn">Enviar</button>
+    </div>
+  </div>
+</div>
+<!-- Modal Menu Hambúrguer -->
+<div id="menuModal" class="modal">
+  <div class="modal-content" style="background:#111;color:white;">
+    <span class="closeMenu" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
+    <h3>MENU</h3>
+    <ul style="list-style:none; padding:0; text-align:left;">
+        <li style="margin:10px 0;">
+  <a href="#" id="abrirTabela" style="color:white; text-decoration:none;">📊 TABELA DE PRÊMIOS</a>
+</li>
+      <li style="margin:10px 0;"><a href="https://mp-rif-online.netlify.app/comojoga" style="color:white; text-decoration:none;">Como Jogar</a></li>
+      <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Ver Saldo</a></li>
+      <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Comprar Créditos</a></li>
+      <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Contato / Suporte</a></li>
+      <l><a href="https://wa.me/5571992290058?text=🎟️%20Seu%20ticket%20tá%20quase%20liberado!%0A%0A👉%20Depois%20do%20pagamento,%20manda%20o%20comprovante%20aqui.%0A%0A💳%20Para%20pagar%20use%20o%20Mercado%20Pago:%0A🌐%20link.mercadopago.com.br/newtechiptv">CONTATO</a></l>
+    </ul>
+  </div>
+</div>
+</div>
+<!-- Modal de Transferência -->
+<div id="modalTransferir" class="modal">
+  <div class="modal-content">
+    <h2>Transferir </br>SALDO ganhou para SALDO Atual</h2>
+    <p>Saldo disponível: <b id="saldoDisponivel">0</b></p>
+    <input type="number" id="valorTransferir" placeholder="Digite valor R$" min="1">
+    <div class="modal-buttons">
+      <button id="cancelarTransferencia">Cancelar</button>
+      <button id="confirmarTransferencia">Transferir</button>
+    </div>
+  </div>
+</div>
+<!-- Modal Tabela de Prêmios -->
+<div id="tabelaModal" class="modal">
+  <div class="modal-content" style="background:#111; color:white; border-radius:12px; padding:20px; text-align:center;">
+    <span class="closeTabela" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
+    <h3 style="color:gold;">📊 TABELA DE PRÊMIOS</h3>
+    <ul style="list-style:none; padding:0; font-size:16px; text-align:left; line-height:1.8;">
+      <li>✅ Marque 2  → Custa R$ 2.00 → Ganha <b>R$10</b></li>
+      <li>✅ Marque 3 → Custa R$ 5.00 →  Ganha <b>R$20</b></li>
+      <li>✅ Marque 4 → Custa R$ 10.00 → Ganha →  <b>R$30</b></li>
+    </ul>
+  </div>
+  
+</div>
+
+<script type="module">
+// --- Firebase ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, push, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
+  authDomain: "geladeira-58de2.firebaseapp.com",
+  databaseURL: "https://geladeira-58de2-default-rtdb.firebaseio.com",
+  projectId: "geladeira-58de2",
+  storageBucket: "geladeira-58de2.firebasestorage.app",
+  messagingSenderId: "823625324816",
+  appId: "1:823625324816:web:7c8a19cabd6461ff666d95",
+  measurementId: "G-W547T81JCQ"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// --- Elementos DOM ---
+const msg = document.getElementById("mensagem");
+const btnSaldo = document.getElementById("btnSaldo");
+const btnSaldoGanho = document.getElementById("btnSaldoGanho");
+const modalSaque = document.getElementById("modalSaque");
+const cancelarBtn = document.getElementById("cancelarBtn");
+const enviarBtn = document.getElementById("enviarBtn");
+const valorInput = document.getElementById("valorInput");
+const nomeInput = document.getElementById("nomeInput");
+const pixInput = document.getElementById("pixInput");
+const listaSaques = document.getElementById("painelSaques") || document.createElement("ul");
+const btnCompra = document.getElementById('refreshBtn');
+const pixModal = document.getElementById('pixModal');
+const closePix = document.querySelector('.closePix');
+const valorBtns = document.querySelectorAll('.valor-btn');
+const whatsappInput = document.getElementById('whatsappInput');
+const infoModal = document.getElementById("infoModal");
+const cancelarInfoBtn = document.getElementById("cancelarInfoBtn");
+const confirmarInfoBtn = document.getElementById("confirmarInfoBtn");
+const hamburger = document.getElementById('hamburger');
+const menuModal = document.getElementById('menuModal');
+const closeMenu = document.querySelector('.closeMenu');
+const tabelaModal = document.getElementById("tabelaModal");
+const abrirTabela = document.getElementById("abrirTabela");
+const closeTabela = document.querySelector(".closeTabela");
+const transferirBtn = document.querySelector(".saldos-container button:nth-child(4)");
+const modalTransferir = document.getElementById("modalTransferir");
+const cancelarTransferencia = document.getElementById("cancelarTransferencia");
+const confirmarTransferencia = document.getElementById("confirmarTransferencia");
+const valorTransferirInput = document.getElementById("valorTransferir");
+const saldoDisponivel = document.getElementById("saldoDisponivel");
+const inputValor = document.getElementById('valorInput');
+
+  
+
+
+
+
+const valorButtons = document.querySelectorAll(".valor-btn");
+
+let linkSelecionado = ""; // armazena o link do botão clicado
+
+// Ao clicar em qualquer botão de valor
+valorButtons.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault(); // evita que o <a> abra direto
+        linkSelecionado = btn.parentElement.getAttribute("href"); // pega o href do <a>
+        infoModal.style.display = "block"; // abre o modal do WhatsApp
+    });
+});
+
+// Botão confirmar no modal de WhatsApp
+confirmarInfoBtn.addEventListener("click", () => {
+    const whatsapp = whatsappInput.value.trim();
+    if (!whatsapp) {
+        
+        return;
+    }
+    infoModal.style.display = "none"; // fecha o modal
+    if (linkSelecionado) {
+        window.location.href = linkSelecionado; // abre o link do botão
+        linkSelecionado = ""; // reseta
+    }
+});
+
+// Botão cancelar
+cancelarInfoBtn.addEventListener("click", () => {
+    infoModal.style.display = "none";
+    linkSelecionado = "";
+});
+// Função para abrir o modal e preencher o valor
+function abrirModalComValor(valor) {
+    inputValor.value = valor; // coloca o valor no input
+    modalSaque.style.display = 'flex'; // mostra o modal
+}
+
+// Fecha o modal ao clicar no botão cancelar
+cancelarBtn.addEventListener('click', () => {
+    modalSaque.style.display = 'none';
+});
+
+// Aguarda o DOM carregar
+document.addEventListener('DOMContentLoaded', () => {
+    // Seleciona todos os botões de saldo ganho
+    document.querySelectorAll('.btnSaldoGanhou').forEach(botao => {
+        botao.addEventListener('click', (e) => {
+            const valor = e.currentTarget.getAttribute('data-saldo'); // pega valor do data-saldo
+            if (valor) {
+                abrirModalComValor(valor);
+            } else {
+                console.warn('O botão não possui data-saldo!');
+            }
+        });
+    });
+});
+// Seleciona todos os botões que vão abrir links
+const linkButtons = document.querySelectorAll(".abrir-link-btn");
+
+linkButtons.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault(); // previne comportamento padrão se for <a>
+
+        const link = btn.getAttribute("data-link"); // pegando o link do botão
+        if (!link) return;
+
+        // Fecha o modal
+        infoModal.style.display = "none";
+
+        // Abre o link
+        window.location.href = link;
+    });
+});
+// --- Variáveis ---
+let saldoAtual = Number(localStorage.getItem("saldoAtual")) || 0;
+let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
+let jogando = false;
+let efeitoAutomatico = null;
+let escolhas = [];
+
+// --- Mapear códigos de prêmio ---
+const codigosPremios = {
+  500:["1408192606003783805"],
+  50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
+  40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
+  30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
+  20:["446224299","394127635","812879695","960907900","491988844","249227980","956544658","349657657","840757998","217686049"],
+  10:["691539989","811999998","108784815","313505598","806528891","366228474","716094153","592329854","846668855","504376967"],
+  9:["874016500","621216610","336090028","485980154","635598519","286682713","732880862","195658863","653677587","129458884"],
+  8:["956535448","003496557","840776998","217612049","739668764","466345912","189763211","112967891","904432227","595665575"],
+  7:["673207856","209122885","487021874","337834017","596597699","387881987","978833854","699939985","767384775","560098454"],
+  6:["673275056","209651885","487029814","337808817","596587999","367871987","309878265","317746673","507846877","999297604"],
+  5:["986476585","443438755","978638854","699975985","767388775","005600454","647728865","878863674","441365795","965878854"],
+  4:["109613223","899876852","755228448","960976264","216594314","919098432","284337447","101697666","702397611"],
+  3:["309821965","317663273","507683477","929766404","446224552","394128835","887963495","960901270","491987744","249212270"],
+  2:["647720985","878867472","441379895","987877854","691997689","811977998","108488515","313503398","806521291","366222274"],
+  1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"]
+
+};
+
+// --- Funções auxiliares ---
+// --- Atualizar valores na interface ---
+function atualizarSaldos(){
+    btnSaldo.textContent = `Saldo Atual ${saldoAtual}`;
+    btnSaldoGanho.textContent = `Saldo/Saque Ganhou ${saldoGanho}`;
+    saldoDisponivel.textContent = saldoGanho;
+    localStorage.setItem("saldoAtual", saldoAtual);
+    localStorage.setItem("saldoGanho", saldoGanho);
+}
+
+// --- Modais info ---
+cancelarInfoBtn.onclick = () => infoModal.style.display="none";
+confirmarInfoBtn.onclick = () => {
+    const whatsapp = whatsappInput.value.trim();
+    if(!whatsapp) { alert("Digite seu WhatsApp"); return; }
+    infoModal.style.display="none";
+    // Exibir campo de compartilhamento
+    document.getElementById('compartilharIndicacao').style.display="block";
+    document.getElementById('linkIndicacaoInput').value = `https://mp-rif-online.netlify.app/achou1ganhou/?ref=${whatsapp}`;
+};
+
+// --- Modal PIX ---
+btnCompra.onclick = ()=> pixModal.style.display="flex";
+closePix.onclick = ()=> pixModal.style.display="none";
+valorBtns.forEach(btn => {
+    btn.onclick = (e)=>{
+        e.preventDefault();
+        alert(`Aguandando Pagamento R$ ${btn.dataset.valor} .00`);
+        pixModal.style.display="none";
+    }
+});
+
+// --- Menu Hambúrguer ---
+hamburger.onclick = ()=> menuModal.style.display="flex";
+closeMenu.onclick = ()=> menuModal.style.display="none";
+
+// --- Modal Tabela ---
+abrirTabela.onclick = ()=> tabelaModal.style.display="flex";
+closeTabela.onclick = ()=> tabelaModal.style.display="none";
+
+// --- Modal Transferir ---
+
+
+// --- Modal Saque ---
+btnSaldoGanho.onclick = ()=> modalSaque.style.display="flex";
+cancelarBtn.onclick = ()=> modalSaque.style.display="none";
+enviarBtn.onclick = ()=>{
+    const nome = nomeInput.value.trim();
+    const pix = pixInput.value.trim();
+    const valor = saldoGanho;
+    if(!nome || !pix || valor<=0){
+        alert("Preencha todos os campos corretamente");
+        return;
+    }
+    // Salvar no Firebase
+    const saqueRef = push(ref(db,'saques'));
+    set(saqueRef,{
+        nome, pix, valor, data: Date.now()
+    });
+    saldoGanho = 0;
+    atualizarSaldos();
+    modalSaque.style.display="none";
+    nomeInput.value = pixInput.value = "";
+};
+
+
+// --- Registrar Compra ---
+
+function registrarCompra(whatsapp, valor) {
+  const transacaoRef = push(ref(db, 'saques')); // 📌 mesmo caminho do saque
+  set(transacaoRef, {
+    tipo: "compra",   // 🔑 identifica que é uma compra
+    whatsapp: whatsapp,
+    valor: valor,
+    data: Date.now()
+  }).then(() => {
+    console.log("Compra registrada com sucesso!");
+  }).catch((err) => {
+    console.error("Erro ao registrar compra:", err);
+  });
+}
+
+function solicitarSaque(nome, pix, whatsapp, valor) {
+  const transacaoRef = push(ref(db, 'saques')); // 📌 mesmo caminho
+  set(transacaoRef, {
+    tipo: "saque",    // 🔑 identifica que é um saque
+    nome: nome,
+    pix: pix,
+    whatsapp: whatsapp,
+    valor: valor,
+    data: Date.now()
+  }).then(() => {
+    saldoGanho = 0;
+    atualizarSaldos();
+    modalSaque.style.display = "none";
+    nomeInput.value = "";
+    pixInput.value = "";
+  }).catch((err) => {
+    console.error("Erro ao salvar saque:", err);
+  });
+}
+
+// --- Créditos via ticket ---
+function liberarCredito(){
+  const input = document.getElementById("codigo").value.toUpperCase().trim();
+  let usados = JSON.parse(localStorage.getItem("codigosUsados"))||[];
+  if(!input){ msg.textContent="Digite um ticket!"; return; }
+  if(usados.includes(input)){ msg.textContent="Ticket já usado!"; return; }
+  let valor=null;
+  for(const key in codigosPremios){
+    if(codigosPremios[key].includes(input)){ valor=Number(key); break; }
+  }
+  if(valor===null){ msg.textContent="Ticket inválido!"; return; }
+  saldoAtual += valor;
+  usados.push(input);
+  localStorage.setItem("codigosUsados", JSON.stringify(usados));
+  msg.textContent=`Crédito de R$${valor} liberado!`;
+  document.getElementById("codigo").value='';
+  atualizarSaldos();
+  setTimeout(()=>{msg.textContent='';},3000);
+}
+
+// --- Geladeiras ---
+function abrirGeladeira(geladeira) {
+
+  const geladeiras = document.querySelectorAll(".geladeira");
+  const index = Array.from(geladeiras).indexOf(geladeira);
+
+  // verifica modo selecionado
+  const modo = Number(document.querySelector('input[name="modo"]:checked').value);
+  let custo = 0;
+  let premio = 0;
+
+  if (modo === 2) { custo = 2; premio = 10; }
+  if (modo === 3) { custo = 5; premio = 20; }
+  if (modo === 4) { custo = 10; premio = 30; }
+
+  // precisa ter saldo suficiente
+  if (saldoAtual < custo) {
+    msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
+    return;
+  }
+  if (jogando) return;
+
+  // Se já escolheu essa, ignora
+  if (escolhas.includes(index)) return;
+
+  // Marca escolha (sem descontar ainda)
+  escolhas.push(index);
+  geladeira.classList.add("aberta");
+  geladeira.querySelector(".interior").textContent = "✅ Marcada";
+// Trava os rádios ao marcar a primeira geladeira
+document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
+  // Só continua quando atingir o limite do modo
+  if (escolhas.length < modo) return;
+
+  // Cobra saldo de acordo com o modo
+  saldoAtual -= custo;
+  atualizarSaldos();
+  jogando = true;
+
+  // Sorteia onde está o brinde
+  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+
+  // Revela as escolhidas
+  escolhas.forEach(idx => {
+    const g = geladeiras[idx];
+    const interior = g.querySelector(".interior");
+    if (idx === brindeIndex) {
+      interior.textContent = `🎁 Você Ganhou R$${premio}!`;
+      g.classList.add("premiada");
+      saldoGanho += premio;
+    } else {
+      interior.textContent = "❌ Errou!";
+    }
+  });
+
+  // Se nenhuma escolhida foi premiada → mostrar onde estava
+  if (!escolhas.includes(brindeIndex)) {
+    const geladeiraPremiada = geladeiras[brindeIndex];
+    const interiorPremiada = geladeiraPremiada.querySelector(".interior");
+    setTimeout(() => {
+      geladeiraPremiada.classList.add("aberta", "premiada");
+      interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
+      setTimeout(() => {
+        geladeiraPremiada.classList.remove("aberta", "premiada");
+        interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
+      }, 1500);
+    }, 800);
+  }
+// Resetar rodada
+setTimeout(() => {
+  escolhas.forEach(idx => {
+    const g = geladeiras[idx];
+    g.classList.remove("aberta", "premiada");
+    g.querySelector(".interior").textContent = `Geladeira ${idx+1}`;
+  });
+  escolhas = [];
+  jogando = false;
+
+  // Reabilita os rádios
+  document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
+
+  msg.textContent = saldoAtual >= 2 ? "Pode jogar de novo!" : "Saldo insuficiente!";
+  atualizarSaldos();
+}, 2200);
+}  
+// --- Efeito automático ---
+function iniciarEfeitoAutomatico(){
+  if(efeitoAutomatico) return;
+  efeitoAutomatico=setInterval(()=>{
+    if(saldoAtual>=2) return;
+    const geladeiras=document.querySelectorAll(".geladeira");
+    const idx=Math.floor(Math.random()*geladeiras.length);
+    const g=geladeiras[idx];
+    const interior=g.querySelector(".interior");
+    if(!g.classList.contains("aberta")){
+      g.classList.add("aberta");
+      interior.textContent="👀";
+      setTimeout(()=>{
+        g.classList.remove("aberta");
+        interior.textContent=`Geladeira ${idx+1}`;
+      },800);
+    }
+  },1500);
+}
+const geladeiras = document.querySelectorAll('.geladeira');
+const indiceBrinde = Math.floor(Math.random() * geladeiras.length);
+geladeiras[indiceBrinde].dataset.temBrinde = "true";
+
+let jaSelecionou = false; // impede múltiplos cliques
+
+geladeiras.forEach(geladeira => {
+    geladeira.addEventListener('click', () => {
+        if (jaSelecionou) return; // já selecionou, bloqueia
+        jaSelecionou = true;
+
+        geladeira.classList.add('aberta');
+
+        if (geladeira.dataset.temBrinde === "true") {
+            geladeira.querySelector('.interior').innerHTML = "🎁 Você ganhou!";
+        } else {
+            geladeira.querySelector('.interior').innerHTML = "❌ Vazio";
+
+            // mostra onde estava o brinde
+            geladeiras.forEach(g => {
+                if (g.dataset.temBrinde === "true") {
+                    g.querySelector('.interior').innerHTML = "🎁 Tava aqui!";
+                    g.classList.add('premiada');
+                }
+            });
+        }
+    });
+});
+function pararEfeitoAutomatico(){
+  if(efeitoAutomatico){ clearInterval(efeitoAutomatico); efeitoAutomatico=null; }
+}
+
+// --- PIX / Compra ---
+// --- Abrir modal PIX ---
+btnCompra.addEventListener('click', () => {
+  pixModal.style.display = 'flex';
+});
+
+// --- Fechar modal PIX ---
+closePix.addEventListener('click', () => {
+  pixModal.style.display = 'none';
+});
+
+// --- Clicar em valor do PIX ---
+valorBtns.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const valorSelecionado = Number(btn.dataset.valor);
+
+    // Salvar valor temporário
+    localStorage.setItem("valorSelecionado", valorSelecionado);
+
+    // Fecha modal PIX e abre modal WhatsApp
+    pixModal.style.display = 'none';
+    infoModal.style.display = 'flex';
+  });
+});
+
+// --- Fechar modal WhatsApp ---
+cancelarInfoBtn.addEventListener('click', () => {
+  infoModal.style.display = 'none';
+  whatsappInput.value = '';
+});
+
+// --- Confirmar WhatsApp ---
+confirmarInfoBtn.addEventListener("click", () => {
+  const whatsapp = whatsappInput.value.trim();
+  const valor = Number(localStorage.getItem("valorSelecionado"));
+  if (!whatsapp) { alert("Informe seu WhatsApp!"); return; }
+
+  // Registrar usuário e compra
+  let meuCodigo = localStorage.getItem("meuCodigo");
+  if (!meuCodigo) {
+    registrarUsuario("Jogador", whatsapp);
+    meuCodigo = localStorage.getItem("meuCodigo");
+  }
+  
+  // Registrar compra no Firebase
+  registrarCompra(whatsapp, valor);
+
+  // Mostrar link de indicação
+  const linkIndicacao = `https://mp-rif-online.netlify.app/achou1ganhou/?ref=${meuCodigo}`;
+  alert(`✅ Compra de R$${valor} realizada com sucesso!\n\nCompartilhe seu link de indicação:\n${linkIndicacao}`);
+
+  // Fechar modal
+  infoModal.style.display = 'none';
+  whatsappInput.value = '';
+});
+// --- Menu / Tabela ---
+hamburger.addEventListener('click',()=>{menuModal.style.display='flex';});
+closeMenu.addEventListener('click',()=>{menuModal.style.display='none';});
+window.addEventListener('click',(e)=>{if(e.target===menuModal) menuModal.style.display='none';});
+abrirTabela.addEventListener('click',(e)=>{e.preventDefault(); tabelaModal.style.display='flex';});
+closeTabela.addEventListener('click',()=>{tabelaModal.style.display='none';});
+window.addEventListener('click',(e)=>{if(e.target===tabelaModal) tabelaModal.style.display='none';});
+
+// --- Inicialização ---
+document.querySelectorAll(".geladeira").forEach(g=>g.addEventListener("click",()=>abrirGeladeira(g)));
+atualizarSaldos();
+iniciarEfeitoAutomatico();
+
+// --- Cor de fundo aleatória ---
+function gerarCorAleatoria(){ const letras='0123456789ABCDEF'; let cor='#'; for(let i=0;i<6;i++) cor+=letras[Math.floor(Math.random()*16)]; return cor; }
+function hexParaRGB(hex){ return {r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16)};}
+function aplicarCorFundo(){ const cor=gerarCorAleatoria(); document.body.style.backgroundColor=cor; const rgb=hexParaRGB(cor); const brilho=0.299*rgb.r+0.587*rgb.g+0.114*rgb.b; document.body.style.color=brilho<128?'#FFF':'#000'; }
+aplicarCorFundo();
+
+// --- WhatsApp Mask ---
+whatsappInput.addEventListener("input",function(e){
+  let valor=e.target.value.replace(/\D/g,'');
+  if(valor.length>11) valor=valor.substring(0,11);
+  if(valor.length<=10) valor=valor.replace(/^(\d{2})(\d{4})(\d{0,4})/,"($1) $2-$3");
+  else valor=valor.replace(/^(\d{2})(\d{5})(\d{0,4})/,"($1) $2-$3");
+  e.target.value=valor;
+});
+
+// --- Expor funções globalmente ---
+window.liberarCredito=liberarCredito;
+window.abrirGeladeira=abrirGeladeira;
+// Função para mostrar o input de compartilhamento
+function mostrarLinkIndicacao(codigo) {
+
+  const link = `https://mp-rif-online.netlify.app/achou1ganhou/?ref=${codigo}`;
+  const divCompartilhar = document.getElementById("compartilharIndicacao");
+  const inputLink = document.getElementById("linkIndicacaoInput");
+  inputLink.value = link;
+  divCompartilhar.style.display = "flex";
+}
+
+// Evento do botão compartilhar
+document.getElementById("btnCompartilharWhats").addEventListener("click", () => {
+  const link = document.getElementById("linkIndicacaoInput").value;
+  const mensagem = encodeURIComponent(`Confira meu link de indicação: ${link}`);
+  const whatsappURL = `https://wa.me/?text=${mensagem}`;
+  window.open(whatsappURL, "_blank");
+});
+
+// --- Exemplo de uso após registrar usuário ---
+const meuCodigo = localStorage.getItem("meuCodigo");
+if (meuCodigo) {
+  mostrarLinkIndicacao(meuCodigo);
+}
+transferirBtn.addEventListener("click", (e) => {
+    e.preventDefault(); // evita comportamento padrão
+
+    // Checa saldo ganho
+    if (saldoGanho > 0) {
+        // Só abre o modal se houver saldo
+        modalTransferir.style.display = "flex";
+        valorTransferirInput.value = saldoGanho; // opcional: preenche o input com o saldo
+    } else {
+        // Se não tiver saldo, alerta e garante que o modal não abra
+        alert("Você não possui saldo ganho para transferir!");
+        modalTransferir.style.display = "none";
+    }
+});
+const DENOMINADOR = 500;
+  const randi = (max) => Math.floor(Math.random() * (max + 1));
+
+  // sorteia o valor verde
+  const sorteado = randi(DENOMINADOR);
+  
+  document.getElementById('valor').textContent = sorteado;
+cancelarTransferencia.addEventListener("click", () => {
+  modalTransferir.style.display = "none";
+});
+
+confirmarTransferencia.addEventListener("click", () => {
+  const valor = Number(valorTransferirInput.value);
+  if(valor <= 0 || valor > saldoGanho){
+      alert("Valor inválido!");
+      return;
+  }
+  saldoGanho -= valor;
+  saldoAtual += valor;
+  atualizarSaldos();
+  valorTransferirInput.value = "";
+  modalTransferir.style.display = "none";
+});
+
+// Função para abrir o modal de transferência com valor atualizado
+// Função para abrir o modal de transferência
+function abrirModalTransferencia() {
+    if (saldoGanho > 0) {
+        // Preenche o input com o saldo ganho atual
+        valorTransferirInput.value = saldoGanho.toFixed(2);
+        // Mostra o modal
+        modalTransferir.style.display = "flex";
+    } else {
+        alert("Você não possui saldo ganho para transferir!");
+    }
+}
+
+// Evento do botão Transferir
+
+
+// Cancelar transferência
+cancelarTransferencia.addEventListener("click", () => {
+    modalTransferir.style.display = "none";
+});
+btnSaldoGanho.addEventListener('click', () => {
+    if(saldoGanho > 0){
+        abrirModalComValor(saldoGanho); // coloca o valor no input
+    } else {
+        alert("Você não tem saldo disponível para saque!");
+    }
+});
+
+function processarSaque() {
+    const valorInput = document.getElementById("valorInput");
+    const nomeInput = document.getElementById("nomeInput");
+    const pixInput = document.getElementById("pixInput");
+
+    const valor = Number(valorInput.value);
+
+    if (valor > 0 && saldoGanhou >= valor) {
+        saldoAtual += valor;
+        saldoGanhou -= valor;
+        alert("Saque realizado com sucesso!");
+
+        // Limpar os inputs
+        nomeInput.value = "";
+        pixInput.value = "";
+        valorInput.value = ""; // Limpa o valor do saque
+    } else {
+        alert("Saldo insuficiente!");
+  }
+}
+valorBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const link = btn.getAttribute('data-link');
+        if(link) {
+            window.location.href = link;
+        }
+    });
+});
+// Pix Modal
+closePix.addEventListener("click", () => pixModal.style.display = "none");
+
+// Menu
+hamburger.addEventListener("click", () => menuModal.style.display = "flex");
+closeMenu.addEventListener("click", () => menuModal.style.display = "none");
+
+// Tabela de Prêmios
+abrirTabela.addEventListener("click", () => tabelaModal.style.display = "flex");
+closeTabela.addEventListener("click", () => tabelaModal.style.display = "none");
+
+// Modal info WhatsApp
+confirmarInfoBtn.addEventListener("click", () => {
+  const whatsapp = whatsappInput.value.trim();
+  if (whatsapp) {
+    localStorage.setItem("whatsapp", whatsapp);
+    infoModal.style.display = "none";
+  } else alert("Digite um WhatsApp válido!");
+});
+cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none");
+
+</script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+</body>
+</html>
