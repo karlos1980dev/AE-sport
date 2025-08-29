@@ -593,11 +593,14 @@ background:lime;
  
 <!-- Input de código -->
 <div class="input-container">
-  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
-  <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button><div id="compartilharIndicacao" style="width:100%;font-size:8px; text-align:right;margin-top: 10px;height:35px; margin:10px;">
+    <div id="compartilharIndicacao" style="width:100%;font-size:8px; text-align:right;margin-top: 10px;height:35px; margin:10px;">
   <input type="hidden" id="linkIndicacaoInput" readonly style="width:1%; padding:5px;" />
   <button id="btnCompartilharWhats">COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO</button>
 </div>
+  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
+  <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button>
+  
+  
 </div>
 
 <div class="saldos-container">
@@ -721,23 +724,23 @@ background:lime;
 </div>
 
 <script type="module">
-// --- Firebase ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, set, push, update, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
-  authDomain: "geladeira-58de2.firebaseapp.com",
-  databaseURL: "https://geladeira-58de2-default-rtdb.firebaseio.com",
-  projectId: "geladeira-58de2",
-  storageBucket: "geladeira-58de2.firebasestorage.app",
-  messagingSenderId: "823625324816",
-  appId: "1:823625324816:web:7c8a19cabd6461ff666d95",
-  measurementId: "G-W547T81JCQ"
-};
+  // Configuração Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
+    authDomain: "geladeira-58de2.firebaseapp.com",
+    databaseURL: "https://geladeira-58de2-default-rtdb.firebaseio.com",
+    projectId: "geladeira-58de2",
+    storageBucket: "geladeira-58de2.firebasestorage.app",
+    messagingSenderId: "823625324816",
+    appId: "1:823625324816:web:7c8a19cabd6461ff666d95",
+    measurementId: "G-W547T81JCQ"
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
 // --- Elementos DOM ---
 const msg = document.getElementById("mensagem");
@@ -771,7 +774,52 @@ const confirmarTransferencia = document.getElementById("confirmarTransferencia")
 const valorTransferirInput = document.getElementById("valorTransferir");
 const saldoDisponivel = document.getElementById("saldoDisponivel");
 const inputValor = document.getElementById('valorInput');
+// Referências do Firebase
+const saquesRef = ref(db, "saques");
 
+
+
+// Abrir modal
+btnCompra.addEventListener("click", () => {
+  infoModal.style.display = "flex";
+});
+
+// Cancelar modal
+cancelarInfoBtn.addEventListener("click", () => {
+  infoModal.style.display = "none";
+  whatsappInput.value = "";
+  
+});
+
+// Confirmar compra
+confirmarInfoBtn.addEventListener("click", () => {
+  const whatsapp = whatsappInput.value.trim();
+  
+
+  if (!whatsapp || isNaN(valor) || valor <= 0) {
+    alert("Preencha WhatsApp e valor corretamente!");
+    return;
+  }
+
+  // Salvar no Firebase
+  const novoRef = push(saquesRef);
+  set(novoRef, {
+    nome: "Compra",
+    pix: "-",
+    valor: 0,
+    whatsapp: whatsapp,
+    valorCompra: valor,
+    data: Date.now()
+  }).then(() => {
+    alert("Compra registrada com sucesso!");
+    infoModal.style.display = "none";
+    whatsappInput.value = "";
+    valorCompraInput.value = "";
+  }).catch(err => {
+    console.error("Erro ao registrar compra:", err);
+    alert("Erro ao registrar, tente novamente.");
+  });
+});
   
 
 
@@ -892,7 +940,7 @@ function atualizarSaldos(){
 cancelarInfoBtn.onclick = () => infoModal.style.display="none";
 confirmarInfoBtn.onclick = () => {
     const whatsapp = whatsappInput.value.trim();
-    if(!whatsapp) { alert("Digite seu WhatsApp"); return; }
+    if(!whatsapp) {  return; }
     infoModal.style.display="none";
     // Exibir campo de compartilhamento
     document.getElementById('compartilharIndicacao').style.display="block";
@@ -946,38 +994,64 @@ enviarBtn.onclick = ()=>{
 
 // --- Registrar Compra ---
 
-function registrarCompra(whatsapp, valor) {
-  const transacaoRef = push(ref(db, 'saques')); // 📌 mesmo caminho do saque
-  set(transacaoRef, {
-    tipo: "compra",   // 🔑 identifica que é uma compra
-    whatsapp: whatsapp,
-    valor: valor,
-    data: Date.now()
-  }).then(() => {
-    console.log("Compra registrada com sucesso!");
-  }).catch((err) => {
-    console.error("Erro ao registrar compra:", err);
-  });
-}
+// --- PIX / Compra ---
+valorBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
 
-function solicitarSaque(nome, pix, whatsapp, valor) {
-  const transacaoRef = push(ref(db, 'saques')); // 📌 mesmo caminho
-  set(transacaoRef, {
-    tipo: "saque",    // 🔑 identifica que é um saque
-    nome: nome,
-    pix: pix,
-    whatsapp: whatsapp,
-    valor: valor,
-    data: Date.now()
-  }).then(() => {
-    saldoGanho = 0;
-    atualizarSaldos();
-    modalSaque.style.display = "none";
-    nomeInput.value = "";
-    pixInput.value = "";
-  }).catch((err) => {
-    console.error("Erro ao salvar saque:", err);
-  });
+        // Pega valor e link do botão
+        const valor = Number(btn.dataset.valor);
+        const link = btn.parentElement.getAttribute("href");
+
+        // Salva temporariamente no localStorage
+        localStorage.setItem("valorSelecionado", valor);
+        localStorage.setItem("linkSelecionado", link);
+
+        // Fecha modal PIX e abre modal WhatsApp
+        pixModal.style.display = 'none';
+        infoModal.style.display = 'flex';
+    });
+});
+
+// Confirmar WhatsApp
+confirmarInfoBtn.addEventListener("click", () => {
+    const whatsapp = whatsappInput.value.trim();
+    const valor = Number(localStorage.getItem("valorSelecionado"));
+    const link = localStorage.getItem("linkSelecionado");
+
+    if (!whatsapp) {
+        
+        return;
+    }
+
+    // Registrar compra no Firebase
+    registrarCompra(whatsapp, valor);
+
+    // Fecha modal
+    infoModal.style.display = "none";
+    whatsappInput.value = "";
+
+    // Redireciona para o link do botão
+    if (link) {
+        window.location.href = link;
+        localStorage.removeItem("linkSelecionado");
+        localStorage.removeItem("valorSelecionado");
+    }
+});
+
+// Função de registrar compra
+function registrarCompra(whatsapp, valor) {
+    const transacaoRef = push(ref(db, 'saques'));
+    set(transacaoRef, {
+        tipo: "compra",
+        whatsapp: whatsapp,
+        valor: valor,
+        data: Date.now()
+    }).then(() => {
+        console.log("Compra registrada com sucesso!");
+    }).catch(err => {
+        console.error("Erro ao registrar compra:", err);
+    });
 }
 
 // --- Créditos via ticket ---
@@ -1172,7 +1246,7 @@ cancelarInfoBtn.addEventListener('click', () => {
 confirmarInfoBtn.addEventListener("click", () => {
   const whatsapp = whatsappInput.value.trim();
   const valor = Number(localStorage.getItem("valorSelecionado"));
-  if (!whatsapp) { alert("Informe seu WhatsApp!"); return; }
+  if (!whatsapp) { return; }
 
   // Registrar usuário e compra
   let meuCodigo = localStorage.getItem("meuCodigo");
@@ -1357,9 +1431,51 @@ confirmarInfoBtn.addEventListener("click", () => {
   if (whatsapp) {
     localStorage.setItem("whatsapp", whatsapp);
     infoModal.style.display = "none";
-  } else alert("Digite um WhatsApp válido!");
+  } 
 });
 cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none");
+
+  // Captura número digitado no modal
+  let whatsappUsuario = "";
+
+  document.getElementById("confirmarInfoBtn").addEventListener("click", () => {
+    const input = document.getElementById("whatsappInput").value.trim();
+    if (input === "") {
+      
+      return;
+    }
+    whatsappUsuario = input;
+    document.getElementById("infoModal").style.display = "none";
+  });
+
+  // Captura clique nos botões de valor
+  document.querySelectorAll(".valor-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault(); // evita redirecionar antes de salvar
+      const valor = btn.dataset.valor;
+
+      if (!whatsappUsuario) {
+        
+        return;
+      }
+
+      // Salva no Firebase
+      const refCompras = ref(db, "achouGanhou");
+      const nova = push(refCompras);
+
+      set(nova, {
+        whatsapp: whatsappUsuario,
+        valor: Number(valor),
+        data: new Date().toLocaleString("pt-BR")
+      }).then(() => {
+        console.log("Compra registrada com sucesso!");
+        // Agora pode ir para o link do pagamento
+        window.location.href = btn.parentElement.getAttribute("href");
+      }).catch(err => {
+        console.error("Erro ao salvar compra:", err);
+      });
+    });
+  });
 
 
 
