@@ -554,7 +554,15 @@ background:lime;
   background: lime;   /* aqui sim */
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 1px 2px rgba(0,0,0,0.23);
 }
+@keyframes pulsar {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
 
+.geladeira.pulsando {
+  animation: pulsar 1s ease-in-out infinite;
+}
 </style></head><body>
 <div class="container-principal">
 <!-- Modal info usuário -->
@@ -585,10 +593,10 @@ background:lime;
  
 <!-- Input de código -->
 <div class="input-container">
-<input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
-  <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button><div id="compartilharIndicacao" style="font-size:10px; text-align:right;margin-top: 10px;height:35px; margin:10px;">
-  <input type="hidden" id="linkIndicacaoInput" readonly style="width:100%; padding:5px;" />
-  <button id="btnCompartilharWhats">COMPARTILHER e GANHAR ATE R$ 100.00 POR INDICACAO</button>
+  <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
+  <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button><div id="compartilharIndicacao" style="width:100%;font-size:8px; text-align:right;margin-top: 10px;height:35px; margin:10px;">
+  <input type="hidden" id="linkIndicacaoInput" readonly style="width:1%; padding:5px;" />
+  <button id="btnCompartilharWhats">COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO</button>
 </div>
 </div>
 
@@ -852,7 +860,7 @@ let escolhas = [];
 
 // --- Mapear códigos de prêmio ---
 const codigosPremios = {
-  500:["1408192606003783805"],
+  500:["14081926060083783805"],
   50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
   40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
   30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
@@ -1352,6 +1360,8 @@ confirmarInfoBtn.addEventListener("click", () => {
   } else alert("Digite um WhatsApp válido!");
 });
 cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none");
+
+
 
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
