@@ -776,7 +776,7 @@ const saldoDisponivel = document.getElementById("saldoDisponivel");
 const inputValor = document.getElementById('valorInput');
 // Referências do Firebase
 const saquesRef = ref(db, "saques");
-
+const abrirBtn = document.getElementById("abrirSaqueBtn");
 
 
 // Abrir modal
@@ -995,6 +995,7 @@ enviarBtn.onclick = ()=>{
 // --- Registrar Compra ---
 
 // --- PIX / Compra ---
+// --- PIX / Compra ---
 valorBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1003,44 +1004,28 @@ valorBtns.forEach(btn => {
         const valor = Number(btn.dataset.valor);
         const link = btn.parentElement.getAttribute("href");
 
-        // Salva temporariamente no localStorage
+        // Guarda no localStorage
         localStorage.setItem("valorSelecionado", valor);
         localStorage.setItem("linkSelecionado", link);
 
-        // Fecha modal PIX e abre modal WhatsApp
+        // Fecha PIX e abre WhatsApp
         pixModal.style.display = 'none';
         infoModal.style.display = 'flex';
     });
 });
 
-// Confirmar WhatsApp
-confirmarInfoBtn.addEventListener("click", () => {
+// --- Confirmar WhatsApp e prosseguir ---
+confirmarInfoBtn.onclick = () => {
     const whatsapp = whatsappInput.value.trim();
     const valor = Number(localStorage.getItem("valorSelecionado"));
     const link = localStorage.getItem("linkSelecionado");
 
-    if (!whatsapp) {
-        
+    if (!whatsapp || !valor) {
+        alert("Informe o WhatsApp corretamente!");
         return;
     }
 
     // Registrar compra no Firebase
-    registrarCompra(whatsapp, valor);
-
-    // Fecha modal
-    infoModal.style.display = "none";
-    whatsappInput.value = "";
-
-    // Redireciona para o link do botão
-    if (link) {
-        window.location.href = link;
-        localStorage.removeItem("linkSelecionado");
-        localStorage.removeItem("valorSelecionado");
-    }
-});
-
-// Função de registrar compra
-function registrarCompra(whatsapp, valor) {
     const transacaoRef = push(ref(db, 'saques'));
     set(transacaoRef, {
         tipo: "compra",
@@ -1049,11 +1034,19 @@ function registrarCompra(whatsapp, valor) {
         data: Date.now()
     }).then(() => {
         console.log("Compra registrada com sucesso!");
-    }).catch(err => {
-        console.error("Erro ao registrar compra:", err);
     });
-}
 
+    // Fecha modal
+    infoModal.style.display = "none";
+    whatsappInput.value = "";
+
+    // Redireciona
+    if (link) {
+        window.location.href = link;
+        localStorage.removeItem("linkSelecionado");
+        localStorage.removeItem("valorSelecionado");
+    }
+};
 // --- Créditos via ticket ---
 function liberarCredito(){
   const input = document.getElementById("codigo").value.toUpperCase().trim();
@@ -1477,8 +1470,7 @@ cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none"
     });
   });
 
-
-
+      
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </body>
