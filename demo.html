@@ -282,7 +282,7 @@ h2.demo{
 <!-- Input de código -->
 <div class="input-container">
   <input type="text" id="codigo" placeholder="Digite seu código">
-  <button onclick="liberarCredito()">Liberar Crédito</button>
+  <button onclick="liberarCredito()">LIBERAR MARCACAO</button>
 </div>
 
 <!-- Lista de códigos demo -->
@@ -358,7 +358,7 @@ const closePix = document.querySelector('.closePix');
 // --- Variáveis ---
 let saldoAtual = Number(localStorage.getItem("saldoAtual_demo")) || 0;
 let saldoGanho = Number(localStorage.getItem("saldoGanho_demo")) || 0;
-let jogando = false;
+
 let efeitoAutomatico = null;
 
 // Tabela de códigos -> créditos (DEMO)
@@ -413,40 +413,77 @@ function pararEfeitoAutomatico() {
   }
 }
 
+let selecionadas = [];
+let jogando = false;
+
+// Sorteia a geladeira premiada entre 0 e 19
+let geladeiraPremiada = Math.floor(Math.random() * 20);
+
 function abrirGeladeira(geladeira) {
-  if (saldoAtual < 2) { msg.textContent = "Saldo insuficiente! compre crédito para continuar."; return; }
-  if (jogando) { msg.textContent = "Aguarde antes de abrir outra geladeira."; return; }
-
-  saldoAtual -= 2;
-  localStorage.setItem("saldoAtual_demo", saldoAtual);
-  jogando = true;
-  atualizarSaldos();
-
-  geladeira.classList.add("aberta");
-  const interior = geladeira.querySelector(".interior");
-  const geladeiras = document.querySelectorAll(".geladeira");
-  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-  const index = Array.from(geladeiras).indexOf(geladeira);
-
-  if (index === brindeIndex) {
-    interior.textContent = "🎉 Parabéns! Você ganhou!";
-    saldoGanho += 10;
-    localStorage.setItem("saldoGanho_demo", saldoGanho);
-    geladeira.classList.add("premiada");
-  } else {
-    interior.textContent = "😢 Tente outra vez!";
+  if (saldoAtual < 2) { 
+    msg.textContent = "Saldo insuficiente! Compre crédito para continuar."; 
+    return; 
   }
 
-  const tempoFechar = (index === brindeIndex) ? 1900 : 1000;
-  setTimeout(()=>{
-    geladeira.classList.remove("aberta","premiada");
-    interior.textContent = `Geladeira ${index+1}`;
-    jogando = false;
-    msg.textContent = saldoAtual >= 2 ? "Você pode jogar novamente!" : "Saldo insuficiente! Digite um código válido.";
-    atualizarSaldos();
-  }, tempoFechar);
-}
+  if (jogando) { 
+    msg.textContent = "Aguarde antes de abrir outra geladeira."; 
+    return; 
+  }
 
+  const geladeiras = document.querySelectorAll(".geladeira");
+  const index = Array.from(geladeiras).indexOf(geladeira);
+
+  if (selecionadas.includes(index)) return;
+
+  // Marca a geladeira como aberta
+  geladeira.classList.add("aberta");
+  selecionadas.push(index);
+
+  // Mensagem enquanto ainda não marcou as 4
+  if (selecionadas.length < 4) {
+    msg.textContent = `Você marcou ${selecionadas.length} de 4 geladeiras...`;
+    return;
+  }
+
+  // 🎯 Após marcar 4, revela resultados
+  jogando = true;
+  saldoAtual -= 2;
+  localStorage.setItem("saldoAtual_demo", saldoAtual);
+  atualizarSaldos();
+
+  selecionadas.forEach((idx) => {
+    const interior = geladeiras[idx].querySelector(".interior");
+    if (!interior) return;
+
+    if (idx === geladeiraPremiada) {
+      interior.textContent = "🎉 Parabéns! Você ganhou!";
+      geladeiras[idx].classList.add("premiada");
+      saldoGanho += 10;
+      localStorage.setItem("saldoGanho_demo", saldoGanho);
+    } else {
+      interior.textContent = "😢 Não foi aqui!";
+    }
+  });
+
+  // Após 3s, limpa e permite nova jogada
+  setTimeout(() => {
+    geladeiras.forEach((g, idx) => {
+      g.classList.remove("aberta", "premiada");
+      const interior = g.querySelector(".interior");
+      if (interior) interior.textContent = `Geladeira ${idx + 1}`;
+    });
+
+    selecionadas = [];
+    jogando = false;
+    msg.textContent = saldoAtual >= 2 
+      ? "Jogue novamente!" 
+      : "Saldo insuficiente! Digite um código válido.";
+
+    // Sorteia uma nova geladeira premiada para a próxima rodada
+    geladeiraPremiada = Math.floor(Math.random() * 20);
+    atualizarSaldos();
+  }, 3000);
+}
 function liberarCredito() {
   const input = document.getElementById("codigo").value.toUpperCase().trim();
   let usados = JSON.parse(localStorage.getItem("codigosUsados_demo")) || [];
@@ -563,7 +600,7 @@ function copiarCodigo(codigo){
   });
 }
 document.getElementById("btnSite").onclick = () => {
-  window.location.href = "https://mp-rif-online.netlify.app/achouganhou";
+  window.location.href = "https://mp-rif-online.netlify.app/achou1ganhou";
 };
 //function zerarDemo(){localStorage.clear();
  // alert("LocalStorage zerado!");

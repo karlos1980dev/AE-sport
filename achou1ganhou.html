@@ -352,6 +352,7 @@ background:lime;
 .comoJoga,
 #btnSaldo,
 #transferi,
+.demo,
 #btnSaldoGanho,
 #refreshBtn {
   padding: 5px 8px;              /* bem menores */
@@ -593,13 +594,13 @@ background:lime;
  
 <!-- Input de código -->
 <div class="input-container">
-    <div id="compartilharIndicacao" style="width:100%;font-size:8px; text-align:right;margin-top: 0px;height:35px; margin:10px;">
-  <input type="hidden" id="linkIndicacaoInput" readonly style="width:1%; padding:5px;" />
-  <button  style="width:100%;font-size:11px; text-align:left;margin-top: 15px;height:35px; margin:10px;"id="btnCompartilharWhats">COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO</button>
+    <div id="compartilharIndicacao" style=";max-width:100%;font-size:12px; height:35px; margin:10px;">
+  <input type="hidden" id="linkIndicacaoInput" readonly style="display:none" />
+  <button  style="width:100%;font-size:11px; height:35px;" id="btnCompartilharWhats">COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO</button> <a href="https://mp-rif-online.netlify.app/demo"><button style="margin-left:20px" class="demo">DEMO</button></a>
+  
 </div>
   <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
   <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button>
-  
   
 </div>
 
