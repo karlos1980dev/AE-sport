@@ -564,11 +564,19 @@ background:lime;
 .geladeira.pulsando {
   animation: pulsar 1s ease-in-out infinite;
 }
+.saldos-container button {
+  white-space: normal;     /* permite quebra de linha */
+  word-wrap: break-word;   /* quebra palavras grandes */
+  text-align: center;      /* centraliza */
+  padding: 8px 12px;
+  max-width: 140px;        /* define limite da largura */
+  font-size: 8px;         /* deixa caber melhor */
+}
 </style></head><body>
 <div class="container-principal">
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
-  <div style="background:grey;color:white;" class="modal-content">
+  <div style="width:80%;background:grey;color:white;" class="modal-content">
     <h3>INFORME WHATSAPP </h3>
     <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp"maxlength="11">
     <div class="modal-buttons">
@@ -603,9 +611,9 @@ background:lime;
 <div class="saldos-container">
     <div class="hamburger" id="hamburger">☰ <br>Menu</div>
     <button id="refreshBtn">COMPRAR ACESSO</button>
-    <button id="btnSaldo">Saldo Atua 0</button>
-  <button id="transferi"> <i class="fa fa-exchange"></i></button>
-    <button id="btnSaldoGanho">Saldo/Saque Ganhou 0</button>  
+    <button id="btnSaldo">Saldo Atual 0</button>
+    <button id="transferi"> <i class="fa fa-exchange"></i></button>
+    <button id="btnSaldoGanho">Saldo / Saque Ganhou 0</button>  
 </div>
 
 <div class="wrap" style="width:100%;">
@@ -940,7 +948,7 @@ const codigosPremios = {
 // --- Atualizar valores na interface ---
 function atualizarSaldos(){
     btnSaldo.textContent = `Saldo Atual ${saldoAtual}`;
-    btnSaldoGanho.textContent = `Saldo/Saque Ganhou ${saldoGanho}`;
+    btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho}`;
     saldoDisponivel.textContent = saldoGanho;
     localStorage.setItem("saldoAtual", saldoAtual);
     localStorage.setItem("saldoGanho", saldoGanho);
