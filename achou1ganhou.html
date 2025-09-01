@@ -55,7 +55,7 @@ h3{
 
 #btnSaldo{background:green;color:white;}
 #btnSaldoGanho{background:orange;color:black;}
-#refreshBtn{background:blue;color:white;}
+
 
 /* Input e botão liberar crédito */
 .input-container{
@@ -427,6 +427,9 @@ background:lime;
   color: white;
   transition: all 0.25s ease;
   box-shadow: 0 3px 6px rgba(0,0,0,0.25); /* sombra realista */
+  text-align: center;
+  justify-content:center;
+  
   
     }
     #menuModal .modal-content {
@@ -564,14 +567,27 @@ background:lime;
 .geladeira.pulsando {
   animation: pulsar 1s ease-in-out infinite;
 }
+#refreshBtn,
 .saldos-container button {
   white-space: normal;     /* permite quebra de linha */
   word-wrap: break-word;   /* quebra palavras grandes */
   text-align: center;      /* centraliza */
   padding: 8px 12px;
   max-width: 140px;        /* define limite da largura */
-  font-size: 8px;         /* deixa caber melhor */
+  font-size: 10px;         /* deixa caber melhor */
 }
+
+
+.saldos-container .hamburger {
+  display: flex;
+  flex-direction: column;  /* mantém o ícone e "Menu" em cima/baixo */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+
+
 </style></head><body>
 <div class="container-principal">
 <!-- Modal info usuário -->
@@ -609,8 +625,8 @@ background:lime;
 </div>
 
 <div class="saldos-container">
-    <div class="hamburger" id="hamburger">☰ <br>Menu</div>
-    <button id="refreshBtn">COMPRAR <br>ACESSO</button>
+    <div class="hamburger" id="hamburger" >☰ <br>Menu</div>
+    <button id="refreshBtn">COMPRAR ACESSO</button>
     <button id="btnSaldo">Saldo Atual 0</button>
     <button id="transferi"> <i class="fa fa-exchange"></i></button>
     <button id="btnSaldoGanho">Saldo / Saque Ganhou 0</button>  
