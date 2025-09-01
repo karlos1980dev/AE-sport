@@ -572,7 +572,7 @@ background:lime;
     <h3>INFORME WHATSAPP </h3>
     <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp"maxlength="11">
     <div class="modal-buttons">
-      <button style="background:red;width:10px;" id="cancelarInfoBtn">Cancelar</button>
+      <button style="background:#ccc;width:10px;" id="cancelarInfoBtn">Cancelar</button>
       <button style="background:#55c1ff;" id="confirmarInfoBtn">Confirmar</button>
       
     </div>
@@ -677,12 +677,12 @@ background:lime;
 <div id="modalSaque" class="modal">
   <div class="modal-content">
     <h2 style="color:Black;">SOLICITA SAQUE VIA PIX</h2>
-    <input type="text" id="nomeInput" placeholder="Digite seu nome">
-    <input type="text" id="pixInput" placeholder="Digite seu Pix">
-    <input type="number" id="valorInput" placeholder="Digite o valor R$" readonly>
+    <input type="text" id="nomeInput" placeholder="Digite seu nome"style="text-align:center;">
+    <input type="text" id="pixInput" placeholder="Digite seu Pix"style="text-align:center;">
+    <input type="number" id="valorInput" placeholder="Digite o valor R$"style="text-align:center; background:Black;color:white" readonly>
     <div class="modal-buttons">
       <button id="cancelarBtn">Cancelar</button>
-      <button id="enviarBtn">Enviar</button>
+      <button id="enviarBtn">SACAR</button>
     </div>
   </div>
 </div>
@@ -916,12 +916,25 @@ let escolhas = [];
 
 // --- Mapear códigos de prêmio ---
 const codigosPremios = {
-  500:["14081926060083783805"],
   
+500:["14081920805"],
+  50:["716412153","592315254","846882055","14081980","195668863","653096775","504350967","635551900","286671413","732888662"],
+  40:["217565914","919970432","284338877","101696966","702396411","229654597","874019900","621211660","336075928","485986854"],
+  30:["739656664","465396612","189768711","112988691","966044327","595658875","109617523","899800852","755223288","960909264"],
+  20:["446224299","394127635","812879695","960907900","491988844","249227980","956544658","349657657","840757998","217686049"],
+  10:["691539989","811999998","108784815","313505598","806528891","366228474","716094153","592329854","846668855","504376967"],
+  9:["874016500","621216610","336090028","485980154","635598519","286682713","732880862","195658863","653677587","129458884"],
+  8:["956535448","003496557","840776998","217612049","739668764","466345912","189763211","112967891","904432227","595665575"],
+  7:["673207856","209122885","487021874","337834017","596597699","387881987","978833854","699939985","767384775","560098454"],
+  6:["673275056","209651885","487029814","337808817","596587999","367871987","309878265","317746673","507846877","999297604"],
+  5:["986476585","443438755","978638854","699975985","767388775","005600454","647728865","878863674","441365795","965878854"],
+  4:["109613223","899876852","755228448","960976264","216594314","919098432","284337447","101697666","702397611"],
+  3:["309821965","317663273","507683477","929766404","446224552","394128835","887963495","960901270","491987744","249212270"],
   2:["647720985","878867472","441379895","987877854","691997689","811977998","108488515","313503398","806521291","366222274"],
   1:["teste1336262","teste00001122","teste0062525","teste97288862999","teste62527882","teste4425252516"]
-
+  
 };
+
 
 // --- Funções auxiliares ---
 // --- Atualizar valores na interface ---
