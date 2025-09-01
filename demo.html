@@ -232,6 +232,23 @@ h2.demo{
     box-shadow: 0 0 0 0 rgba(40,167,69, 0);
   }
 }
+#listaCodigos button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  gap:30px;
+  font-size: 14px;
+  font-weight: bold;
+  background: #2bff2e;   /* verde neon */
+  color: black;
+  animation: pulsar 1.5s infinite; /* efeito pulsar */
+  transition: background 0.3s;
+}
+
+#listaCodigos button:hover {
+  background: #00ff42; /* tom mais forte no hover */
+}
 </style>
 </head>
 <body>
@@ -242,6 +259,9 @@ h2.demo{
 <div class="saldos-container">
     
 
+  <p id="mensagem"></p></br>
+
+</body>
   <button id="refreshBtn">COMPRAR CRÉDITO</button>
   <button id="btnSaldo">Saldo Atual: R$ 0</button>
   <button id="btnSaldoGanho">Saldo Ganhou: R$ 0</button>
@@ -289,7 +309,7 @@ h2.demo{
 <!-- Lista de códigos demo -->
 <div id="listaCodigos" style="margin:15px 0; text-align:center;">
   
-  <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+  <div style="display:flex; justify-content:center; gap:60px; flex-wrap:wrap;">
     <button onclick="copiarCodigo('DEMO2')">DEMO2<br><small>R$2</small></button>
     <button onclick="copiarCodigo('DEMO10')">DEMO10<br><small>R$10</small></button>
     <button onclick="copiarCodigo('DEMO0000')">DEMO0000<br><small>R$1000</small></button>
