@@ -570,7 +570,7 @@ background:lime;
 <div id="infoModal" class="modal">
   <div style="background:grey;color:white;" class="modal-content">
     <h3>INFORME WHATSAPP </h3>
-    <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp">
+    <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp"maxlength="11">
     <div class="modal-buttons">
       <button style="background:red;width:10px;" id="cancelarInfoBtn">Cancelar</button>
       <button style="background:#55c1ff;" id="confirmarInfoBtn">Confirmar</button>
@@ -594,12 +594,7 @@ background:lime;
  
 <!-- Input de código -->
 <div class="input-container">
- <div id="compartilharIndicacao" style="display:flex; gap:10px; max-width:100%; font-size:12px; height:35px; margin:10px;">
-  <input type="hidden" id="linkIndicacaoInput" readonly style="display:none" />
-  <button style="flex:1; font-size:11px; height:35px;" id="btnCompartilharWhats">
-    COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO
-  </button><a href="https://mp-rif-online.netlify.app/demo" style="display:flex;"><button style="height:35px;">DEMO</button></a>
-</div>
+ 
   <input style="border-radius:10px"type="text" id="codigo" placeholder="Digite Seu Ticket Saldo">
   <button style="background:#55d5ff"; onclick="liberarCredito()">Liberar Marcação</button>
   
@@ -667,7 +662,17 @@ background:lime;
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 20</div></div>
  
 </div>
-
+<div class="input-container">
+ <div id="compartilharIndicacao" style="display:flex; gap:10px; max"-width:100%; font-size:12px; height:35px; margin:10px;">
+  <input type="hidden" id="linkIndicacaoInput" readonly style="display:none" />
+  <button style="flex:1; font-size:11px; height:35px;" id="btnCompartilharWhats">
+    COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO
+  </button>
+  <a href="https://achouganhou.netlify.app/demo" style="display:flex;">
+    <button style="background:#40f5ff;height:35px;">JOGAR DEMO</button>
+  </a>
+</div>
+</div>
 <!-- Modal de saque -->
 <div id="modalSaque" class="modal">
   <div class="modal-content">
@@ -724,6 +729,7 @@ background:lime;
   </div>
   
 </div>
+
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1281,13 +1287,7 @@ function aplicarCorFundo(){ const cor=gerarCorAleatoria(); document.body.style.b
 aplicarCorFundo();
 
 // --- WhatsApp Mask ---
-whatsappInput.addEventListener("input",function(e){
-  let valor=e.target.value.replace(/\D/g,'');
-  if(valor.length>11) valor=valor.substring(0,11);
-  if(valor.length<=10) valor=valor.replace(/^(\d{2})(\d{4})(\d{0,4})/,"($1) $2-$3");
-  else valor=valor.replace(/^(\d{2})(\d{5})(\d{0,4})/,"($1) $2-$3");
-  e.target.value=valor;
-});
+
 
 // --- Expor funções globalmente ---
 window.liberarCredito=liberarCredito;
