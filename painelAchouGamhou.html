@@ -63,14 +63,33 @@
     font-size: 16px; 
   }
 
+  .btn-status {
+    cursor: pointer;
+    border: none;
+    padding: 5px 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+  }
+
+  .btn-verde {
+    background: green;
+  }
+
+  .btn-vermelho {
+    background: red;
+  }
+
   /* Para telas pequenas */
   @media (max-width: 768px) {
     th, td {
       font-size: 0.75rem;
       padding: 6px;
     }
-    .btn-delete {
+    .btn-delete, .btn-status {
       font-size: 14px;
+      padding: 4px 8px;
     }
   }
 
@@ -101,6 +120,7 @@
       <th>WhatsApp</th>
       <th>Valor Compra (R$)</th>
       <th>Data/Hora</th>
+      <th>Status</th>
       <th>Excluir</th>
     </tr>
   </thead>
@@ -131,6 +151,19 @@
   const status = document.getElementById("status");
   const saquesRef = ref(db, 'saques');
 
+  // Função para salvar no localStorage
+  function salvarStatusLocal(key, valor) {
+    let statusSaques = JSON.parse(localStorage.getItem("statusSaques")) || {};
+    statusSaques[key] = valor;
+    localStorage.setItem("statusSaques", JSON.stringify(statusSaques));
+  }
+
+  // Função para carregar status do localStorage
+  function carregarStatusLocal(key) {
+    let statusSaques = JSON.parse(localStorage.getItem("statusSaques")) || {};
+    return statusSaques[key] || "❌";
+  }
+
   onValue(saquesRef, snapshot => {
     const dados = snapshot.val();
     tabela.innerHTML = '';
@@ -139,6 +172,11 @@
       Object.entries(dados).forEach(([key, item]) => {
         const tr = document.createElement('tr');
         const data = new Date(item.data).toLocaleString();
+
+        // Pega o status salvo no localStorage
+        let statusAtual = carregarStatusLocal(key);
+        let classe = statusAtual === "✅" ? "btn-verde" : "btn-vermelho";
+
         tr.innerHTML = `
           <td>${item.nome || '-'}</td>
           <td>${item.pix || '-'}</td>
@@ -146,20 +184,37 @@
           <td>${item.whatsapp || '-'}</td>
           <td>${item.valorCompra || '-'}</td>
           <td>${data}</td>
+          <td><button class="btn-status ${classe}" data-key="${key}">${statusAtual}</button></td>
           <td><button class="btn-delete" data-key="${key}">X</button></td>
         `;
         tabela.appendChild(tr);
       });
       status.textContent = `Total de saques: ${Object.keys(dados).length}`;
       
+      // Botão de excluir
       document.querySelectorAll('.btn-delete').forEach(btn => {
         btn.addEventListener('click', () => {
           const key = btn.getAttribute('data-key');
           if(confirm('Deseja realmente excluir este saque?')) {
             remove(ref(db, 'saques/' + key))
-              .then(() => alert('Saque excluído com sucesso!'))
+              .then(() => {
+                alert('Saque excluído com sucesso!');
+                localStorage.removeItem(key); // também remove do localStorage
+              })
               .catch(err => alert('Erro ao excluir: ' + err));
           }
+        });
+      });
+
+      // Botão de status
+      document.querySelectorAll('.btn-status').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-key');
+          let novoValor = btn.textContent === "✅" ? "❌" : "✅";
+          btn.textContent = novoValor;
+          btn.classList.toggle("btn-verde");
+          btn.classList.toggle("btn-vermelho");
+          salvarStatusLocal(key, novoValor);
         });
       });
 
