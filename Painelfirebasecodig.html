@@ -249,7 +249,7 @@ window.excluirCodigo = async (codigo) => {
 };
 
 window.enviarWhatsApp = (codigo, valor) => {
-  const mensagem = `└──► ${codigo}\n\n✨ CÓDIGOS GERADOS ✨\nVALOR ${valor}\n\nAcesse o site e cole o código:\nhttps://achouganhou.netlify.app/achou1ganhou\n\nBOA SORTE`;
+  const mensagem = `└──► ${codigo}\n\n✨ CÓDIGOS GERADOS ✨\nVALOR ${valor}\n\nAcesse o site e cole o código:\nhttps://achouganhou.netlify.app\n\nBOA SORTE`;
   const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
   window.open(url, '_blank');
 };
