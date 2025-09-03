@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Códigos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .painel {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .inputs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .inputs input, .inputs button {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+
+  .inputs button {
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  .inputs button:hover {
+    background-color: #218838;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  table th, table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+  }
+
+  table th {
+    background-color: #f4f4f4;
+  }
+
+  .usado { color: red; font-weight: bold; }
+  .disponivel { color: green; font-weight: bold; }
+
+  button.whatsapp {
+    background-color: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  button.whatsapp:hover {
+    background-color: #128C7E;
+  }
+
+  @media (max-width: 600px) {
+    .inputs { flex-direction: column; }
+    .inputs input, .inputs button { width: 100%; }
+    table th, table td { font-size: 14px; padding: 6px; }
+  }
+</style>
+</head>
+<body>
+  <div class="painel">
+    <h2>Painel de Códigos</h2>
+
+    <div class="inputs">
+      <input type="number" id="valorCodigo" placeholder="Digite o valor">
+      <button id="gerarBtn">Gerar Código</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Valor</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaCodigos"></tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue, remove, update, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
+      authDomain: "geladeira-58de2.firebaseapp.com",
+      databaseURL: "https://geladeira-58de2-default-rtdb.firebaseio.com",
+      projectId: "geladeira-58de2",
+      storageBucket: "geladeira-58de2.firebasestorage.app",
+      messagingSenderId: "823625324816",
+      appId: "1:823625324816:web:7c8a19cabd6461ff666d95",
+      measurementId: "G-W547T81JCQ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const gerarBtn = document.getElementById("gerarBtn");
+    const valorInput = document.getElementById("valorCodigo");
+    const listaCodigos = document.getElementById("listaCodigos");
+
+    function gerarCodigoAleatorio() {
+      return Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
+    }
+
+    gerarBtn.addEventListener("click", async () => {
+      const valor = parseInt(valorInput.value);
+      if (!valor || valor <= 0) { alert("Digite um valor válido!"); return; }
+
+      const codigo = gerarCodigoAleatorio();
+      const codigoRef = ref(db, "codigos/" + codigo);
+
+      await set(codigoRef, { valor: valor, usado: false });
+      valorInput.value = "";
+      alert("Código criado: " + codigo);
+    });
+
+    const codigosRef = ref(db, "codigos");
+    onValue(codigosRef, (snapshot) => {
+      listaCodigos.innerHTML = "";
+      if (snapshot.exists()) {
+        snapshot.forEach((child) => {
+          const codigo = child.key;
+          const dados = child.val();
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${codigo}</td>
+            <td>${dados.valor}</td>
+            <td class="${dados.usado ? "usado" : "disponivel"}">
+              ${dados.usado ? "❌ Usado" : "✅ Disponível"}
+            </td>
+            <td>
+              <button onclick="marcarUsado('${codigo}')">Usar</button>
+              <button onclick="excluirCodigo('${codigo}')">Excluir</button>
+              <button class="whatsapp" onclick="enviarWhatsApp('${codigo}', ${dados.valor})">WhatsApp</button>
+            </td>
+          `;
+          listaCodigos.appendChild(tr);
+        });
+      }
+    });
+
+    window.marcarUsado = async (codigo) => {
+      const codigoRef = ref(db, "codigos/" + codigo);
+      await update(codigoRef, { usado: true });
+    };
+
+    window.excluirCodigo = async (codigo) => {
+      const codigoRef = ref(db, "codigos/" + codigo);
+      await remove(codigoRef);
+    };
+
+    window.enviarWhatsApp = (codigo, valor) => {
+      const telefone = "5511999999999"; // Substitua pelo número desejado
+      const mensagem = `Olá, meu código é: ${codigo} e o valor é: ${valor}`;
+      const url = `https://wa.me/${telefone}?text=${encodeURIComponent(mensagem)}`;
+      window.open(url, "_blank");
+    };
+  </script>
+</body>
+</html>
