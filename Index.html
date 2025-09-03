@@ -1245,43 +1245,90 @@ function iniciarEfeitoAutomatico(){
     const g=geladeiras[idx];
     const interior=g.querySelector(".interior");
     if(!g.classList.contains("aberta")){
-      g.classList.add("aberta");
-      interior.textContent="";
-      setTimeout(()=>{
-        g.classList.remove("aberta");
-        interior.textContent=`Geladeira ${idx+1}`;
-      },800);
+      g.clasfunction abrirGeladeira(geladeira) {
+
+  const geladeiras = document.querySelectorAll(".geladeira");
+  const index = Array.from(geladeiras).indexOf(geladeira);
+
+  // verifica modo selecionado
+  const modo = Number(document.querySelector('input[name="modo"]:checked').value);
+  let custo = 0;
+  let premio = 0;
+
+  if (modo === 2) { custo = 2; premio = 16; }
+  if (modo === 3) { custo = 5; premio = 20; }
+  if (modo === 4) { custo = 10; premio = 30; }
+
+  // precisa ter saldo suficiente
+  if (saldoAtual < custo) {
+    msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
+    return;
+  }
+  if (jogando) return;
+
+  // Se já escolheu essa, ignora
+  if (escolhas.includes(index)) return;
+
+  // Marca escolha (sem descontar ainda)
+  escolhas.push(index);
+  geladeira.classList.add("aberta");
+  geladeira.querySelector(".interior").textContent = "✅ Marcada";
+// Trava os rádios ao marcar a primeira geladeira
+document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
+  // Só continua quando atingir o limite do modo
+  if (escolhas.length < modo) return;
+
+  // Cobra saldo de acordo com o modo
+  saldoAtual -= custo;
+  atualizarSaldos();
+  jogando = true;
+
+  // Sorteia onde está o brinde
+  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+
+  // Revela as escolhidas
+  escolhas.forEach(idx => {
+    const g = geladeiras[idx];
+    const interior = g.querySelector(".interior");
+    if (idx === brindeIndex) {
+      interior.textContent = `🎁 Você Ganhou R$${premio}!`;
+      g.classList.add("premiada");
+      saldoGanho += premio;
+    } else {
+      interior.textContent = "❌ Errou!";
     }
-  },1500);
-}
-const geladeiras = document.querySelectorAll('.geladeira');
-const indiceBrinde = Math.floor(Math.random() * geladeiras.length);
-geladeiras[indiceBrinde].dataset.temBrinde = "true";
+  });
 
-let jaSelecionou = false; // impede múltiplos cliques
+  // Se nenhuma escolhida foi premiada → mostrar onde estava
+  if (!escolhas.includes(brindeIndex)) {
+    const geladeiraPremiada = geladeiras[brindeIndex];
+    const interiorPremiada = geladeiraPremiada.querySelector(".interior");
+    setTimeout(() => {
+      geladeiraPremiada.classList.add("aberta", "premiada");
+      interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
+      setTimeout(() => {
+        geladeiraPremiada.classList.remove("aberta", "premiada");
+        interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
+      }, 1500);
+    }, 800);
+  }
+// Resetar rodada
+setTimeout(() => {
+  escolhas.forEach(idx => {
+    const g = geladeiras[idx];
+    g.classList.remove("aberta", "premiada");
+    g.querySelector(".interior").textContent = `Geladeira ${idx+1}`;
+  });
+  escolhas = [];
+  jogando = false;
 
-geladeiras.forEach(geladeira => {
-    geladeira.addEventListener('click', () => {
-        if (jaSelecionou) return; // já selecionou, bloqueia
-        jaSelecionou = true;
+  // Reabilita os rádios
+  document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
 
-        geladeira.classList.add('aberta');
-
-        if (geladeira.dataset.temBrinde === "true") {
-            geladeira.querySelector('.interior').innerHTML = " Você ganhou!";
-        } else {
-            geladeira.querySelector('.interior').innerHTML = "❌ Vazio";
-
-            // mostra onde estava o brinde
-            geladeiras.forEach(g => {
-                if (g.dataset.temBrinde === "true") {
-                    g.querySelector('.interior').innerHTML = " Tava aqui!";
-                    g.classList.add('premiada');
-                }
-            });
-        }
-    });
-});
+  msg.textContent = saldoAtual >= 2 ? "Pode jogar de novo!" : "Saldo insuficiente!";
+  atualizarSaldos();
+}, 2200);
+}  
 function pararEfeitoAutomatico(){
   if(efeitoAutomatico){ clearInterval(efeitoAutomatico); efeitoAutomatico=null; }
 }
