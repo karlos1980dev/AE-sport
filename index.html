@@ -518,7 +518,7 @@ background:lime;
   .container-principal {
     padding: 10px 5px;
     border-width: 2px;
-    max-height: none;  /*  evita esmagar as geladeiras */
+    max-height: none;  /* 🔥 evita esmagar as geladeiras */
   }
 
   .geladeiras {
@@ -728,13 +728,13 @@ background:lime;
     <h3>MENU</h3>
     <ul style="list-style:none; padding:0; text-align:left;">
         <li style="margin:10px 0;">
-  <a href="#" id="abrirTabela" style="color:white; text-decoration:none;"> TABELA DE PRÊMIOS</a>
+  <a href="#" id="abrirTabela" style="color:white; text-decoration:none;">📊 TABELA DE PRÊMIOS</a>
 </li>
       <li style="margin:10px 0;"><a href="https://achouganhou.netlify.app//comojoga" style="color:white; text-decoration:none;">Como Jogar</a></li>
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Ver Saldo</a></li>
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Comprar Créditos</a></li>
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Contato / Suporte</a></li>
-      <l><a href="https://wa.me/5571992290058?text=️%20Seu%20ticket%20tá%20quase%20liberado!%0A%0A%20Depois%20do%20pagamento,%20manda%20o%20comprovante%20aqui.%0A%0A%20Para%20pagar%20use%20o%20Mercado%20Pago:%0A%20link.mercadopago.com.br/newtechiptv">CONTATO</a></l>
+      <l><a href="https://wa.me/5571992290058?text=🎟️%20Seu%20ticket%20tá%20quase%20liberado!%0A%0A👉%20Depois%20do%20pagamento,%20manda%20o%20comprovante%20aqui.%0A%0A💳%20Para%20pagar%20use%20o%20Mercado%20Pago:%0A🌐%20link.mercadopago.com.br/newtechiptv">CONTATO</a></l>
     </ul>
   </div>
 </div>
@@ -746,7 +746,7 @@ background:lime;
     <p>Saldo disponível: <b id="saldoDisponivel">0</b></p>
     <input type="number" id="valorTransferir" placeholder="Digite valor R$" min="1">
     <div class="modal-buttons">
-      <button id="cancelarTransferencia">Cancelar</button>
+      <button style="background:#ccc;" id="cancelarTransferencia">Cancelar</button>
       <button id="confirmarTransferencia">Transferir</button>
     </div>
   </div>
@@ -755,7 +755,7 @@ background:lime;
 <div id="tabelaModal" class="modal">
   <div class="modal-content" style="background:#111; color:white; border-radius:12px; padding:20px; text-align:center;">
     <span class="closeTabela" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
-    <h3 style="color:gold;"> TABELA DE PRÊMIOS</h3>
+    <h3 style="color:gold;">📊 TABELA DE PRÊMIOS</h3>
     <ul style="list-style:none; padding:0; font-size:16px; text-align:left; line-height:1.8;">
       <li>✅ Marque 2  → Custa R$ 2.00 → Ganha →  <b>R$ 16</b></li>
       <li>✅ Marque 3 → Custa R$ 5.00 →  Ganha →  <b>R$ 20</b></li>
@@ -1197,100 +1197,6 @@ document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled 
     const g = geladeiras[idx];
     const interior = g.querySelector(".interior");
     if (idx === brindeIndex) {
-      interior.textContent = ` Você Ganhou R$${premio}!`;
-      g.classList.add("premiada");
-      saldoGanho += premio;
-    } else {
-      interior.textContent = "❌ Errou!";
-    }
-  });
-
-  // Se nenhuma escolhida foi premiada → mostrar onde estava
-  if (!escolhas.includes(brindeIndex)) {
-    const geladeiraPremiada = geladeiras[brindeIndex];
-    const interiorPremiada = geladeiraPremiada.querySelector(".interior");
-    setTimeout(() => {
-      geladeiraPremiada.classList.add("aberta", "premiada");
-      interiorPremiada.textContent = " Aqui estava o brinde!";
-      setTimeout(() => {
-        geladeiraPremiada.classList.remove("aberta", "premiada");
-        interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
-      }, 1500);
-    }, 800);
-  }
-// Resetar rodada
-setTimeout(() => {
-  escolhas.forEach(idx => {
-    const g = geladeiras[idx];
-    g.classList.remove("aberta", "premiada");
-    g.querySelector(".interior").textContent = `Geladeira ${idx+1}`;
-  });
-  escolhas = [];
-  jogando = false;
-
-  // Reabilita os rádios
-  document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
-
-  msg.textContent = saldoAtual >= 2 ? "Pode jogar de novo!" : "Saldo insuficiente!";
-  atualizarSaldos();
-}, 2200);
-}  
-// --- Efeito automático ---
-function iniciarEfeitoAutomatico(){
-  if(efeitoAutomatico) return;
-  efeitoAutomatico=setInterval(()=>{
-    if(saldoAtual>=2) return;
-    const geladeiras=document.querySelectorAll(".geladeira");
-    const idx=Math.floor(Math.random()*geladeiras.length);
-    const g=geladeiras[idx];
-    const interior=g.querySelector(".interior");
-    if(!g.classList.contains("aberta")){
-      g.clasfunction abrirGeladeira(geladeira) {
-
-  const geladeiras = document.querySelectorAll(".geladeira");
-  const index = Array.from(geladeiras).indexOf(geladeira);
-
-  // verifica modo selecionado
-  const modo = Number(document.querySelector('input[name="modo"]:checked').value);
-  let custo = 0;
-  let premio = 0;
-
-  if (modo === 2) { custo = 2; premio = 16; }
-  if (modo === 3) { custo = 5; premio = 20; }
-  if (modo === 4) { custo = 10; premio = 30; }
-
-  // precisa ter saldo suficiente
-  if (saldoAtual < custo) {
-    msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
-    return;
-  }
-  if (jogando) return;
-
-  // Se já escolheu essa, ignora
-  if (escolhas.includes(index)) return;
-
-  // Marca escolha (sem descontar ainda)
-  escolhas.push(index);
-  geladeira.classList.add("aberta");
-  geladeira.querySelector(".interior").textContent = "✅ Marcada";
-// Trava os rádios ao marcar a primeira geladeira
-document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
-  // Só continua quando atingir o limite do modo
-  if (escolhas.length < modo) return;
-
-  // Cobra saldo de acordo com o modo
-  saldoAtual -= custo;
-  atualizarSaldos();
-  jogando = true;
-
-  // Sorteia onde está o brinde
-  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-
-  // Revela as escolhidas
-  escolhas.forEach(idx => {
-    const g = geladeiras[idx];
-    const interior = g.querySelector(".interior");
-    if (idx === brindeIndex) {
       interior.textContent = `🎁 Você Ganhou R$${premio}!`;
       g.classList.add("premiada");
       saldoGanho += premio;
@@ -1329,6 +1235,53 @@ setTimeout(() => {
   atualizarSaldos();
 }, 2200);
 }  
+// --- Efeito automático ---
+function iniciarEfeitoAutomatico(){
+  if(efeitoAutomatico) return;
+  efeitoAutomatico=setInterval(()=>{
+    if(saldoAtual>=2) return;
+    const geladeiras=document.querySelectorAll(".geladeira");
+    const idx=Math.floor(Math.random()*geladeiras.length);
+    const g=geladeiras[idx];
+    const interior=g.querySelector(".interior");
+    if(!g.classList.contains("aberta")){
+      g.classList.add("aberta");
+      interior.textContent="👀";
+      setTimeout(()=>{
+        g.classList.remove("aberta");
+        interior.textContent=`Geladeira ${idx+1}`;
+      },800);
+    }
+  },1500);
+}
+const geladeiras = document.querySelectorAll('.geladeira');
+const indiceBrinde = Math.floor(Math.random() * geladeiras.length);
+geladeiras[indiceBrinde].dataset.temBrinde = "true";
+
+let jaSelecionou = false; // impede múltiplos cliques
+
+geladeiras.forEach(geladeira => {
+    geladeira.addEventListener('click', () => {
+        if (jaSelecionou) return; // já selecionou, bloqueia
+        jaSelecionou = true;
+
+        geladeira.classList.add('aberta');
+
+        if (geladeira.dataset.temBrinde === "true") {
+            geladeira.querySelector('.interior').innerHTML = "🎁 Você ganhou!";
+        } else {
+            geladeira.querySelector('.interior').innerHTML = "❌ Vazio";
+
+            // mostra onde estava o brinde
+            geladeiras.forEach(g => {
+                if (g.dataset.temBrinde === "true") {
+                    g.querySelector('.interior').innerHTML = "🎁 Tava aqui!";
+                    g.classList.add('premiada');
+                }
+            });
+        }
+    });
+});
 function pararEfeitoAutomatico(){
   if(efeitoAutomatico){ clearInterval(efeitoAutomatico); efeitoAutomatico=null; }
 }
