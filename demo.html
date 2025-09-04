@@ -25,7 +25,8 @@ h1{
 h2.demo{
   margin:8px 0 12px 0;
   font-size:4.2vw;
-  color:#b22222;
+  color:black;
+  font-weight:bold;
   text-transform:uppercase;
   letter-spacing:2px;
 }
@@ -253,7 +254,7 @@ h2.demo{
 </head>
 <body>
 <h1>DEMOSTRATIVO ACHOU GANHOU</h1>
-<h2 class="demo">DEMONSTRATIVO SEM VALOR REAL DE GANHO</h2>
+
 
 <!-- Saldos -->
 <div class="saldos-container">
@@ -267,12 +268,12 @@ h2.demo{
   <button id="btnSaldoGanho">Saldo Ganhou: R$ 0</button>
   
 </div>
-<button id="btnSite">🌐 Visitar o Site ACHOU GANHOU </button>
+<button id="btnSite">🌐 Visitar o Site ACHOU GANHOU A </button>
 <!-- Modal info usuário (DEMO) -->
 <div id="infoModal" class="modal">
   <div class="modal-content">
     <h3>Informe seu WhatsApp e valor da compra</h3>
-    <p style="font-size:12px;color:#b22222;margin:-4px 0 8px 0;"><strong>Versão DEMO:</strong> nenhum dado será enviado.</p>
+    <p style="font-size:12px;color:#b22222;margin:-4px 0 8px 0;"><strong>Versão DEMO:</strong> nenhum dado será enviado.e apenas simulação não tem valor real</p>
     <input type="text" id="whatsappInput" placeholder="Digite seu WhatsApp">
     <input type="number" id="valorCompraInput" placeholder="Digite valor R$">
     <div class="modal-buttons">
@@ -326,7 +327,7 @@ h2.demo{
 <div id="modalSaque" class="modal">
   <div class="modal-content">
     <h2>Solicitar Pix</h2>
-    <p style="font-size:12px;color:#b22222;margin-top:-8px;"><strong>Versão DEMO:</strong> nada será enviado.</p>
+    <p style="font-size:12px;color:#b22222;margin-top:-8px;"><strong>Versão DEMO:</strong> nada será enviado.e penas simulação sem valor real acesse o site</p>
     <input type="text" id="nomeInput" placeholder="Digite seu nome">
     <input type="text" id="pixInput" placeholder="Digite seu Pix">
     <input type="number" id="valorInput" placeholder="Digite o valor R$" readonly>
@@ -422,9 +423,9 @@ function iniciarEfeitoAutomatico() {
       setTimeout(() => {
         geladeira.classList.remove("aberta");
         interior.textContent = `Geladeira ${randomIndex + 1}`;
-      }, 800);
+      }, 400);
     }
-  }, 1500);
+  }, 1000);
 }
 function pararEfeitoAutomatico() {
   if (efeitoAutomatico) {
@@ -468,8 +469,9 @@ function abrirGeladeira(geladeira) {
   // 🎯 Após marcar 4, revela resultados
   jogando = true;
   saldoAtual -= 2;
-  localStorage.setItem("saldoAtual_demo", saldoAtual);
   atualizarSaldos();
+
+  let acertou = false;
 
   selecionadas.forEach((idx) => {
     const interior = geladeiras[idx].querySelector(".interior");
@@ -478,19 +480,26 @@ function abrirGeladeira(geladeira) {
     if (idx === geladeiraPremiada) {
       interior.textContent = "🎉 Parabéns! Você ganhou!";
       geladeiras[idx].classList.add("premiada");
-      saldoGanho += 10;
-      localStorage.setItem("saldoGanho_demo", saldoGanho);
+      saldoGanho += 30;
+      acertou = true;
     } else {
       interior.textContent = "😢 Não foi aqui!";
     }
   });
+
+  // 👉 Se não acertou, mostrar onde estava o prêmio
+  if (!acertou) {
+    const interiorPremiada = geladeiras[geladeiraPremiada].querySelector(".interior");
+    geladeiras[geladeiraPremiada].classList.add("aberta", "premiada");
+    interiorPremiada.textContent = "🎁 Estava aqui!";
+  }
 
   // Após 3s, limpa e permite nova jogada
   setTimeout(() => {
     geladeiras.forEach((g, idx) => {
       g.classList.remove("aberta", "premiada");
       const interior = g.querySelector(".interior");
-      if (interior) interior.textContent = `Geladeira ${idx + 1}`;
+      if (interior) interior.textContent = `ACHOU GANHOU ${idx + 1}`;
     });
 
     selecionadas = [];
@@ -499,7 +508,7 @@ function abrirGeladeira(geladeira) {
       ? "Jogue novamente!" 
       : "Saldo insuficiente! Digite um código válido.";
 
-    // Sorteia uma nova geladeira premiada para a próxima rodada
+    // Sorteia nova premiada
     geladeiraPremiada = Math.floor(Math.random() * 20);
     atualizarSaldos();
   }, 3000);
@@ -622,6 +631,7 @@ function copiarCodigo(codigo){
 document.getElementById("btnSite").onclick = () => {
   window.location.href = "https://achouganhou.netlify.app/achou1ganhou";
 };
+alert("SITE DEMONSTRATIVO (DEMO)\n\nSEM VALOR REAL DE GANHO ()DEMO). \nE APENAS PARA TESTA,E CONHECE O JOGO.\nPARA APOSTA REAL\nACESSE O SITE E CLICK EM\n\n(ACHOU GANHOU)")
 //function zerarDemo(){localStorage.clear();
  // alert("LocalStorage zerado!");
  // location.reload(); // recarrega a página já limpa}
