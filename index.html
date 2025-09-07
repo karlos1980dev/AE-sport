@@ -586,7 +586,17 @@ background:lime;
   text-align: center;
 }
 
+/* Animação para botão pulsar */
+@keyframes pulsarBtn {
+  0% { transform: scale(1); }
+  10%{background:Green;color:red;}
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
 
+.pulsar-btn {
+  animation: pulsarBtn 0.8s ease-in-out infinite;
+}
 
 </style></head>
 <body>
@@ -1286,7 +1296,7 @@ function pararEfeitoAutomatico(){
   if(efeitoAutomatico){ clearInterval(efeitoAutomatico); efeitoAutomatico=null; }
 }
 
-// --- PIX / Compra ---
+
 // --- Abrir modal PIX ---
 btnCompra.addEventListener('click', () => {
   pixModal.style.display = 'flex';
@@ -1548,8 +1558,32 @@ cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none"
   });
 function limpa(){
     localStorage.clear();
+    alert("limpo saldos");
 }
-      
+     function atualizarPulsarBtn() {
+  // Pega os textos dos saldos e transforma em número
+  let saldoAtual = parseFloat(btnSaldo.textContent.replace(/[^\d]/g, '')) || 0;
+  let saldoGanho = parseFloat(btnSaldoGanho.textContent.replace(/[^\d]/g, '')) || 0;
+
+  // Se ambos forem zero, adiciona a animação
+  if (saldoAtual === 0 && saldoGanho === 0) {
+    btnCompra.classList.add('pulsar-btn');
+  } else {
+    // Se qualquer saldo for diferente de zero, remove a animação
+    btnCompra.classList.remove('pulsar-btn');
+  }
+}
+
+// Chama sempre que atualizar os saldos manualmente
+atualizarPulsarBtn();
+
+// Se os saldos mudarem dinamicamente, você pode chamar atualizarPulsarBtn() após cada atualização
+
+function limpar(){
+    localStorage.clear()
+    alert("limpo com sucesso ");
+};
+
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </body>
