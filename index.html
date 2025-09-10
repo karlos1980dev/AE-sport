@@ -604,7 +604,7 @@ background:lime;
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
   <div style="width:80%;background:grey;color:white;" class="modal-content">
-    <h3>INFORME WHATSAPP </h3>
+    <h3>INFORME CONTATO PARA RECEBER A COMISSÃO </h3>
     <input type="tel" id="whatsappInput" placeholder="Digite seu WhatsApp"maxlength="11">
     <div class="modal-buttons">
       <button style="background:#ccc;width:10px;" id="cancelarInfoBtn">Cancelar</button>
@@ -737,7 +737,7 @@ background:lime;
   <button style="flex:1; font-size:11px; height:35px;" id="btnCompartilharWhats">
     COMPARTILHER e GANHER ATE <span style="color:blue;font-size:12px;font-weight:1000;">R$ 1.000.00</span> SO COM INDICACAO
   </button>
-  <a href="https://achouganhou.netlify.app/demo" style="display:flex; border-radius:10px;text-decoration:none">
+  <a href="https://achouganhou.netlify.app/demo" style="display:flex; border-radius:10px;text-decoration:none;">
     <button style="background:#40f5ff;height:35px;text-decoration:none;">JOGAR DEMO</button>
   </a>
 </div>
@@ -858,33 +858,61 @@ document.getElementById('btnCompartilharWhats').addEventListener('click', () => 
 // Liberar crédito via código
 async function liberarCreditocod() {
   const codigo = document.getElementById("codigo").value.trim();
-  if (!codigo) { alert("Informe seu código!"); return; }
+  if (!codigo) {
+    alert("Informe seu código!");
+    return;
+  }
 
   try {
-    const codigoSnap = await get(child(ref(db), `codigos/${codigo}`));
-    if (!codigoSnap.exists()) { alert("❌ Código inválido!"); return; }
+    // Referência ao código no banco
+    const codigoRef = ref(db, `codigos/${codigo}`);
+    const codigoSnap = await get(codigoRef);
+
+    if (!codigoSnap.exists()) {
+      alert("❌ Código inválido!");
+      return;
+    }
 
     const dadosCodigo = codigoSnap.val();
-    if (dadosCodigo.usado) { alert("⚠️ Esse código já foi utilizado!"); return; }
 
-    // Atualiza saldo do usuário
-    await runTransaction(ref(db, `usuarios/${usuarioId}`), user => {
-      if(user) user.saldo = (user.saldo || 0) + dadosCodigo.valor;
-      return user;
+    if (dadosCodigo.usado) {
+      alert("⚠️ Esse código já foi utilizado!");
+      return;
+    }
+
+    // Atualiza saldo do usuário atual
+    const usuarioRefAtual = ref(db, `usuarios/${usuarioId}`);
+    await runTransaction(usuarioRefAtual, usuario => {
+      if (usuario) {
+        if (!usuario.saldo) usuario.saldo = 0;
+        usuario.saldo += dadosCodigo.valor;
+      }
+      return usuario;
     });
 
-    // Marca o código como usado
-    await update(ref(db, `codigos/${codigo}`), { usado: true });
+    // Atualiza interface
+    usuarioData.saldo = (usuarioData.saldo || 0) + dadosCodigo.valor;
+    btnSaldo.innerText = "Saldo Atual " + usuarioData.saldo.toFixed(2);
 
-    // Atualiza saldo na tela
-    document.getElementById('btnSaldo').innerText = "Saldo Atual " + ((usuarioData.saldo || 0) + dadosCodigo.valor).toFixed(2);
+    // Marca código como usado
+    await update(codigoRef, { usado: true });
 
     // Aplica 20% para quem indicou
-    if(usuarioData.indicadoPor) {
-      await runTransaction(ref(db, `usuarios/${usuarioData.indicadoPor}`), indicado => {
-        if(indicado) indicado.saldoGanhou = (indicado.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
+    if (usuarioData.indicadoPor) {
+      const indicadoRef = ref(db, `usuarios/${usuarioData.indicadoPor}`);
+      await runTransaction(indicadoRef, indicado => {
+        if (indicado) {
+          if (!indicado.saldoGanhou) indicado.saldoGanhou = 0;
+          indicado.saldoGanhou += dadosCodigo.valor * 0.2;
+        }
         return indicado;
       });
+
+      // Atualiza interface do saldoGanho caso seja o mesmo usuário
+      if (usuarioData.indicadoPor === usuarioId) {
+        usuarioData.saldoGanhou = (usuarioData.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
+        btnSaldoGanho.innerText = "Saldo / Saque Ganhou " + usuarioData.saldoGanhou.toFixed(2);
+      }
     }
 
     alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
@@ -896,7 +924,6 @@ async function liberarCreditocod() {
 
   document.getElementById("codigo").value = "";
 }
-
 window.liberarCreditocod = liberarCreditocod;
 
 // --- Elementos DOM ---
@@ -956,8 +983,7 @@ confirmarInfoBtn.addEventListener("click", () => {
   
 
   if (!whatsapp || isNaN(valor) || valor <= 0) {
-    alert("Preencha WhatsApp e valor corretamente!");
-    return;
+      return;
   }
 
   // Salvar no Firebase
@@ -970,7 +996,7 @@ confirmarInfoBtn.addEventListener("click", () => {
     valorCompra: valor,
     data: Date.now()
   }).then(() => {
-    alert("Compra registrada com sucesso!");
+    alert("Registrada com sucesso!");
     infoModal.style.display = "none";
     whatsappInput.value = "";
     valorCompraInput.value = "";
@@ -1172,7 +1198,7 @@ confirmarInfoBtn.addEventListener("click", () => {
     const link = localStorage.getItem("linkSelecionado");
 
     if (!whatsapp || !valor) {
-        alert("Informe o WhatsApp corretamente!");
+        alert("faltar so Mais um passo para jogar e Receber seus bonus!");
         return;
     }
 
@@ -1224,7 +1250,7 @@ async function liberarCredito() {
   const codigo = document.getElementById("codigo").value.trim();
 
   if (!codigo ) {
-    alert("Informe seu WhatsApp e o código!");
+    
     return;
   }
 
@@ -1460,19 +1486,7 @@ confirmarInfoBtn.addEventListener("click", () => {
   const valor = Number(localStorage.getItem("valorSelecionado"));
   if (!whatsapp) { return; }
 
-  // Registrar usuário e compra
-  let meuCodigo = localStorage.getItem("meuCodigo");
-  if (!meuCodigo) {
-    registrarUsuario("Jogador", whatsapp);
-    meuCodigo = localStorage.getItem("meuCodigo");
-  }
-  
-  // Registrar compra no Firebase
-  registrarCompra(whatsapp, valor);
-
-  // Mostrar link de indicação
-  const linkIndicacao = `https://achouganhou.netlify.app//achou1ganhou/?ref=${meuCodigo}`;
-  alert(`✅ Compra de R$${valor} realizada com sucesso!\n\nCompartilhe seu link de indicação:\n${linkIndicacao}`);
+ 
 
   // Fechar modal
   infoModal.style.display = 'none';
@@ -1497,7 +1511,7 @@ function hexParaRGB(hex){ return {r:parseInt(hex.slice(1,3),16), g:parseInt(hex.
 function aplicarCorFundo(){ const cor=gerarCorAleatoria(); document.body.style.backgroundColor=cor; const rgb=hexParaRGB(cor); const brilho=0.299*rgb.r+0.587*rgb.g+0.114*rgb.b; document.body.style.color=brilho<128?'#FFF':'#000'; }
 aplicarCorFundo();
 
-// --- WhatsApp Mask ---
+
 
 
 // --- Expor funções globalmente ---
