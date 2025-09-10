@@ -865,6 +865,65 @@ const saquesRef = ref(db, "saques");
 const abrirBtn = document.getElementById("abrirSaqueBtn");
 const geladeirasEl = document.getElementById('geladeiras');
 const premioEl = document.getElementById('premio');
+// --- Modal WhatsApp & Indicação ---
+
+
+
+const compartilharIndicacaoDiv = document.getElementById("compartilharIndicacao");
+const linkIndicacaoInput = document.getElementById("linkIndicacaoInput");
+const btnCompartilharWhats = document.getElementById("btnCompartilharWhats");
+
+// Inicialmente esconde botão de compartilhar
+compartilharIndicacaoDiv.style.display = "none";
+
+// Função para salvar WhatsApp e liberar o link
+async function salvarWhatsapp() {
+    const numero = whatsappInput.value.trim();
+    if (!numero) {
+        alert("Digite seu WhatsApp primeiro!");
+        return;
+    }
+
+    // Atualiza no Firebase
+    await update(ref(db, `usuarios/${usuarioId}`), { whatsapp: numero });
+
+    // Atualiza localStorage
+    localStorage.setItem("whatsapp", numero);
+
+    // Gera link de indicação
+    const link = `https://achouganhou.netlify.app/achou1ganhou/?ref=${usuarioId}`;
+    linkIndicacaoInput.value = link;
+
+    // Mostra botão de compartilhar
+    compartilharIndicacaoDiv.style.display = "flex";
+
+    // Fecha modal
+    infoModal.style.display = "none";
+}
+
+// Confirmação do WhatsApp
+confirmarInfoBtn.addEventListener("click", salvarWhatsapp);
+
+// Quando a página carregar, verifica se já tem WhatsApp salvo
+document.addEventListener("DOMContentLoaded", () => {
+    const numero = localStorage.getItem("whatsapp");
+    if (numero && usuarioId) {
+        linkIndicacaoInput.value =
+            `https://achouganhou.netlify.app/achou1ganhou/?ref=${usuarioId}`;
+        compartilharIndicacaoDiv.style.display = "flex";
+    }
+});
+
+// Compartilhar link no WhatsApp
+btnCompartilharWhats.addEventListener("click", () => {
+    const link = linkIndicacaoInput.value.trim();
+    if (!link) {
+        alert("Você precisa salvar o WhatsApp primeiro!");
+        return;
+    }
+    const msg = encodeURIComponent(`Confira meu link de indicação: ${link}`);
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+});
 
 // --- Gera ou recupera ID único do usuário ---
 let usuarioId = localStorage.getItem("usuarioId");
