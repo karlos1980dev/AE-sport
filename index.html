@@ -825,10 +825,51 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// --- Elementos DOM ---
+const msg = document.getElementById("mensagem");
+const btnSaldo = document.getElementById("btnSaldo");
+const btnSaldoGanho = document.getElementById("btnSaldoGanho");
+const modalSaque = document.getElementById("modalSaque");
+const cancelarBtn = document.getElementById("cancelarBtn");
+const enviarBtn = document.getElementById("enviarBtn");
+const valorInput = document.getElementById("valorInput");
+const nomeInput = document.getElementById("nomeInput");
+const pixInput = document.getElementById("pixInput");
+const listaSaques = document.getElementById("painelSaques") || document.createElement("ul");
+const btnCompra = document.getElementById('refreshBtn');
+const pixModal = document.getElementById('pixModal');
+const closePix = document.querySelector('.closePix');
+const valorBtns = document.querySelectorAll('.valor-btn');
+const whatsappInput = document.getElementById('whatsappInput');
+const infoModal = document.getElementById("infoModal");
+const cancelarInfoBtn = document.getElementById("cancelarInfoBtn");
+const confirmarInfoBtn = document.getElementById("confirmarInfoBtn");
+const hamburger = document.getElementById('hamburger');
+const menuModal = document.getElementById('menuModal');
+const closeMenu = document.querySelector('.closeMenu');
+const tabelaModal = document.getElementById("tabelaModal");
+const abrirTabela = document.getElementById("abrirTabela");
+const closeTabela = document.querySelector(".closeTabela");
+const transferirBtn = document.querySelector(".saldos-container button:nth-child(4)");
+const modalTransferir = document.getElementById("modalTransferir");
+const cancelarTransferencia = document.getElementById("cancelarTransferencia");
+const confirmarTransferencia = document.getElementById("confirmarTransferencia");
+const valorTransferirInput = document.getElementById("valorTransferir");
+const saldoDisponivel = document.getElementById("saldoDisponivel");
+const inputValor = document.getElementById('valorInput');
+// Referências do Firebase
+const saquesRef = ref(db, "saques");
+const abrirBtn = document.getElementById("abrirSaqueBtn");
+const geladeirasEl = document.getElementById('geladeiras');
+const premioEl = document.getElementById('premio');
 
-const usuarioId = "usuarioId1";
+// --- Gera ou recupera ID único do usuário ---
+let usuarioId = localStorage.getItem("usuarioId");
+if (!usuarioId) {
+  usuarioId = "user_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+  localStorage.setItem("usuarioId", usuarioId);
+}
 let usuarioData = {};
-
 // Carregar dados do usuário
 const usuarioRef = ref(db, `usuarios/${usuarioId}`);
 onValue(usuarioRef, snapshot => {
@@ -854,7 +895,15 @@ document.getElementById('btnCompartilharWhats').addEventListener('click', () => 
   const whatsappLink = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
   window.open(whatsappLink, '_blank');
 });
+// Captura ID do indicador pela URL
+const urlParams = new URLSearchParams(window.location.search);
+const indicadoPor = urlParams.get("indicadoPor");
 
+if (indicadoPor) {
+  update(ref(db, `usuarios/${usuarioId}`), {
+    indicadoPor: indicadoPor
+  });
+}
 // Liberar crédito via código
 async function liberarCreditocod() {
   const codigo = document.getElementById("codigo").value.trim();
@@ -894,7 +943,7 @@ async function liberarCreditocod() {
     usuarioData.saldo = (usuarioData.saldo || 0) + dadosCodigo.valor;
     btnSaldo.innerText = "Saldo Atual " + usuarioData.saldo.toFixed(2);
 
-    // Marca código como usado
+// Marca código como usado
     await update(codigoRef, { usado: true });
 
     // Aplica 20% para quem indicou
@@ -908,12 +957,13 @@ async function liberarCreditocod() {
         return indicado;
       });
 
-      // Atualiza interface do saldoGanho caso seja o mesmo usuário
-      if (usuarioData.indicadoPor === usuarioId) {
+      // Atualizar interface se o usuário logado for o indicador
+      if (usuarioId === usuarioData.indicadoPor) {
         usuarioData.saldoGanhou = (usuarioData.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
         btnSaldoGanho.innerText = "Saldo / Saque Ganhou " + usuarioData.saldoGanhou.toFixed(2);
       }
     }
+  
 
     alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
 
@@ -925,45 +975,6 @@ async function liberarCreditocod() {
   document.getElementById("codigo").value = "";
 }
 window.liberarCreditocod = liberarCreditocod;
-
-// --- Elementos DOM ---
-const msg = document.getElementById("mensagem");
-const btnSaldo = document.getElementById("btnSaldo");
-const btnSaldoGanho = document.getElementById("btnSaldoGanho");
-const modalSaque = document.getElementById("modalSaque");
-const cancelarBtn = document.getElementById("cancelarBtn");
-const enviarBtn = document.getElementById("enviarBtn");
-const valorInput = document.getElementById("valorInput");
-const nomeInput = document.getElementById("nomeInput");
-const pixInput = document.getElementById("pixInput");
-const listaSaques = document.getElementById("painelSaques") || document.createElement("ul");
-const btnCompra = document.getElementById('refreshBtn');
-const pixModal = document.getElementById('pixModal');
-const closePix = document.querySelector('.closePix');
-const valorBtns = document.querySelectorAll('.valor-btn');
-const whatsappInput = document.getElementById('whatsappInput');
-const infoModal = document.getElementById("infoModal");
-const cancelarInfoBtn = document.getElementById("cancelarInfoBtn");
-const confirmarInfoBtn = document.getElementById("confirmarInfoBtn");
-const hamburger = document.getElementById('hamburger');
-const menuModal = document.getElementById('menuModal');
-const closeMenu = document.querySelector('.closeMenu');
-const tabelaModal = document.getElementById("tabelaModal");
-const abrirTabela = document.getElementById("abrirTabela");
-const closeTabela = document.querySelector(".closeTabela");
-const transferirBtn = document.querySelector(".saldos-container button:nth-child(4)");
-const modalTransferir = document.getElementById("modalTransferir");
-const cancelarTransferencia = document.getElementById("cancelarTransferencia");
-const confirmarTransferencia = document.getElementById("confirmarTransferencia");
-const valorTransferirInput = document.getElementById("valorTransferir");
-const saldoDisponivel = document.getElementById("saldoDisponivel");
-const inputValor = document.getElementById('valorInput');
-// Referências do Firebase
-const saquesRef = ref(db, "saques");
-const abrirBtn = document.getElementById("abrirSaqueBtn");
-const geladeirasEl = document.getElementById('geladeiras');
-const premioEl = document.getElementById('premio');
-
 
 // Abrir modal
 btnCompra.addEventListener("click", () => {
@@ -1095,20 +1106,13 @@ let saldoGanho = Number(localStorage.getItem("saldoGanho")) || 0;
 let jogando = false;
 let efeitoAutomatico = null;
 let escolhas = [];
-
-// --- Mapear códigos de prêmio ---
-
-
-// --- Funções auxiliares ---
 // --- Atualizar valores na interface ---
 function atualizarSaldos(){
     btnSaldo.textContent = `Saldo Atual ${saldoAtual}`;
     btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho}`;
     saldoDisponivel.textContent = saldoGanho;
     localStorage.setItem("saldoAtual", saldoAtual);
-    localStorage.setItem("saldoGanho", saldoGanho);
-}
-
+    localStorage.setItem("saldoGanho", saldoGanho);}
 // --- Modais info ---
 cancelarInfoBtn.onclick = () => infoModal.style.display="none";
 confirmarInfoBtn.onclick = () => {
@@ -1139,18 +1143,12 @@ closeMenu.onclick = ()=> menuModal.style.display="none";
 abrirTabela.onclick = ()=> tabelaModal.style.display="flex";
 closeTabela.onclick = ()=> tabelaModal.style.display="none";
 
-// --- Modal Transferir ---
-
-
-// --- Modal Saque ---
 // --- Modal Saque ---
 btnSaldoGanho.onclick = () => {
     if (saldoGanho > 0) {
         modalSaque.style.display = "flex";
         valorInput.value = saldoGanho; // já preenche o valor no input
-    } else {
- 
-    }
+    } 
 };
 cancelarBtn.onclick = ()=> modalSaque.style.display="none";
 enviarBtn.onclick = ()=>{
@@ -1164,44 +1162,35 @@ enviarBtn.onclick = ()=>{
     // Salvar no Firebase
     const saqueRef = push(ref(db,'saques'));
     set(saqueRef,{
-        nome, pix, valor, data: Date.now()
-    });
+        nome, pix, valor, data: Date.now()  });
     saldoGanho = 0;
     atualizarSaldos();
     modalSaque.style.display="none";
-    nomeInput.value = pixInput.value = "";
-};
-
+    nomeInput.value = pixInput.value = "";};
 // --- PIX / Compra ---
 valorBtns.forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
-
         // Pega valor e link do botão
         const valor = Number(btn.dataset.valor);
         const link = btn.closest("a").getAttribute("href"); // pega link do <a>
-
         // Guarda no localStorage
         localStorage.setItem("valorSelecionado", valor);
         localStorage.setItem("linkSelecionado", link);
-
         // Fecha PIX e abre WhatsApp
         pixModal.style.display = 'none';
         infoModal.style.display = 'flex';
     });
 });
-
 // --- Confirmar WhatsApp e prosseguir ---
 confirmarInfoBtn.addEventListener("click", () => {
     const whatsapp = whatsappInput.value.trim();
     const valor = Number(localStorage.getItem("valorSelecionado"));
     const link = localStorage.getItem("linkSelecionado");
-
     if (!whatsapp || !valor) {
         alert("faltar so Mais um passo para jogar e Receber seus bonus!");
         return;
     }
-
     // Registrar compra no Firebase
     const transacaoRef = push(ref(db, 'saques'));
     set(transacaoRef, {
@@ -1214,11 +1203,9 @@ confirmarInfoBtn.addEventListener("click", () => {
     }).catch(err => {
         console.error("Erro ao salvar no Firebase:", err);
     });
-
     // Fecha modal e limpa input
     infoModal.style.display = "none";
     whatsappInput.value = "";
-
     // Redireciona pro link do botão clicado
     if (link) {
         window.location.href = link;
@@ -1226,91 +1213,63 @@ confirmarInfoBtn.addEventListener("click", () => {
         localStorage.removeItem("valorSelecionado");
     }
 });
-// --- Créditos via ticket ---
-
-
 // Referência aos códigos no Firebase
 const codigosRef = ref(db, "codigosDisponiveis");
 
-// Função para liberar crédito via código digitado
-// --- Função para liberar jogada após usar código ---
 function liberarMarcacao() {
     jogando = false;       // desbloqueia novas jogadas
     escolhas = [];         // reseta escolhas
-    atualizarSaldos();     // atualiza saldo na tela
-    document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false); // reabilita os rádios
+    atualizarSaldos();     // atualiza saldo na tela    document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false); // reabilita os rádios
     console.log("Jogada liberada após código!");
 }
-
 // Torna a função acessível globalmente (necessário em type="module")
 window.liberarMarcacao = liberarMarcacao;
-
 // --- Função de liberar crédito via código ---
 async function liberarCredito() {
   const codigo = document.getElementById("codigo").value.trim();
-
-  if (!codigo ) {
-    
+  if (!codigo ) {    
     return;
   }
-
   try {
     const dbRef = ref(db);
-
     // Busca código
     const snap = await get(child(dbRef, `codigos/${codigo}`));
-
     if (snap.exists()) {
       const dadosCodigo = snap.val();
-
       if (!dadosCodigo.usado) {
         // Atualiza saldo local
         saldoAtual += dadosCodigo.valor;
-
         // Atualiza saldo no Firebase
         const userRef = child(dbRef, `usuarios`);
         await set(userRef, { saldo: saldoAtual });
-
         // Marca o código como usado
         await update(child(dbRef, `codigos/${codigo}`), { usado: true });
-
         alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
-
         // Atualiza o saldo na tela
         atualizarSaldos();
-
         // Libera jogada
         liberarMarcacao();
-
       } else {
         alert("⚠️ Esse código já foi utilizado!");
       }
     } else {
-      alert("❌ Código inválido!");
-    }
+      alert("❌ Código inválido!");  }
   } catch (error) {
     console.error("Erro Firebase:", error);
-    alert("Erro ao validar código.");
-  }
-
-  document.getElementById("codigo").value = "";
-}
+    alert("Erro ao validar código.");}
+  document.getElementById("codigo").value = "";}
 // Torna a função global para chamada via botão
 window.liberarCredito = liberarCredito;
 // --- Geladeiras ---
-
 function abrirGeladeira(geladeira) {
   const geladeiras = document.querySelectorAll(".geladeira");
   const index = Array.from(geladeiras).indexOf(geladeira);
-
   // Pega o modo selecionado
   const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
   if (!modoSelecionado) return;
-
   let custo = 0;
   let premio = 0;
   let limiteEscolhas = 1;
-
   // Define custo, prêmio e limite de geladeiras conforme o modo
   if (modoSelecionado === "0.10") { custo = 0.10; premio = 2; limiteEscolhas = 2; }
   else if (modoSelecionado === "0.50") { custo = 0.50; premio = 3; limiteEscolhas = 2; }
@@ -1318,38 +1277,26 @@ function abrirGeladeira(geladeira) {
   else if (modoSelecionado === "2") { custo = 2; premio = 15; limiteEscolhas = 2; }
   else if (modoSelecionado === "5") { custo = 5; premio = 20; limiteEscolhas = 3; }
   else if (modoSelecionado === "10") { custo = 10; premio = 30; limiteEscolhas = 4; }
-
-  // Verifica se há saldo suficiente para jogar
+ // Verifica se há saldo suficiente para jogar
   if (saldoAtual < custo) {
     msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
-    return;
-  }
-
+    return; }
   if (jogando) return;
-
   // Evita marcar a mesma geladeira duas vezes
   if (escolhas.includes(index)) return;
-
   // Marca a geladeira escolhida
   escolhas.push(index);
   geladeira.classList.add("aberta");
   geladeira.querySelector(".interior").textContent = "✅ Marcada";
-
-  // Desativa os rádios ao iniciar a rodada
-  document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
-
+  // Desativa os rádios ao iniciar a rodada document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
   // Continua selecionando até atingir o limite do modo
   if (escolhas.length < limiteEscolhas) return;
-
   // Cobra o saldo (arredondando para evitar floats estranhos)
   saldoAtual -= custo;
   saldoAtual = Math.round(saldoAtual * 100) / 100;
-
   jogando = true;
-
   // Sorteia brinde
   const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-
   // Revela geladeiras escolhidas
   escolhas.forEach(idx => {
     const g = geladeiras[idx];
@@ -1363,7 +1310,6 @@ function abrirGeladeira(geladeira) {
       interior.textContent = "❌ Errou!";
     }
   });
-
   // Se nenhuma geladeira escolhida foi premiada, mostra onde estava
   if (!escolhas.includes(brindeIndex)) {
     const geladeiraPremiada = geladeiras[brindeIndex];
@@ -1375,9 +1321,7 @@ function abrirGeladeira(geladeira) {
         geladeiraPremiada.classList.remove("aberta", "premiada");
         interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
       }, 1500);
-    }, 800);
-  }
-
+    }, 800); }
   // Resetar rodada
   setTimeout(() => {
     escolhas.forEach(idx => {
@@ -1387,14 +1331,11 @@ function abrirGeladeira(geladeira) {
     });
     escolhas = [];
     jogando = false;
-
-    // Reabilita os rádios
-    document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
+    // Reabilita os rádios document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
 
     msg.textContent = saldoAtual >= Math.min(0.10, 2) ? "Pode jogar de novo!" : "Saldo insuficiente!";
     atualizarSaldos();
   }, 2200);
-
   atualizarSaldos();
 }
 // --- Efeito automático ---
@@ -1431,10 +1372,7 @@ geladeiras.forEach(geladeira => {
 
         if (geladeira.dataset.temBrinde === "true") {
             geladeira.querySelector('.interior').innerHTML = "🎁 Você ganhou!";
-        } else {
-            geladeira.querySelector('.interior').innerHTML = "❌ Vazio";
-
-            // mostra onde estava o brinde
+        } else {         geladeira.querySelector('.interior').innerHTML = "❌ Vazio";            // mostra onde estava o brinde
             geladeiras.forEach(g => {
                 if (g.dataset.temBrinde === "true") {
                     g.querySelector('.interior').innerHTML = "🎁 Tava aqui!";
@@ -1447,47 +1385,36 @@ geladeiras.forEach(geladeira => {
 function pararEfeitoAutomatico(){
   if(efeitoAutomatico){ clearInterval(efeitoAutomatico); efeitoAutomatico=null; }
 }
-
-
 // --- Abrir modal PIX ---
 btnCompra.addEventListener('click', () => {
   pixModal.style.display = 'flex';
 });
-
 // --- Fechar modal PIX ---
 closePix.addEventListener('click', () => {
   pixModal.style.display = 'none';
 });
-
 // --- Clicar em valor do PIX ---
 valorBtns.forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.preventDefault();
     const valorSelecionado = Number(btn.dataset.valor);
-
     // Salvar valor temporário
     localStorage.setItem("valorSelecionado", valorSelecionado);
-
     // Fecha modal PIX e abre modal WhatsApp
     pixModal.style.display = 'none';
     infoModal.style.display = 'flex';
   });
 });
-
 // --- Fechar modal WhatsApp ---
 cancelarInfoBtn.addEventListener('click', () => {
   infoModal.style.display = 'none';
   whatsappInput.value = '';
 });
-
 // --- Confirmar WhatsApp ---
 confirmarInfoBtn.addEventListener("click", () => {
   const whatsapp = whatsappInput.value.trim();
   const valor = Number(localStorage.getItem("valorSelecionado"));
   if (!whatsapp) { return; }
-
- 
-
   // Fechar modal
   infoModal.style.display = 'none';
   whatsappInput.value = '';
@@ -1499,7 +1426,6 @@ window.addEventListener('click',(e)=>{if(e.target===menuModal) menuModal.style.d
 abrirTabela.addEventListener('click',(e)=>{e.preventDefault(); tabelaModal.style.display='flex';});
 closeTabela.addEventListener('click',()=>{tabelaModal.style.display='none';});
 window.addEventListener('click',(e)=>{if(e.target===tabelaModal) tabelaModal.style.display='none';});
-
 // --- Inicialização ---
 document.querySelectorAll(".geladeira").forEach(g=>g.addEventListener("click",()=>abrirGeladeira(g)));
 atualizarSaldos();
@@ -1510,10 +1436,6 @@ function gerarCorAleatoria(){ const letras='0123456789ABCDEF'; let cor='#'; for(
 function hexParaRGB(hex){ return {r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16)};}
 function aplicarCorFundo(){ const cor=gerarCorAleatoria(); document.body.style.backgroundColor=cor; const rgb=hexParaRGB(cor); const brilho=0.299*rgb.r+0.587*rgb.g+0.114*rgb.b; document.body.style.color=brilho<128?'#FFF':'#000'; }
 aplicarCorFundo();
-
-
-
-
 // --- Expor funções globalmente ---
 window.liberarCredito=liberarCredito;
 window.abrirGeladeira=abrirGeladeira;
@@ -1526,7 +1448,6 @@ function mostrarLinkIndicacao(codigo) {
   inputLink.value = link;
   divCompartilhar.style.display = "flex";
 }
-
 // Evento do botão compartilhar
 document.getElementById("btnCompartilharWhats").addEventListener("click", () => {
   const link = document.getElementById("linkIndicacaoInput").value;
@@ -1564,7 +1485,6 @@ const DENOMINADOR = 500;
 cancelarTransferencia.addEventListener("click", () => {
   modalTransferir.style.display = "none";
 });
-
 confirmarTransferencia.addEventListener("click", () => {
   const valor = Number(valorTransferirInput.value);
   if(valor <= 0 || valor > saldoGanho){
@@ -1590,10 +1510,6 @@ function abrirModalTransferencia() {
         alert("Você não possui saldo ganho para transferir!");
     }
 }
-
-// Evento do botão Transferir
-
-
 // Cancelar transferência
 cancelarTransferencia.addEventListener("click", () => {
     modalTransferir.style.display = "none";
@@ -1623,24 +1539,16 @@ function processarSaque() {
         pixInput.value = "";
         valorInput.value = ""; // Limpa o valor do saque
     } else {
-        alert("Saldo insuficiente!");
-  }
-}
+        alert("Saldo insuficiente!");}}
 valorBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const link = btn.getAttribute('data-link');
-        if(link) {
-            window.location.href = link;
-        }
-    });
-});
+        if(link) { window.location.href = link; }   });});
 // Pix Modal
 closePix.addEventListener("click", () => pixModal.style.display = "none");
-
 // Menu
 hamburger.addEventListener("click", () => menuModal.style.display = "flex");
 closeMenu.addEventListener("click", () => menuModal.style.display = "none");
-
 // Tabela de Prêmios
 abrirTabela.addEventListener("click", () => tabelaModal.style.display = "flex");
 closeTabela.addEventListener("click", () => tabelaModal.style.display = "none");
@@ -1654,11 +1562,8 @@ confirmarInfoBtn.addEventListener("click", () => {
   } 
 });
 cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none");
-
   // Captura número digitado no modal
-  let whatsappUsuario = "";
-
-  document.getElementById("confirmarInfoBtn").addEventListener("click", () => {
+  let whatsappUsuario = ""; document.getElementById("confirmarInfoBtn").addEventListener("click", () => {
     const input = document.getElementById("whatsappInput").value.trim();
     if (input === "") {
       
@@ -1700,10 +1605,6 @@ function limpa(){
     localStorage.clear();
     alert("limpo saldos");
 }
-     
-
-
-
 // Exemplo: botão COMPRAR ACESSO só pulsa quando saldo e saldoGanho = 0
 function atualizarBotaoPulsar() {
   const saldoAtual = parseFloat(btnSaldo.textContent.replace(/\D/g,'') || 0);
@@ -1715,16 +1616,12 @@ function atualizarBotaoPulsar() {
     btnCompra.classList.remove("pulsar-btn");
   }
 }
-
-// Atualiza toda vez que o saldo muda
-
 // Inicializa o botão pulsante
 atualizarBotaoPulsar();
 function limpar(){
     localStorage.clear()
     alert("limpo com sucesso ");
 };
-
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </body>
