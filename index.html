@@ -674,25 +674,25 @@ background:lime;
   <!-- Linha de valores menores -->
   <div style="display:flex; gap:10px; justify-content:center;">
     <input type="radio" name="modo" id="modo01" value="0.10">
-    <label for="modo01">R$ 0.10 </label>
+    <label for="modo01">Cust 0.10 (R$ 2)</label>
 
     <input type="radio" name="modo" id="modo05" value="0.50">
-    <label for="modo05">R$ 0.50</label>
+    <label for="modo05">Cust 0.50 (R$ 5)</label>
 
     <input type="radio" name="modo" id="modo1" value="1.00">
-    <label for="modo1">R$ 1.00</label>
+    <label for="modo1">Cust 1.00 (R$ 10)</label>
   </div>
 
   <!-- Linha de valores maiores -->
   <div style="display:flex; gap:10px; justify-content:center;">
     <input type="radio" name="modo" id="modo2" value="2">
-    <label for="modo2">R$ 2.00</label>
+    <label for="modo2">Cust 2.00 (R$ 15)</label>
 
     <input type="radio" name="modo" id="modo3" value="5">
-    <label for="modo3">R$ 5.00</label>
+    <label for="modo3">Cust$ 5.00 (R$ 20)</label>
 
     <input type="radio" name="modo" id="modo4" value="10">
-    <label for="modo4">R$ 10.00</label>
+    <label for="modo4">Cust 10.00 (R$ 30)</label>
   </div>
 
 </div>
@@ -735,10 +735,10 @@ background:lime;
  <div id="compartilharIndicacao" style="display:flex; gap:10px; max"-width:100%; font-size:12px; height:35px; margin:10px;">
   <input type="hidden" id="linkIndicacaoInput" readonly style="display:none" />
   <button style="flex:1; font-size:11px; height:35px;" id="btnCompartilharWhats">
-    COMPARTILHER e GANHER ATE R$ 100.00 POR INDICACAO
+    COMPARTILHER e GANHER ATE <span style="color:blue;font-size:12px;font-weight:1000;">R$ 1.000.00</span> SO COM INDICACAO
   </button>
-  <a href="https://achouganhou.netlify.app/demo" style="display:flex;">
-    <button style="background:#40f5ff;height:35px;">JOGAR DEMO</button>
+  <a href="https://achouganhou.netlify.app/demo" style="display:flex; border-radius:10px;text-decoration:none">
+    <button style="background:#40f5ff;height:35px;text-decoration:none;">JOGAR DEMO</button>
   </a>
 </div>
 </div>
@@ -791,6 +791,9 @@ background:lime;
     <span class="closeTabela" style="cursor:pointer; float:right; font-size:20px;">&times;</span>
     <h3 style="color:gold;">📊 TABELA DE PRÊMIOS</h3>
     <ul style="list-style:none; padding:0; font-size:16px; text-align:left; line-height:1.8;">
+        <li>✅ Marque 2  → Custa R$ 0.10 → Ganha →  <b>R$ 2</b></li>
+      <li>✅ Marque 2→ Custa R$ 0.50 →  Ganha →  <b>R$ 5.00</b></li>
+      <li>✅ Marque 3 → Custa R$ 1.00 → Ganha →  <b>R$ 10</b></li>
       <li>✅ Marque 2  → Custa R$ 2.00 → Ganha →  <b>R$ 16</b></li>
       <li>✅ Marque 3 → Custa R$ 5.00 →  Ganha →  <b>R$ 20</b></li>
       <li>✅ Marque 4 → Custa R$ 10.00 → Ganha →  <b>R$ 30</b></li>
@@ -1285,8 +1288,8 @@ function abrirGeladeira(geladeira) {
   // Define custo, prêmio e limite de geladeiras conforme o modo
   if (modoSelecionado === "0.10") { custo = 0.10; premio = 2; limiteEscolhas = 2; }
   else if (modoSelecionado === "0.50") { custo = 0.50; premio = 3; limiteEscolhas = 2; }
-  else if (modoSelecionado === "1.00") { custo = 1; premio = 4; limiteEscolhas = 3; }
-  else if (modoSelecionado === "2") { custo = 2; premio = 16; limiteEscolhas = 2; }
+  else if (modoSelecionado === "1.00") { custo = 1; premio = 10; limiteEscolhas = 3; }
+  else if (modoSelecionado === "2") { custo = 2; premio = 15; limiteEscolhas = 2; }
   else if (modoSelecionado === "5") { custo = 5; premio = 20; limiteEscolhas = 3; }
   else if (modoSelecionado === "10") { custo = 10; premio = 30; limiteEscolhas = 4; }
 
