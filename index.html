@@ -806,10 +806,10 @@ background:lime;
 <script type="module">
 // --- Inicialização Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { 
-  getDatabase, ref, push, set, onValue, get, update, child, runTransaction 
+import {
+  getDatabase, ref, push, set, onValue, get, child, update, runTransaction,
+  query, orderByChild, equalTo
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
 // --- Config Firebase ---
 const firebaseConfig = {
   apiKey: "AIzaSyBw8nq_MTcdc91y0nG7jeTvROsAaz1Hj8U",
