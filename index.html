@@ -600,6 +600,9 @@ background:lime;
 
 </style></head>
 <body>
+    <div id="notificacaoIndicacao" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; display: none; z-index: 9999; font-weight: bold;">
+  Indicador recebeu 20% do valor!
+</div>
 <div class="container-principal">
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
@@ -905,74 +908,67 @@ if (indicadoPor) {
   });
 }
 // Liberar crédito via código
-async function liberarCreditocod() {
-  const codigo = document.getElementById("codigo").value.trim();
-  if (!codigo) {
-    alert("Informe seu código!");
-    return;
-  }
-
+async function liberarCreditocod(codigo) {
   try {
-    // Referência ao código no banco
+    // Referências
     const codigoRef = ref(db, `codigos/${codigo}`);
-    const codigoSnap = await get(codigoRef);
+    const usuarioRef = ref(db, `usuarios/${usuarioId}`);
 
+    // Busca dados do código
+    const codigoSnap = await get(codigoRef);
     if (!codigoSnap.exists()) {
-      alert("❌ Código inválido!");
+      alert("Código inválido!");
       return;
     }
-
     const dadosCodigo = codigoSnap.val();
 
+    // Verifica se o código já foi usado
     if (dadosCodigo.usado) {
-      alert("⚠️ Esse código já foi utilizado!");
+      alert("Código já foi utilizado!");
       return;
     }
 
-    // Atualiza saldo do usuário atual
-    const usuarioRefAtual = ref(db, `usuarios/${usuarioId}`);
-    await runTransaction(usuarioRefAtual, usuario => {
+    // Atualiza saldo do usuário que resgatou
+    await runTransaction(usuarioRef, usuario => {
       if (usuario) {
-        if (!usuario.saldo) usuario.saldo = 0;
-        usuario.saldo += dadosCodigo.valor;
+        usuario.saldo = (usuario.saldo || 0) + dadosCodigo.valor;
       }
       return usuario;
     });
 
-    // Atualiza interface
-    usuarioData.saldo = (usuarioData.saldo || 0) + dadosCodigo.valor;
-    btnSaldo.innerText = "Saldo Atual " + usuarioData.saldo.toFixed(2);
+    // Marca código como usado
+    await set(codigoRef, { ...dadosCodigo, usado: true });
 
-// Marca código como usado
-    await update(codigoRef, { usado: true });
-
-    // Aplica 20% para quem indicou
-    if (usuarioData.indicadoPor) {
-      const indicadoRef = ref(db, `usuarios/${usuarioData.indicadoPor}`);
-      await runTransaction(indicadoRef, indicado => {
-        if (indicado) {
-          if (!indicado.saldoGanhou) indicado.saldoGanhou = 0;
-          indicado.saldoGanhou += dadosCodigo.valor * 0.2;
-        }
-        return indicado;
-      });
-
-      // Atualizar interface se o usuário logado for o indicador
-      if (usuarioId === usuarioData.indicadoPor) {
-        usuarioData.saldoGanhou = (usuarioData.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
-        btnSaldoGanho.innerText = "Saldo / Saque Ganhou " + usuarioData.saldoGanhou.toFixed(2);
-      }
+  // Aplica 20% para quem indicou
+if (dadosCodigo.indicadoPor) {
+  const indicadoRef = ref(db, `usuarios/${dadosCodigo.indicadoPor}`);
+  await runTransaction(indicadoRef, indicado => {
+    if (indicado) {
+      indicado.saldoGanhou = (indicado.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
     }
-  
+    return indicado;
+  });
 
-    alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
+  // Mostra notificação
+  const notificacao = document.getElementById("notificacaoIndicacao");
+  notificacao.style.display = "block";
+  setTimeout(() => {
+    notificacao.style.display = "none";
+  }, 3000); // some após 3 segundos
+}
+
+    // Atualiza interface do usuário atual
+    const usuarioSnap = await get(usuarioRef);
+    const usuarioData = usuarioSnap.val() || {};
+    btnSaldo.innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
+    btnSaldoGanho.innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
+
+    alert("Crédito liberado com sucesso!");
 
   } catch (error) {
-    console.error("Erro Firebase:", error);
-    alert("Erro ao validar código.");
+    console.error("Erro ao liberar crédito:", error);
+    alert("Ocorreu um erro ao liberar o crédito!");
   }
-
-  document.getElementById("codigo").value = "";
 }
 window.liberarCreditocod = liberarCreditocod;
 
@@ -1108,11 +1104,14 @@ let efeitoAutomatico = null;
 let escolhas = [];
 // --- Atualizar valores na interface ---
 function atualizarSaldos(){
-    btnSaldo.textContent = `Saldo Atual ${saldoAtual}`;
-    btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho}`;
+    btnSaldo.textContent = `Saldo Atual ${saldoAtual.toFixed(2)}`;
+    btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho.toFixed(2)}`;
     saldoDisponivel.textContent = saldoGanho;
     localStorage.setItem("saldoAtual", saldoAtual);
-    localStorage.setItem("saldoGanho", saldoGanho);}
+    localStorage.setItem("saldoGanho", saldoGanho);
+
+    atualizarBotaoPulsar(); // ✅ chama aqui
+}
 // --- Modais info ---
 cancelarInfoBtn.onclick = () => infoModal.style.display="none";
 confirmarInfoBtn.onclick = () => {
@@ -1361,27 +1360,7 @@ const geladeiras = document.querySelectorAll('.geladeira');
 const indiceBrinde = Math.floor(Math.random() * geladeiras.length);
 geladeiras[indiceBrinde].dataset.temBrinde = "true";
 
-let jaSelecionou = false; // impede múltiplos cliques
 
-geladeiras.forEach(geladeira => {
-    geladeira.addEventListener('click', () => {
-        if (jaSelecionou) return; // já selecionou, bloqueia
-        jaSelecionou = true;
-
-        geladeira.classList.add('aberta');
-
-        if (geladeira.dataset.temBrinde === "true") {
-            geladeira.querySelector('.interior').innerHTML = "🎁 Você ganhou!";
-        } else {         geladeira.querySelector('.interior').innerHTML = "❌ Vazio";            // mostra onde estava o brinde
-            geladeiras.forEach(g => {
-                if (g.dataset.temBrinde === "true") {
-                    g.querySelector('.interior').innerHTML = "🎁 Tava aqui!";
-                    g.classList.add('premiada');
-                }
-            });
-        }
-    });
-});
 function pararEfeitoAutomatico(){
   if(efeitoAutomatico){ clearInterval(efeitoAutomatico); efeitoAutomatico=null; }
 }
