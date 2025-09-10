@@ -1,0 +1,15 @@
+{
+  "name": "achou-ganhou-backend",
+  "version": "1.0.0",
+  "description": "Integração Mercado Pago + Firebase",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "mercadopago": "^1.5.16",
+    "firebase": "^10.12.2"
+  }
+}
