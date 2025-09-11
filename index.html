@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="stylesheet.css" media="screen" />
-<title>ACHOU GANHOU </title>
+<title>ACHOU 1 GANHOU </title>
 <style>
 body{
 margin:0; height:100dvh; display:grid; place-items:center;
@@ -656,21 +656,7 @@ background:lime;
     <button id="btnSaldoGanho">Saldo / Saque Ganhou 0</button>  
 </div>
 
-<div class="wrap" style="width:100%;">
-  <div class="painel" style="display:flex; align-items:center; justify-content:space-between;background:#222;padding:10px; border-radius:5px;color:white; font-weight:bold; width:90%; margin:5px;">
-    
-    <!-- Esquerda -->
-    <div style="display:flex; align-items:center; gap:5px;">
-      <label>ONLINE</label>
-      <span class="verde" id="valor" style="color:lime;">108</span>
-      <span class="vermelho" style="color:white;">/</span><span style="color:red;"> 500</span>
-    </div>
 
-    <!-- Direita -->
-    <p id="mensagem" style="margin:0; color:yellow; display:flex; align-items:center;">ACHOU GANHOU</p>
-
-  </div>
-</div>
 
 <div id="modosJogo" style="display:flex; flex-direction:column; gap:10px;">
 
@@ -706,7 +692,21 @@ background:lime;
 </div>
 
 
+<div class="wrap" style="width:100%;padding:5px;">
+  <div class="painel" style="display:flex; align-items:center; justify-content:space-between;background:#222;padding:10px; border-radius:5px;color:white; font-weight:bold; width:90%; margin:5px;">
+    
+    <!-- Esquerda -->
+    <div style="display:flex; align-items:center; gap:5px;">
+      <label>ONLINE</label>
+      <span class="verde" id="valor" style="color:lime;">108</span>
+      <span class="vermelho" style="color:white;">/</span><span style="color:red;"> 500</span>
+    </div>
 
+    <!-- Direita -->
+    <p id="mensagem" style="margin:0; color:yellow; display:flex; align-items:center;">ACHOU GANHOU</p>
+
+  </div>
+</div>
 <!-- Geladeiras -->
 <div class="geladeiras">
   <div class="geladeira" onclick="abrirGeladeira(this)"><div class="porta"></div><div class="interior">Geladeira 1</div></div>
@@ -1275,40 +1275,67 @@ function liberarMarcacao() {
 // Torna a função acessível globalmente (necessário em type="module")
 window.liberarMarcacao = liberarMarcacao;
 // --- Função de liberar crédito via código ---
+// --- Função de liberar crédito via código (com comissão) ---
 async function liberarCredito() {
   const codigo = document.getElementById("codigo").value.trim();
-  if (!codigo ) {    
-    return;
-  }
+  if (!codigo) return;
+
   try {
-    const dbRef = ref(db);
-    // Busca código
-    const snap = await get(child(dbRef, `codigos/${codigo}`));
-    if (snap.exists()) {
-      const dadosCodigo = snap.val();
-      if (!dadosCodigo.usado) {
-        // Atualiza saldo local
-        saldoAtual += dadosCodigo.valor;
-        // Atualiza saldo no Firebase
-        const userRef = child(dbRef, `usuarios`);
-        await set(userRef, { saldo: saldoAtual });
-        // Marca o código como usado
-        await update(child(dbRef, `codigos/${codigo}`), { usado: true });
-        alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
-        // Atualiza o saldo na tela
-        atualizarSaldos();
-        // Libera jogada
-        liberarMarcacao();
-      } else {
-        alert("⚠️ Esse código já foi utilizado!");
+    const codigoRef = ref(db, `codigos/${codigo}`);
+    const usuarioRef = ref(db, `usuarios/${usuarioId}`);
+
+    const snap = await get(codigoRef);
+    if (!snap.exists()) {
+      alert("❌ Código inválido!");
+      return;
+    }
+
+    const dadosCodigo = snap.val();
+    if (dadosCodigo.usado) {
+      alert("⚠️ Esse código já foi utilizado!");
+      return;
+    }
+
+    // Atualiza saldo do usuário que resgatou
+    await runTransaction(usuarioRef, (usuario) => {
+      if (usuario) {
+        usuario.saldo = (usuario.saldo || 0) + dadosCodigo.valor;
       }
-    } else {
-      alert("❌ Código inválido!");  }
+      return usuario;
+    });
+
+    // Marca código como usado
+    await update(codigoRef, { usado: true });
+
+    // Aplica comissão de 20% para quem indicou
+    const indicadoPorId = dadosCodigo.indicadoPor || usuarioData.indicadoPor;
+    if (indicadoPorId) {
+      await runTransaction(ref(db, `usuarios/${indicadoPorId}`), (indicador) => {
+        if (indicador) {
+          indicador.saldoGanhou = (indicador.saldoGanhou || 0) + (dadosCodigo.valor * 0.2);
+        }
+        return indicador;
+      });
+    }
+
+    // Atualiza interface
+    const usuarioSnap = await get(usuarioRef);
+    const dadosUsuario = usuarioSnap.val() || {};
+    saldoAtual = dadosUsuario.saldo || 0;
+    saldoGanho = dadosUsuario.saldoGanhou || 0;
+    atualizarSaldos();
+
+    alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
+
+    liberarMarcacao();
+
   } catch (error) {
     console.error("Erro Firebase:", error);
-    alert("Erro ao validar código.");}
-  document.getElementById("codigo").value = "";}
-// Torna a função global para chamada via botão
+    alert("Erro ao validar código.");
+  }
+
+  document.getElementById("codigo").value = "";
+}
 window.liberarCredito = liberarCredito;
 // --- Geladeiras ---
 function abrirGeladeira(geladeira) {
