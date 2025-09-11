@@ -860,15 +860,9 @@ const confirmarTransferencia = document.getElementById("confirmarTransferencia")
 const valorTransferirInput = document.getElementById("valorTransferir");
 const saldoDisponivel = document.getElementById("saldoDisponivel");
 const inputValor = document.getElementById('valorInput');
-// Referências do Firebase
 const saquesRef = ref(db, "saques");
 const abrirBtn = document.getElementById("abrirSaqueBtn");
 const geladeirasEl = document.getElementById('geladeiras');
-const premioEl = document.getElementById('premio');
-// --- Modal WhatsApp & Indicação ---
-
-
-
 const compartilharIndicacaoDiv = document.getElementById("compartilharIndicacao");
 const linkIndicacaoInput = document.getElementById("linkIndicacaoInput");
 const btnCompartilharWhats = document.getElementById("btnCompartilharWhats");
@@ -967,67 +961,65 @@ if (indicadoPor) {
   });
 }
 // Liberar crédito via código
+// Função para liberar crédito via código e aplicar comissão
 async function liberarCreditocod(codigo) {
-  try {
-    // Referências
-    const codigoRef = ref(db, `codigos/${codigo}`);
-    const usuarioRef = ref(db, `usuarios/${usuarioId}`);
+    try {
+        const codigoRef = ref(db, `codigos/${codigo}`);
+        const usuarioRef = ref(db, `usuarios/${usuarioId}`);
 
-    // Busca dados do código
-    const codigoSnap = await get(codigoRef);
-    if (!codigoSnap.exists()) {
-      alert("Código inválido!");
-      return;
+        const codigoSnap = await get(codigoRef);
+        if (!codigoSnap.exists()) {
+            alert("Código inválido!");
+            return;
+        }
+        const dadosCodigo = codigoSnap.val();
+
+        if (dadosCodigo.usado) {
+            alert("Código já foi utilizado!");
+            return;
+        }
+
+        // Atualiza saldo do usuário que resgatou
+        await runTransaction(usuarioRef, usuario => {
+            if (usuario) {
+                usuario.saldo = (usuario.saldo || 0) + dadosCodigo.valor;
+            }
+            return usuario;
+        });
+
+        // Marca código como usado
+        await update(codigoRef, { usado: true });
+
+        // Aplica comissão de 20% para quem indicou
+        const indicadoPorId = dadosCodigo.indicadoPor || usuarioData.indicadoPor;
+        if (indicadoPorId) {
+            await runTransaction(ref(db, `usuarios/${indicadoPorId}`), indicado => {
+                if (indicado) {
+                    indicado.saldoGanhou = (indicado.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
+                }
+                return indicado;
+            });
+
+            if (notificacaoIndicacao) {
+                notificacaoIndicacao.style.display = "block";
+                setTimeout(() => {
+                    notificacaoIndicacao.style.display = "none";
+                }, 3000);
+            }
+        }
+
+        // Atualiza interface do usuário
+        const usuarioSnap = await get(usuarioRef);
+        const usuarioData = usuarioSnap.val() || {};
+        btnSaldo.innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
+        btnSaldoGanho.innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
+
+        alert("Crédito liberado com sucesso!");
+
+    } catch (error) {
+        console.error("Erro ao liberar crédito:", error);
+        alert("Ocorreu um erro ao liberar o crédito!");
     }
-    const dadosCodigo = codigoSnap.val();
-
-    // Verifica se o código já foi usado
-    if (dadosCodigo.usado) {
-      alert("Código já foi utilizado!");
-      return;
-    }
-
-    // Atualiza saldo do usuário que resgatou
-    await runTransaction(usuarioRef, usuario => {
-      if (usuario) {
-        usuario.saldo = (usuario.saldo || 0) + dadosCodigo.valor;
-      }
-      return usuario;
-    });
-
-    // Marca código como usado
-    await set(codigoRef, { ...dadosCodigo, usado: true });
-
-  // Aplica 20% para quem indicou
-if (dadosCodigo.indicadoPor) {
-  const indicadoRef = ref(db, `usuarios/${dadosCodigo.indicadoPor}`);
-  await runTransaction(indicadoRef, indicado => {
-    if (indicado) {
-      indicado.saldoGanhou = (indicado.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
-    }
-    return indicado;
-  });
-
-  // Mostra notificação
-  const notificacao = document.getElementById("notificacaoIndicacao");
-  notificacao.style.display = "block";
-  setTimeout(() => {
-    notificacao.style.display = "none";
-  }, 3000); // some após 3 segundos
-}
-
-    // Atualiza interface do usuário atual
-    const usuarioSnap = await get(usuarioRef);
-    const usuarioData = usuarioSnap.val() || {};
-    btnSaldo.innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
-    btnSaldoGanho.innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
-
-    alert("Crédito liberado com sucesso!");
-
-  } catch (error) {
-    console.error("Erro ao liberar crédito:", error);
-    alert("Ocorreu um erro ao liberar o crédito!");
-  }
 }
 window.liberarCreditocod = liberarCreditocod;
 
@@ -1367,6 +1359,7 @@ function abrirGeladeira(geladeira) {
     } else {
       interior.textContent = "❌ Errou!";
     }
+    
   });
   // Se nenhuma geladeira escolhida foi premiada, mostra onde estava
   if (!escolhas.includes(brindeIndex)) {
@@ -1559,7 +1552,68 @@ btnSaldoGanho.addEventListener('click', () => {
         alert("Você não tem saldo disponível para saque!");
     }
 });
+// Função para processar pagamento via botão PIX/valor
+async function processarCompra(valor, usuarioId, indicadoPorId = null) {
+    try {
+        const usuarioRef = ref(db, `usuarios/${usuarioId}`);
 
+        // Atualiza saldo do usuário que comprou
+        await runTransaction(usuarioRef, usuario => {
+            if (usuario) {
+                usuario.saldo = (usuario.saldo || 0) + valor;
+            }
+            return usuario;
+        });
+
+        // Atualiza saldo do indicador com 20% de comissão
+        if (indicadoPorId) {
+            const indicadoRef = ref(db, `usuarios/${indicadoPorId}`);
+            await runTransaction(indicadoRef, indicado => {
+                if (indicado) {
+                    indicado.saldoGanhou = (indicado.saldoGanhou || 0) + valor * 0.2;
+                }
+                return indicado;
+            });
+
+            // Exibe notificação de comissão
+            if (document.getElementById("notificacaoIndicacao")) {
+                const notif = document.getElementById("notificacaoIndicacao");
+                notif.style.display = "block";
+                setTimeout(() => {
+                    notif.style.display = "none";
+                }, 3000);
+            }
+        }
+
+        // Atualiza valores na interface
+        const usuarioSnap = await get(usuarioRef);
+        const usuarioData = usuarioSnap.val() || {};
+        document.getElementById("btnSaldo").innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
+        document.getElementById("btnSaldoGanho").innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
+
+        alert("Compra realizada com sucesso!");
+
+    } catch (error) {
+        console.error("Erro ao processar compra:", error);
+        alert("Ocorreu um erro na compra!");
+    }
+}
+
+// Adicionando eventos aos botões de valor
+document.querySelectorAll(".valor-btn").forEach(botao => {
+    botao.addEventListener("click", async (e) => {
+        const valor = parseFloat(botao.getAttribute("data-valor"));
+        const usuarioId = localStorage.getItem("usuarioId"); // ou como você salva o ID
+        const indicadoPorId = localStorage.getItem("indicadoPor"); // ID do indicador
+
+        if (!usuarioId) {
+            alert("Usuário não identificado!");
+            return;
+        }
+
+        await processarCompra(valor, usuarioId, indicadoPorId);
+    });
+});
 function processarSaque() {
     const valorInput = document.getElementById("valorInput");
     const nomeInput = document.getElementById("nomeInput");
@@ -1660,6 +1714,41 @@ function limpar(){
     localStorage.clear()
     alert("limpo com sucesso ");
 };
+
+  // --- Elementos da interface ---
+ 
+  const notificacaoIndicacao = document.getElementById("notificacaoIndicacao");
+  
+  // --- Salvar saldos no Firebase ---
+  async function salvarNoFirebase() {
+    if (!usuarioId) return;
+
+    const usuarioRef = ref(db, `usuarios/${usuarioId}`);
+    await update(usuarioRef, {
+      saldo: saldoAtual,
+      saldoGanho: saldoGanho
+    });
+  }
+
+  // --- Adicionar comissão de 20% ao indicador ---
+  async function adicionarComissao(indicadoPorId, valor) {
+    if (!indicadoPorId) return;
+
+    const indicadoRef = ref(db, `usuarios/${indicadoPorId}`);
+    await runTransaction(indicadoRef, indicado => {
+      if (indicado) {
+        indicado.saldoGanho = (indicado.saldoGanho || 0) + valor * 0.2;
+      }
+      return indicado;
+    });
+    if (notificacaoIndicacao) {
+      notificacaoIndicacao.style.display = "block";
+      setTimeout(() => notificacaoIndicacao.style.display = "none", 3000);
+    }
+  }
+  // --- Inicialização ---
+  atualizarSaldos();
+
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </body>
