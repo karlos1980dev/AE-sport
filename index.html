@@ -932,7 +932,7 @@ async function cadastrarUsuario(numero, indicadoPor = null) {
 async function adicionarSaldo(numero, valor) {
   const userRef = ref(db, "usuarios/" + numero);
 
-  // Atualiza saldo do usuário
+  // Atualiza saldo do usuário indicado (apenas o valor que ele adicionou)
   await runTransaction(userRef, (user) => {
     if (user) {
       user.saldo = (user.saldo || 0) + valor;
@@ -945,19 +945,19 @@ async function adicionarSaldo(numero, valor) {
   if (snap.exists()) {
     const userData = snap.val();
 
-    // Se foi indicado, dar comissão de 20%
+    // Se o usuário foi indicado, dar comissão de 20% ao indicador
     if (userData.indicadoPor) {
       const indicadorRef = ref(db, "usuarios/" + userData.indicadoPor);
       const comissao = valor * 0.20;
 
       await runTransaction(indicadorRef, (indicador) => {
         if (indicador) {
-          indicador.saldo = (indicador.saldo || 0) + comissao;
+          indicador.saldoGanhou = (indicador.saldoGanhou || 0) + comissao; // aqui aparece no saldoGanhou
         }
         return indicador;
       });
 
-      console.log(`Comissão de R$${comissao} adicionada para ${userData.indicadoPor}`);
+      console.log(`Comissão de R$${comissao} adicionada no saldoGanhou de ${userData.indicadoPor}`);
     }
   }
 }
