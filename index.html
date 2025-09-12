@@ -918,6 +918,49 @@ btnCompartilharWhats.addEventListener("click", () => {
     const msg = encodeURIComponent(`Confira meu link de indicação: ${link}`);
     window.open(`https://wa.me/?text=${msg}`, "_blank");
 });
+async function cadastrarUsuario(numero, indicadoPor = null) {
+  const userRef = ref(db, "usuarios/" + numero);
+  await set(userRef, {
+    numero: numero,
+    saldo: 0,
+    indicadoPor: indicadoPor || null
+  });
+  console.log("Usuário cadastrado:", numero, "Indicado por:", indicadoPor);
+}
+
+// Função para adicionar saldo
+async function adicionarSaldo(numero, valor) {
+  const userRef = ref(db, "usuarios/" + numero);
+
+  // Atualiza saldo do usuário
+  await runTransaction(userRef, (user) => {
+    if (user) {
+      user.saldo = (user.saldo || 0) + valor;
+    }
+    return user;
+  });
+
+  // Busca dados do usuário
+  const snap = await get(userRef);
+  if (snap.exists()) {
+    const userData = snap.val();
+
+    // Se foi indicado, dar comissão de 20%
+    if (userData.indicadoPor) {
+      const indicadorRef = ref(db, "usuarios/" + userData.indicadoPor);
+      const comissao = valor * 0.20;
+
+      await runTransaction(indicadorRef, (indicador) => {
+        if (indicador) {
+          indicador.saldo = (indicador.saldo || 0) + comissao;
+        }
+        return indicador;
+      });
+
+      console.log(`Comissão de R$${comissao} adicionada para ${userData.indicadoPor}`);
+    }
+  }
+}
 
 // --- Gera ou recupera ID único do usuário ---
 let usuarioId = localStorage.getItem("usuarioId");
@@ -1580,15 +1623,21 @@ btnSaldoGanho.addEventListener('click', () => {
     }
 });
 // Função para processar pagamento via botão PIX/valor
-async function processarCompra(valor, usuarioId, indicadoPorId = null) {
+async function processarCompra(valor, usuarioId = null, indicadoPorId = null) {
     try {
-        const usuarioRef = ref(db, `usuarios/${usuarioId}`);
+        // Garante que temos um usuário
+        const uid = usuarioId || localStorage.getItem("usuarioId");
+        if (!uid) {
+            alert("Usuário não identificado!");
+            return;
+        }
 
-        // Atualiza saldo do usuário que comprou
+        const usuarioRef = ref(db, `usuarios/${uid}`);
+
+        // Atualiza saldo do comprador
         await runTransaction(usuarioRef, usuario => {
-            if (usuario) {
-                usuario.saldo = (usuario.saldo || 0) + valor;
-            }
+            if (!usuario) usuario = {};
+            usuario.saldo = (Number(usuario.saldo) || 0) + Number(valor || 0);
             return usuario;
         });
 
@@ -1596,36 +1645,32 @@ async function processarCompra(valor, usuarioId, indicadoPorId = null) {
         if (indicadoPorId) {
             const indicadoRef = ref(db, `usuarios/${indicadoPorId}`);
             await runTransaction(indicadoRef, indicado => {
-                if (indicado) {
-                    indicado.saldoGanhou = (indicado.saldoGanhou || 0) + valor * 0.2;
-                }
+                if (!indicado) indicado = {};
+                indicado.saldoGanhou = (Number(indicado.saldoGanhou) || 0) + (Number(valor) * 0.2);
                 return indicado;
             });
 
-            // Exibe notificação de comissão
-            if (document.getElementById("notificacaoIndicacao")) {
-                const notif = document.getElementById("notificacaoIndicacao");
+            // Notificação de comissão
+            const notif = document.getElementById("notificacaoIndicacao");
+            if (notif) {
                 notif.style.display = "block";
-                setTimeout(() => {
-                    notif.style.display = "none";
-                }, 3000);
+                setTimeout(() => notif.style.display = "none", 3000);
             }
         }
 
-        // Atualiza valores na interface
-        const usuarioSnap = await get(usuarioRef);
-        const usuarioData = usuarioSnap.val() || {};
-        document.getElementById("btnSaldo").innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
-        document.getElementById("btnSaldoGanho").innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
+        // Atualiza os saldos locais se existirem
+        if (typeof saldoAtual !== "undefined") {
+            saldoAtual += Number(valor);
+            atualizarSaldos?.();
+        }
 
-        alert("Compra realizada com sucesso!");
+        console.log(`Compra processada: +${valor}, comissão aplicada para ${indicadoPorId || "ninguém"}`);
 
-    } catch (error) {
-        console.error("Erro ao processar compra:", error);
-        alert("Ocorreu um erro na compra!");
+    } catch (err) {
+        console.error("Erro em processarCompra:", err);
+        alert("Erro ao processar compra.");
     }
 }
-
 // Adicionando eventos aos botões de valor
 document.querySelectorAll(".valor-btn").forEach(botao => {
     botao.addEventListener("click", async (e) => {
