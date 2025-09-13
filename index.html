@@ -866,101 +866,60 @@ const geladeirasEl = document.getElementById('geladeiras');
 const compartilharIndicacaoDiv = document.getElementById("compartilharIndicacao");
 const linkIndicacaoInput = document.getElementById("linkIndicacaoInput");
 const btnCompartilharWhats = document.getElementById("btnCompartilharWhats");
+// Função para atualizar interface de saldo
+async function atualizarInterfaceSaldo() {
+    const userRef = ref(db, "usuarios/" + usuarioId);
+    const snap = await get(userRef);
+    const dados = snap.val() || {};
 
-// Inicialmente esconde botão de compartilhar
-compartilharIndicacaoDiv.style.display = "none";
+    btnSaldo.textContent = Number(dados.saldo || 0);
+    btnSaldoGanho.textContent = Number(dados.saldoGanhou || 0);
+  btnSaldo.textContent = `Saldo Atual ${saldoAtual}`;
+    btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho}`;
+    saldoDisponivel.textContent = saldoGanho;
+    localStorage.setItem("saldoAtual", saldoAtual);
+    localStorage.setItem("saldoGanho", saldoGanho);}
+// Função para sacar saldo (transfere saldoGanhou para saldo e zera saldoGanhou)
+// Função de saque: zera saldoGanho e adiciona a saldoAtual
+async function sacarSaldo() {
+    if (!usuarioId) return;
+    const userRef = ref(db, `usuarios/${usuarioId}`);
+    await runTransaction(userRef, (user) => {
+ if (!user) user = { saldo: 0, saldoGanhou: 0 };
+        const ganho = Number(user.saldoGanhou || 0);
+        if (ganho > 0) {
+            // Adiciona o saldo ganho ao saldo atual
+      user.saldo = (Number(user.saldo) || 0) + ganho;
+  // Salva o valor do saque no localStorage (não mostra na interface)
+        localStorage.setItem("ultimoSaque", ganho);
+// Zera o saldoGanhou
+      user.saldoGanhou = 0; }return user;});
+    // Atualiza interface e localStorage dos saldos
+  await atualizarInterfaceSaldo();}
+// Atualiza saldo ao carregar página
+document.addEventListener("DOMContentLoaded", async () => {
+ if (usuarioId) {
+        await atualizarInterfaceSaldo(); // garante que os valores vêm do Firebase
+        }
 
-// Função para salvar WhatsApp e liberar o link
-async function salvarWhatsapp() {
-    const numero = whatsappInput.value.trim();
-    if (!numero) {
-        alert("Digite seu WhatsApp primeiro!");
-        return;
-    }
-
-    // Atualiza no Firebase
-    await update(ref(db, `usuarios/${usuarioId}`), { whatsapp: numero });
-
-    // Atualiza localStorage
-    localStorage.setItem("whatsapp", numero);
-
-    // Gera link de indicação
-    const link = `https://achouganhou.netlify.app/achou1ganhou/?ref=${usuarioId}`;
-    linkIndicacaoInput.value = link;
-
-    // Mostra botão de compartilhar
-    compartilharIndicacaoDiv.style.display = "flex";
-
-    // Fecha modal
-    infoModal.style.display = "none";
-}
-
-// Confirmação do WhatsApp
-confirmarInfoBtn.addEventListener("click", salvarWhatsapp);
-
-// Quando a página carregar, verifica se já tem WhatsApp salvo
-document.addEventListener("DOMContentLoaded", () => {
+    // Verifica WhatsApp salvo
     const numero = localStorage.getItem("whatsapp");
-    if (numero && usuarioId) {
+    if (numero) {
         linkIndicacaoInput.value =
-            `https://achouganhou.netlify.app/?ref=${usuarioId}`;
+                    `https://achouganhou.netlify.app/?ref=${usuarioId}`;
         compartilharIndicacaoDiv.style.display = "flex";
-    }
-});
-
+            }
+        });
 // Compartilhar link no WhatsApp
 btnCompartilharWhats.addEventListener("click", () => {
     const link = linkIndicacaoInput.value.trim();
     if (!link) {
         alert("Você precisa salvar o WhatsApp primeiro!");
         return;
-    }
+            }
     const msg = encodeURIComponent(`Confira meu link de indicação: ${link}`);
     window.open(`https://wa.me/?text=${msg}`, "_blank");
 });
-async function cadastrarUsuario(numero, indicadoPor = null) {
-  const userRef = ref(db, "usuarios/" + numero);
-  await set(userRef, {
-    numero: numero,
-    saldo: 0,
-    indicadoPor: indicadoPor || null
-  });
-  console.log("Usuário cadastrado:", numero, "Indicado por:", indicadoPor);
-}
-
-// Função para adicionar saldo
-async function adicionarSaldo(numero, valor) {
-  const userRef = ref(db, "usuarios/" + numero);
-
-  // Atualiza saldo do usuário indicado (apenas o valor que ele adicionou)
-  await runTransaction(userRef, (user) => {
-    if (user) {
-      user.saldo = (user.saldo || 0) + valor;
-    }
-    return user;
-  });
-
-  // Busca dados do usuário
-  const snap = await get(userRef);
-  if (snap.exists()) {
-    const userData = snap.val();
-
-    // Se o usuário foi indicado, dar comissão de 20% ao indicador
-    if (userData.indicadoPor) {
-      const indicadorRef = ref(db, "usuarios/" + userData.indicadoPor);
-      const comissao = valor * 0.20;
-
-      await runTransaction(indicadorRef, (indicador) => {
-        if (indicador) {
-          indicador.saldoGanhou = (indicador.saldoGanhou || 0) + comissao; // aqui aparece no saldoGanhou
-        }
-        return indicador;
-      });
-
-      console.log(`Comissão de R$${comissao} adicionada no saldoGanhou de ${userData.indicadoPor}`);
-    }
-  }
-}
 
 // --- Gera ou recupera ID único do usuário ---
 let usuarioId = localStorage.getItem("usuarioId");
@@ -1005,66 +964,6 @@ if (indicadoPor) {
 }
 // Liberar crédito via código
 // Função para liberar crédito via código e aplicar comissão
-async function liberarCreditocod(codigo) {
-    try {
-        const codigoRef = ref(db, `codigos/${codigo}`);
-        const usuarioRef = ref(db, `usuarios/${usuarioId}`);
-
-        const codigoSnap = await get(codigoRef);
-        if (!codigoSnap.exists()) {
-            alert("Código inválido!");
-            return;
-        }
-        const dadosCodigo = codigoSnap.val();
-
-        if (dadosCodigo.usado) {
-            alert("Código já foi utilizado!");
-            return;
-        }
-
-        // Atualiza saldo do usuário que resgatou
-        await runTransaction(usuarioRef, usuario => {
-            if (usuario) {
-                usuario.saldo = (usuario.saldo || 0) + dadosCodigo.valor;
-            }
-            return usuario;
-        });
-
-        // Marca código como usado
-        await update(codigoRef, { usado: true });
-
-        // Aplica comissão de 20% para quem indicou
-        const indicadoPorId = dadosCodigo.indicadoPor || usuarioData.indicadoPor;
-        if (indicadoPorId) {
-            await runTransaction(ref(db, `usuarios/${indicadoPorId}`), indicado => {
-                if (indicado) {
-                    indicado.saldoGanhou = (indicado.saldoGanhou || 0) + dadosCodigo.valor * 0.2;
-                }
-                return indicado;
-            });
-
-            if (notificacaoIndicacao) {
-                notificacaoIndicacao.style.display = "block";
-                setTimeout(() => {
-                    notificacaoIndicacao.style.display = "none";
-                }, 3000);
-            }
-        }
-
-        // Atualiza interface do usuário
-        const usuarioSnap = await get(usuarioRef);
-        const usuarioData = usuarioSnap.val() || {};
-        btnSaldo.innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
-        btnSaldoGanho.innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
-
-        alert("Crédito liberado com sucesso!");
-
-    } catch (error) {
-        console.error("Erro ao liberar crédito:", error);
-        alert("Ocorreu um erro ao liberar o crédito!");
-    }
-}
-window.liberarCreditocod = liberarCreditocod;
 
 // Abrir modal
 btnCompra.addEventListener("click", () => {
@@ -1113,9 +1012,6 @@ modosValor.forEach(radio => {
     console.log("Valor selecionado:", radio.value);
   });
 });
-
-
-
 const valorButtons = document.querySelectorAll(".valor-btn");
 
 let linkSelecionado = ""; // armazena o link do botão clicado
@@ -1197,15 +1093,7 @@ let jogando = false;
 let efeitoAutomatico = null;
 let escolhas = [];
 // --- Atualizar valores na interface ---
-function atualizarSaldos(){
-    btnSaldo.textContent = `Saldo Atual ${saldoAtual.toFixed(2)}`;
-    btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho.toFixed(2)}`;
-    saldoDisponivel.textContent = saldoGanho;
-    localStorage.setItem("saldoAtual", saldoAtual);
-    localStorage.setItem("saldoGanho", saldoGanho);
 
-    atualizarBotaoPulsar(); // ✅ chama aqui
-}
 // --- Modais info ---
 cancelarInfoBtn.onclick = () => infoModal.style.display="none";
 confirmarInfoBtn.onclick = () => {
@@ -1214,7 +1102,7 @@ confirmarInfoBtn.onclick = () => {
     infoModal.style.display="none";
     // Exibir campo de compartilhamento
     document.getElementById('compartilharIndicacao').style.display="block";
-    document.getElementById('linkIndicacaoInput').value = `https://achouganhou.netlify.app/achou1ganhou/?ref=${whatsapp}`;
+    document.getElementById('linkIndicacaoInput').value = `https://achouganhou.netlify.app/achouganhou/?ref=${whatsapp}`;
 };
 
 // --- Modal PIX ---
@@ -1228,21 +1116,7 @@ valorBtns.forEach(btn => {
     }
 });
 
-// --- Menu Hambúrguer ---
-hamburger.onclick = ()=> menuModal.style.display="flex";
-closeMenu.onclick = ()=> menuModal.style.display="none";
 
-// --- Modal Tabela ---
-abrirTabela.onclick = ()=> tabelaModal.style.display="flex";
-closeTabela.onclick = ()=> tabelaModal.style.display="none";
-
-// --- Modal Saque ---
-btnSaldoGanho.onclick = () => {
-    if (saldoGanho > 0) {
-        modalSaque.style.display = "flex";
-        valorInput.value = saldoGanho; // já preenche o valor no input
-    } 
-};
 cancelarBtn.onclick = ()=> modalSaque.style.display="none";
 enviarBtn.onclick = ()=>{
     const nome = nomeInput.value.trim();
@@ -1317,16 +1191,39 @@ function liberarMarcacao() {
 }
 // Torna a função acessível globalmente (necessário em type="module")
 window.liberarMarcacao = liberarMarcacao;
-// --- Função de liberar crédito via código ---
+
 // --- Função de liberar crédito via código (com comissão) ---
+
+
+// --- Função para atualizar a interface com os saldos ---
+function atualizarSaldos() {
+  const elementos = [
+    { id: "saldoDisplay", valor: saldoAtual },
+    { id: "saldo", valor: saldoAtual },
+    { id: "btnSaldo", valor: saldoAtual },
+    { id: "btnSaldoGanho", valor: saldoGanho }
+  ];
+  elementos.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (!el) return;
+    if (el.tagName === "BUTTON") el.innerText = `Saldo: R$${item.valor.toFixed(2)}`;
+    else el.textContent = `Saldo: R$${item.valor.toFixed(2)}`;
+  });
+}
+
+// --- Função para liberar marcação após código ---
+
+// --- Função para liberar crédito via código ---
 async function liberarCredito() {
-  const codigo = document.getElementById("codigo").value.trim();
-  if (!codigo) return;
+  const inputCodigo = document.getElementById("codigo");
+  const codigo = inputCodigo?.value?.trim();
+  if (!codigo) {
+    alert("Digite o código.");
+    return;
+  }
 
   try {
     const codigoRef = ref(db, `codigos/${codigo}`);
-    const usuarioRef = ref(db, `usuarios/${usuarioId}`);
-
     const snap = await get(codigoRef);
     if (!snap.exists()) {
       alert("❌ Código inválido!");
@@ -1339,126 +1236,167 @@ async function liberarCredito() {
       return;
     }
 
-    // Atualiza saldo do usuário que resgatou
+    if (!usuarioId) {
+      alert("❌ Usuário não definido!");
+      return;
+    }
+
+    // Atualiza saldo do usuário usando transaction
+    const usuarioRef = ref(db, `usuarios/${usuarioId}`);
     await runTransaction(usuarioRef, (usuario) => {
-      if (usuario) {
-        usuario.saldo = (usuario.saldo || 0) + dadosCodigo.valor;
-      }
+      if (!usuario) usuario = { saldo: 0, saldoGanhou: 0, indicadoPor: null };
+      usuario.saldo = (Number(usuario.saldo) || 0) + (Number(dadosCodigo.valor) || 0);
       return usuario;
     });
 
     // Marca código como usado
-    await update(codigoRef, { usado: true });
+    await update(codigoRef, { usado: true, usadoPor: usuarioId, dataUsado: Date.now() });
 
     // Aplica comissão de 20% para quem indicou
-    const indicadoPorId = dadosCodigo.indicadoPor || usuarioData.indicadoPor;
+    const usuarioSnap = await get(usuarioRef);
+    const usuarioAtual = usuarioSnap.val() || {};
+    const indicadoPorId = dadosCodigo.indicadoPor || usuarioAtual.indicadoPor;
+
     if (indicadoPorId) {
-      await runTransaction(ref(db, `usuarios/${indicadoPorId}`), (indicador) => {
-        if (indicador) {
-          indicador.saldoGanhou = (indicador.saldoGanhou || 0) + (dadosCodigo.valor * 0.2);
-        }
+      const indicadoRef = ref(db, `usuarios/${indicadoPorId}`);
+      await runTransaction(indicadoRef, (indicador) => {
+        if (!indicador) indicador = { saldo: 0, saldoGanhou: 0 };
+        indicador.saldoGanhou = (Number(indicador.saldoGanhou) || 0) + (Number(dadosCodigo.valor || 0) * 0.2);
         return indicador;
       });
+      console.log(`Comissão aplicada para ${indicadoPorId}`);
     }
 
-    // Atualiza interface
-    const usuarioSnap = await get(usuarioRef);
-    const dadosUsuario = usuarioSnap.val() || {};
-    saldoAtual = dadosUsuario.saldo || 0;
-    saldoGanho = dadosUsuario.saldoGanhou || 0;
-    atualizarSaldos();
+    // Atualiza variáveis locais e interface
+    const novoSnap = await get(usuarioRef);
+    const novoUsuario = novoSnap.val() || {};
+    saldoAtual = Number(novoUsuario.saldo) || 0;
+    saldoGanho = Number(novoUsuario.saldoGanhou) || 0;
 
-    alert(`✅ Código válido! +${dadosCodigo.valor} créditos adicionados`);
+    localStorage.setItem("saldoAtual", saldoAtual);
+    localStorage.setItem("saldoGanho", saldoGanho);
+
+    atualizarSaldos();
+    alert(`✅ Código válido! +R$${Number(dadosCodigo.valor).toFixed(2)} adicionados.`);
 
     liberarMarcacao();
 
-  } catch (error) {
-    console.error("Erro Firebase:", error);
-    alert("Erro ao validar código.");
+  } catch (err) {
+    console.error("Erro em liberarCredito:", err);
+    alert("Erro ao validar código. Veja o console.");
+  } finally {
+    if (inputCodigo) inputCodigo.value = "";
   }
-
-  document.getElementById("codigo").value = "";
 }
 window.liberarCredito = liberarCredito;
-// --- Geladeiras ---
-function abrirGeladeira(geladeira) {
-  const geladeiras = document.querySelectorAll(".geladeira");
-  const index = Array.from(geladeiras).indexOf(geladeira);
-  // Pega o modo selecionado
-  const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
-  if (!modoSelecionado) return;
-  let custo = 0;
-  let premio = 0;
-  let limiteEscolhas = 1;
-  // Define custo, prêmio e limite de geladeiras conforme o modo
-  if (modoSelecionado === "0.10") { custo = 0.10; premio = 2; limiteEscolhas = 2; }
-  else if (modoSelecionado === "0.50") { custo = 0.50; premio = 3; limiteEscolhas = 2; }
-  else if (modoSelecionado === "1.00") { custo = 1; premio = 10; limiteEscolhas = 3; }
-  else if (modoSelecionado === "2") { custo = 2; premio = 15; limiteEscolhas = 2; }
-  else if (modoSelecionado === "5") { custo = 5; premio = 20; limiteEscolhas = 3; }
-  else if (modoSelecionado === "10") { custo = 10; premio = 30; limiteEscolhas = 4; }
- // Verifica se há saldo suficiente para jogar
-  if (saldoAtual < custo) {
-    msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
-    return; }
-  if (jogando) return;
-  // Evita marcar a mesma geladeira duas vezes
-  if (escolhas.includes(index)) return;
-  // Marca a geladeira escolhida
-  escolhas.push(index);
-  geladeira.classList.add("aberta");
-  geladeira.querySelector(".interior").textContent = "✅ Marcada";
-  // Desativa os rádios ao iniciar a rodada document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
-  // Continua selecionando até atingir o limite do modo
-  if (escolhas.length < limiteEscolhas) return;
-  // Cobra o saldo (arredondando para evitar floats estranhos)
-  saldoAtual -= custo;
-  saldoAtual = Math.round(saldoAtual * 100) / 100;
-  jogando = true;
-  // Sorteia brinde
-  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-  // Revela geladeiras escolhidas
-  escolhas.forEach(idx => {
-    const g = geladeiras[idx];
-    const interior = g.querySelector(".interior");
-    if (idx === brindeIndex) {
-      interior.textContent = `🎁 Você Ganhou R$${premio}!`;
-      g.classList.add("premiada");
-      saldoGanho += premio;
-      saldoGanho = Math.round(saldoGanho * 100) / 100;
-    } else {
-      interior.textContent = "❌ Errou!";
-    }
-    
-  });
-  // Se nenhuma geladeira escolhida foi premiada, mostra onde estava
-  if (!escolhas.includes(brindeIndex)) {
-    const geladeiraPremiada = geladeiras[brindeIndex];
-    const interiorPremiada = geladeiraPremiada.querySelector(".interior");
-    setTimeout(() => {
-      geladeiraPremiada.classList.add("aberta", "premiada");
-      interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
-      setTimeout(() => {
-        geladeiraPremiada.classList.remove("aberta", "premiada");
-        interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
-      }, 1500);
-    }, 800); }
-  // Resetar rodada
-  setTimeout(() => {
-    escolhas.forEach(idx => {
-      const g = geladeiras[idx];
-      g.classList.remove("aberta", "premiada");
-      g.querySelector(".interior").textContent = `Geladeira ${idx + 1}`;
-    });
-    escolhas = [];
-    jogando = false;
-    // Reabilita os rádios document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
 
-    msg.textContent = saldoAtual >= Math.min(0.10, 2) ? "Pode jogar de novo!" : "Saldo insuficiente!";
+// --- Função para abrir geladeira ---
+async function abrirGeladeira(geladeira) {
+    const geladeiras = document.querySelectorAll(".geladeira");
+    const index = Array.from(geladeiras).indexOf(geladeira);
+
+    const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
+    if (!modoSelecionado) return alert("Selecione um modo de jogo!");
+
+    // Define custo, prêmio e limite de escolhas por modo
+    let custo = 0, premio = 0, limiteEscolhas = 1;
+    switch (modoSelecionado) {
+        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 2; break;
+        case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
+        case "1.00": custo = 1; premio = 10; limiteEscolhas = 3; break;
+        case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
+        case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
+        case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
+        default: return;
+    }
+
+    if (jogando) return;
+    if (saldoAtual < custo) return msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
+    if (escolhas.includes(index)) return;
+
+    // Marca a geladeira selecionada
+    escolhas.push(index);
+    geladeira.classList.add("aberta");
+    geladeira.querySelector(".interior").textContent = "✅ Marcada";
+    document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
+
+    // Se ainda não atingiu o limite de escolhas, espera
+    if (escolhas.length < limiteEscolhas) return;
+
+    // Desconta o custo do saldo atual (uma vez)
+    saldoAtual -= custo;
+    saldoAtual = Math.round(saldoAtual * 100) / 100;
+
+    if (usuarioId) {
+        await runTransaction(ref(db, `usuarios/${usuarioId}`), u => {
+            if (!u) u = { saldo: 0, saldoGanhou: 0 };
+            u.saldo = saldoAtual;
+            return u;
+        });
+    }
+
+    jogando = true;
+
+    // Define qual geladeira terá o prêmio
+    const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+
+    escolhas.forEach(idx => {
+        const g = geladeiras[idx];
+        const interior = g.querySelector(".interior");
+
+        if (idx === brindeIndex) {
+            interior.textContent = `🎁 Você Ganhou R$${premio}!`;
+            g.classList.add("premiada");
+            saldoGanho += premio; // prêmio vai somente para saldoGanho
+        } else {
+            interior.textContent = "❌ Errou!";
+        }
+    });
+
     atualizarSaldos();
-  }, 2200);
-  atualizarSaldos();
+
+    // Mostra onde estava o prêmio se não marcou
+    if (!escolhas.includes(brindeIndex)) {
+        const gPremiada = geladeiras[brindeIndex];
+        const interiorPremiada = gPremiada.querySelector(".interior");
+        setTimeout(() => {
+            gPremiada.classList.add("aberta", "premiada");
+            interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
+            setTimeout(() => {
+                gPremiada.classList.remove("aberta", "premiada");
+                interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
+            }, 1500);
+        }, 800);
+    }
+
+    // Limpa tudo após o tempo
+    setTimeout(async () => {
+        escolhas.forEach(idx => {
+            const g = geladeiras[idx];
+            g.classList.remove("aberta", "premiada");
+            g.querySelector(".interior").textContent = `Geladeira ${idx + 1}`;
+        });
+
+        escolhas = [];
+        jogando = false;
+        document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
+        msg.textContent = saldoAtual >= Math.min(0.10, 2) ? "Pode jogar de novo!" : "Saldo insuficiente!";
+
+        // Atualiza saldo no Firebase
+        if (usuarioId) {
+            await runTransaction(ref(db, `usuarios/${usuarioId}`), u => {
+                if (!u) u = { saldo: 0, saldoGanhou: 0 };
+                u.saldo = saldoAtual;      // apenas custo saiu do saldoAtual
+                u.saldoGanhou = saldoGanho; // prêmio vai para saldoGanho
+                return u;
+            });
+        }
+
+        atualizarSaldos();
+    }, 2200);
 }
+
+window.abrirGeladeira = abrirGeladeira;
 // --- Efeito automático ---
 function iniciarEfeitoAutomatico(){
   if(efeitoAutomatico) return;
@@ -1543,7 +1481,7 @@ window.abrirGeladeira=abrirGeladeira;
 // Função para mostrar o input de compartilhamento
 function mostrarLinkIndicacao(codigo) {
 
-  const link = `https://achouganhou.netlify.app//achou1ganhou/?ref=${codigo}`;
+  const link = `https://achouganhou.netlify.app//achouganhou/?ref=${codigo}`;
   const divCompartilhar = document.getElementById("compartilharIndicacao");
   const inputLink = document.getElementById("linkIndicacaoInput");
   inputLink.value = link;
@@ -1586,6 +1524,7 @@ const DENOMINADOR = 500;
 cancelarTransferencia.addEventListener("click", () => {
   modalTransferir.style.display = "none";
 });
+
 confirmarTransferencia.addEventListener("click", () => {
   const valor = Number(valorTransferirInput.value);
   if(valor <= 0 || valor > saldoGanho){
@@ -1611,6 +1550,10 @@ function abrirModalTransferencia() {
         alert("Você não possui saldo ganho para transferir!");
     }
 }
+
+// Evento do botão Transferir
+
+
 // Cancelar transferência
 cancelarTransferencia.addEventListener("click", () => {
     modalTransferir.style.display = "none";
@@ -1622,70 +1565,7 @@ btnSaldoGanho.addEventListener('click', () => {
         alert("Você não tem saldo disponível para saque!");
     }
 });
-// Função para processar pagamento via botão PIX/valor
-async function processarCompra(valor, usuarioId = null, indicadoPorId = null) {
-    try {
-        // Garante que temos um usuário
-        const uid = usuarioId || localStorage.getItem("usuarioId");
-        if (!uid) {
-            alert("Usuário não identificado!");
-            return;
-        }
 
-        const usuarioRef = ref(db, `usuarios/${uid}`);
-
-        // Atualiza saldo do comprador
-        await runTransaction(usuarioRef, usuario => {
-            if (!usuario) usuario = {};
-            usuario.saldo = (Number(usuario.saldo) || 0) + Number(valor || 0);
-            return usuario;
-        });
-
-        // Atualiza saldo do indicador com 20% de comissão
-        if (indicadoPorId) {
-            const indicadoRef = ref(db, `usuarios/${indicadoPorId}`);
-            await runTransaction(indicadoRef, indicado => {
-                if (!indicado) indicado = {};
-                indicado.saldoGanhou = (Number(indicado.saldoGanhou) || 0) + (Number(valor) * 0.2);
-                return indicado;
-            });
-
-            // Notificação de comissão
-            const notif = document.getElementById("notificacaoIndicacao");
-            if (notif) {
-                notif.style.display = "block";
-                setTimeout(() => notif.style.display = "none", 3000);
-            }
-        }
-
-        // Atualiza os saldos locais se existirem
-        if (typeof saldoAtual !== "undefined") {
-            saldoAtual += Number(valor);
-            atualizarSaldos?.();
-        }
-
-        console.log(`Compra processada: +${valor}, comissão aplicada para ${indicadoPorId || "ninguém"}`);
-
-    } catch (err) {
-        console.error("Erro em processarCompra:", err);
-        alert("Erro ao processar compra.");
-    }
-}
-// Adicionando eventos aos botões de valor
-document.querySelectorAll(".valor-btn").forEach(botao => {
-    botao.addEventListener("click", async (e) => {
-        const valor = parseFloat(botao.getAttribute("data-valor"));
-        const usuarioId = localStorage.getItem("usuarioId"); // ou como você salva o ID
-        const indicadoPorId = localStorage.getItem("indicadoPor"); // ID do indicador
-
-        if (!usuarioId) {
-            alert("Usuário não identificado!");
-            return;
-        }
-
-        await processarCompra(valor, usuarioId, indicadoPorId);
-    });
-});
 function processarSaque() {
     const valorInput = document.getElementById("valorInput");
     const nomeInput = document.getElementById("nomeInput");
@@ -1703,11 +1583,84 @@ function processarSaque() {
         pixInput.value = "";
         valorInput.value = ""; // Limpa o valor do saque
     } else {
-        alert("Saldo insuficiente!");}}
+        alert("Saldo insuficiente!");
+  }
+}
 valorBtns.forEach(btn => {
     btn.addEventListener('click', () => {
         const link = btn.getAttribute('data-link');
-        if(link) { window.location.href = link; }   });});
+        if(link) {
+            window.location.href = link;
+        }
+    });
+});
+// Função para processar pagamento via botão PIX/valor
+async function processarCompra(valor, usuarioId, indicadoPorId = null) {
+    try {
+        const usuarioRef = ref(db, `usuarios/${usuarioId}`);
+
+        // Atualiza saldo do usuário que comprou
+        await runTransaction(usuarioRef, usuario => {
+            if (usuario) {
+                usuario.saldo = (usuario.saldo || 0) + valor;
+            }
+            return usuario;
+        });
+
+        // Atualiza saldo do indicador com 20% de comissão
+        if (indicadoPorId) {
+            const indicadoRef = ref(db, `usuarios/${indicadoPorId}`);
+            await runTransaction(indicadoRef, indicado => {
+                if (indicado) {
+                    indicado.saldoGanhou = (indicado.saldoGanhou || 0) + valor * 0.2;
+                }
+                return indicado;
+            });
+
+            // Exibe notificação de comissão
+            if (document.getElementById("notificacaoIndicacao")) {
+                const notif = document.getElementById("notificacaoIndicacao");
+                notif.style.display = "block";
+                setTimeout(() => {
+                    notif.style.display = "none";
+                }, 3000);
+            }
+        }
+
+        // Atualiza valores na interface
+        const usuarioSnap = await get(usuarioRef);
+        const usuarioData = usuarioSnap.val() || {};
+        document.getElementById("btnSaldo").innerText = "Saldo Atual: " + (usuarioData.saldo || 0).toFixed(2);
+        document.getElementById("btnSaldoGanho").innerText = "Saldo / Saque Ganhou: " + (usuarioData.saldoGanhou || 0).toFixed(2);
+
+        alert("Compra realizada com sucesso!");
+
+    } catch (error) {
+        console.error("Erro ao processar compra:", error);
+        alert("Ocorreu um erro na compra!");
+    }
+}
+
+// Adicionando eventos aos botões de valor
+document.querySelectorAll(".valor-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        // Fecha modal PIX e abre modal WhatsApp
+        pixModal.style.display = 'none';
+        infoModal.style.display = 'flex';
+
+        // Guarda o link do botão se precisar redirecionar
+        const link = btn.closest("a")?.getAttribute("href");
+        if(link) {
+            localStorage.setItem("linkSelecionado", link);
+        }
+
+        // Guarda o valor clicado (opcional, sem afetar saldo)
+        localStorage.setItem("valorSelecionado", btn.dataset.valor);
+    });
+});
+// Substitua/cole essa função no seu script (assegure-se de remover duplicatas antigas)
+
 // Pix Modal
 closePix.addEventListener("click", () => pixModal.style.display = "none");
 // Menu
@@ -1768,7 +1721,9 @@ cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none"
 function limpa(){
     localStorage.clear();
     alert("limpo saldos");
+    
 }
+
 // Exemplo: botão COMPRAR ACESSO só pulsa quando saldo e saldoGanho = 0
 function atualizarBotaoPulsar() {
   const saldoAtual = parseFloat(btnSaldo.textContent.replace(/\D/g,'') || 0);
@@ -1818,6 +1773,7 @@ function limpar(){
       setTimeout(() => notificacaoIndicacao.style.display = "none", 3000);
     }
   }
+  
   // --- Inicialização ---
   atualizarSaldos();
 
