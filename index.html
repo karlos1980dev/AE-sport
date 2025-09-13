@@ -941,13 +941,13 @@ document.getElementById('confirmarInfoBtn').addEventListener('click', async () =
   const numero = document.getElementById('whatsappInput').value.trim();
   if(numero.length < 10) { alert('Digite um número válido!'); return; }
   await update(ref(db, `usuarios/${usuarioId}`), { whatsapp: numero });
-  alert('Número salvo com sucesso!');
+  alert('Número salvo com sucesso COMPARTILHER para Receber seus Bonus Diarios!');
   document.getElementById('infoModal').style.display = 'none';
 });
 
 // Compartilhar link de indicação
 document.getElementById('btnCompartilharWhats').addEventListener('click', () => {
-  if(!usuarioData.whatsapp) { alert('Salve seu WhatsApp primeiro!'); return; }
+  if(!usuarioData.whatsapp) { alert('Salve seu WhatsApp primeiro Para te direto a bônus!'); return; }
   const urlSite = "https://achouganhou.netlify.app?indicadoPor=" + usuarioId;
   const mensagem = `Olha! Fui indicado por ${usuarioData.whatsapp} para conhecer este site: ${urlSite}`;
   const whatsappLink = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
@@ -996,7 +996,7 @@ confirmarInfoBtn.addEventListener("click", () => {
     valorCompra: valor,
     data: Date.now()
   }).then(() => {
-    alert("Registrada com sucesso!");
+    alert("Registrada com sucesso COMPARTILHER para Receber os bônus diários!");
     infoModal.style.display = "none";
     whatsappInput.value = "";
     valorCompraInput.value = "";
@@ -1192,10 +1192,7 @@ function liberarMarcacao() {
 // Torna a função acessível globalmente (necessário em type="module")
 window.liberarMarcacao = liberarMarcacao;
 
-// --- Função de liberar crédito via código (com comissão) ---
 
-
-// --- Função para atualizar a interface com os saldos ---
 function atualizarSaldos() {
   const elementos = [
     { id: "saldoDisplay", valor: saldoAtual },
@@ -1210,8 +1207,6 @@ function atualizarSaldos() {
     else el.textContent = `Saldo: R$${item.valor.toFixed(2)}`;
   });
 }
-
-// --- Função para liberar marcação após código ---
 
 // --- Função para liberar crédito via código ---
 async function liberarCredito() {
@@ -1296,7 +1291,7 @@ async function abrirGeladeira(geladeira) {
     const index = Array.from(geladeiras).indexOf(geladeira);
 
     const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
-    if (!modoSelecionado) return alert("Selecione um modo de jogo!");
+    if (!modoSelecionado) return alert("Selecione um Valor para jogar!");
 
     // Define custo, prêmio e limite de escolhas por modo
     let custo = 0, premio = 0, limiteEscolhas = 1;
