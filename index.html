@@ -867,40 +867,51 @@ const compartilharIndicacaoDiv = document.getElementById("compartilharIndicacao"
 const linkIndicacaoInput = document.getElementById("linkIndicacaoInput");
 const btnCompartilharWhats = document.getElementById("btnCompartilharWhats");
 // Função para atualizar interface de saldo
+// Atualiza interface e localStorage
 async function atualizarInterfaceSaldo() {
-    const userRef = ref(db, "usuarios/" + usuarioId);
+    if (!usuarioId) return;
+
+    const userRef = ref(db, `usuarios/${usuarioId}`);
     const snap = await get(userRef);
     const dados = snap.val() || {};
 
-    btnSaldo.textContent = Number(dados.saldo || 0);
-    btnSaldoGanho.textContent = Number(dados.saldoGanhou || 0);
-  btnSaldo.textContent = `Saldo Atual ${saldoAtual}`;
-    btnSaldoGanho.textContent = `Saldo   Saque Ganhou ${saldoGanho}`;
-    saldoDisponivel.textContent = saldoGanho;
+    saldoAtual = Number(dados.saldo || 0);       // pega exatamente do Firebase
+    saldoGanho = Number(dados.saldoGanhou || 0);
+
     localStorage.setItem("saldoAtual", saldoAtual);
-    localStorage.setItem("saldoGanho", saldoGanho);}
-// Função para sacar saldo (transfere saldoGanhou para saldo e zera saldoGanhou)
-// Função de saque: zera saldoGanho e adiciona a saldoAtual
+    localStorage.setItem("saldoGanho", saldoGanho);
+
+    btnSaldo.textContent = `Saldo: R$${saldoAtual.toFixed(2)}`;
+    btnSaldoGanho.textContent = `Saldo / Saque Ganhou: R$${saldoGanho.toFixed(2)}`;
+}
+
+// Função de saque: zera saldoGanho e salva último saque
 async function sacarSaldo() {
     if (!usuarioId) return;
+
     const userRef = ref(db, `usuarios/${usuarioId}`);
+
     await runTransaction(userRef, (user) => {
- if (!user) user = { saldo: 0, saldoGanhou: 0 };
+        if (!user) user = { saldo: 0, saldoGanhou: 0 };
         const ganho = Number(user.saldoGanhou || 0);
+
         if (ganho > 0) {
-            // Adiciona o saldo ganho ao saldo atual
-      user.saldo = (Number(user.saldo) || 0) + ganho;
-  // Salva o valor do saque no localStorage (não mostra na interface)
-        localStorage.setItem("ultimoSaque", ganho);
-// Zera o saldoGanhou
-      user.saldoGanhou = 0; }return user;});
-    // Atualiza interface e localStorage dos saldos
-  await atualizarInterfaceSaldo();}
-// Atualiza saldo ao carregar página
-document.addEventListener("DOMContentLoaded", async () => {
- if (usuarioId) {
-        await atualizarInterfaceSaldo(); // garante que os valores vêm do Firebase
+            user.saldo = Number(user.saldo || 0) + ganho; // adiciona o ganho ao saldo atual
+            user.saldoGanhou = 0; // zera saldoGanhou
+
+            localStorage.setItem("ultimoSaque", ganho); // salva valor do saque
         }
+        return user;
+    });
+
+    await atualizarInterfaceSaldo(); // garante que interface e localStorage estejam corretos
+}
+
+// Ao carregar página, busca do Firebase (não do localStorage!)
+document.addEventListener("DOMContentLoaded", async () => {
+    if (usuarioId) {
+        await atualizarInterfaceSaldo();
+    }
 
     // Verifica WhatsApp salvo
     const numero = localStorage.getItem("whatsapp");
