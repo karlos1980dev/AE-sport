@@ -1158,14 +1158,21 @@ enviarBtn.addEventListener("click", async () => {
     }
 
     // Transação no Firebase para transferir saldoGanho para saldo
-    try {
+        try {
+        // Transação no Firebase para reduzir apenas saldoGanho
         await runTransaction(usuarioRef, (user) => {
             if (!user) user = { saldo: 0, saldoGanho: 0 };
-            user.saldo += user.saldoGanho; // transfere saldoGanho para saldo
-            user.saldoGanho = 0;           // zera saldoGanho
+
+            if ((user.saldoGanho || 0) <= 0) {
+                throw new Error("Sem saldo disponível para saque.");
+            }
+
+            // ❌ não mexe em user.saldo
+            // ✅ apenas zera ou reduz saldoGanho
+            user.saldoGanho = 0;
+
             return user;
         });
-
         // Atualiza variáveis locais
         saldoAtual += saldoGanho;
         saldoGanho = 0;
