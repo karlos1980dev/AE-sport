@@ -1557,6 +1557,20 @@ confirmarTransferencia.addEventListener("click", async () => {
     alert(err.message || "Erro ao confirmar transferência. Veja o console.");
   }
 });
+// Evento do botão Transferir
+
+
+// Cancelar transferência
+cancelarTransferencia.addEventListener("click", () => {
+    modalTransferir.style.display = "none";
+});
+btnSaldoGanho.addEventListener('click', () => {
+    if(saldoGanho > 0){
+        abrirModalComValor(saldoGanho); // coloca o valor no input
+    } else {
+        alert("Você não tem saldo disponível para saque!");
+    }
+});
 
 function processarSaque() {
     const valorInput = document.getElementById("valorInput");
