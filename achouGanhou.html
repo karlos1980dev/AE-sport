@@ -626,6 +626,7 @@ background:lime;
 
   <!-- Linha de valores menores -->
   <div style="display:flex; gap:10px; justify-content:center;">
+      
     <input type="radio" name="modo" id="modo01" value="0.10">
     <label for="modo01"><span style="color:red;">Cust 0.10</span> (R$ 2)</label>
 
@@ -1158,14 +1159,21 @@ enviarBtn.addEventListener("click", async () => {
     }
 
     // Transação no Firebase para transferir saldoGanho para saldo
-    try {
+        try {
+        // Transação no Firebase para reduzir apenas saldoGanho
         await runTransaction(usuarioRef, (user) => {
             if (!user) user = { saldo: 0, saldoGanho: 0 };
-            user.saldo += user.saldoGanho; // transfere saldoGanho para saldo
-            user.saldoGanho = 0;           // zera saldoGanho
+
+            if ((user.saldoGanho || 0) <= 0) {
+                throw new Error("Sem saldo disponível para saque.");
+            }
+
+            // ❌ não mexe em user.saldo
+            // ✅ apenas zera ou reduz saldoGanho
+            user.saldoGanho = 0;
+
             return user;
         });
-
         // Atualiza variáveis locais
         saldoAtual += saldoGanho;
         saldoGanho = 0;
@@ -1276,9 +1284,9 @@ async function abrirGeladeira(geladeira) {
     // Define custo, prêmio e limite de escolhas por modo
     let custo = 0, premio = 0, limiteEscolhas = 1;
     switch (modoSelecionado) {
-        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 2; break;
+        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 1; break;
         case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
-        case "1.00": custo = 1; premio = 10; limiteEscolhas = 3; break;
+        case "1.00": custo = 1; premio = 10; limiteEscolhas = 2; break;
         case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
         case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
         case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
@@ -1498,32 +1506,65 @@ cancelarTransferencia.addEventListener("click", () => {
   modalTransferir.style.display = "none";
 });
 
-confirmarTransferencia.addEventListener("click", () => {
-  const valor = Number(valorTransferirInput.value);
-  if(valor <= 0 || valor > saldoGanho){
+// ---------- Handler corrigido para confirmar transferência ----------
+confirmarTransferencia.addEventListener("click", async () => {
+  try {
+    // valida elementos
+    if (!usuarioRef) throw new Error("Usuário não inicializado.");
+    const valor = Number(valorTransferirInput.value || 0);
+    if (isNaN(valor) || valor <= 0) {
       alert("Valor inválido!");
       return;
-  }
-  saldoGanho -= valor;
-  saldoAtual += valor;
-  atualizarSaldos();
-  valorTransferirInput.value = "";
-  modalTransferir.style.display = "none";
-});
-
-// Função para abrir o modal de transferência com valor atualizado
-// Função para abrir o modal de transferência
-function abrirModalTransferencia() {
-    if (saldoGanho > 0) {
-        // Preenche o input com o saldo ganho atual
-        valorTransferirInput.value = saldoGanho.toFixed(2);
-        // Mostra o modal
-        modalTransferir.style.display = "flex";
-    } else {
-        alert("Você não possui saldo ganho para transferir!");
     }
-}
 
+    // Faz a transação no Firebase (garante consistência)
+    await runTransaction(usuarioRef, (u) => {
+      if (!u) u = { saldo: 0, saldoGanho: 0, saldoGanhou: 0 }; // compatibilidade com nomes
+      // pega saldo ganho do registro (tanto saldoGanho quanto saldoGanhou)
+      const ganhoAtual = Number(u.saldoGanho ?? u.saldoGanhou ?? 0);
+
+      if (valor > ganhoAtual) {
+        // retorna sem alterar para abortar a transaction
+        throw new Error("Saldo ganho insuficiente");
+      }
+
+      // atualiza saldos
+      u.saldo = (Number(u.saldo) || 0) + valor;
+
+      // reduz ambos os campos para manter compatibilidade com o DB antigo/novo
+      const resto = ganhoAtual - valor;
+      u.saldoGanho = resto;
+      u.saldoGanhou = resto;
+
+      return u;
+    });
+
+    // grava um log da transferência (opcional, útil para auditoria)
+    const transferRef = push(ref(db, "transferencias"));
+    await set(transferRef, {
+      usuarioId,
+      valor,
+      data: Date.now(),
+      tipo: "transferencia"
+    });
+
+    // atualiza variáveis locais buscando o estado mais recente no DB
+    const snap = await get(usuarioRef);
+    const uData = snap.val() || {};
+    saldoAtual = Number(uData.saldo || 0);
+    saldoGanho = Number(uData.saldoGanho ?? uData.saldoGanhou ?? 0);
+
+    // atualiza interface e fecha modal
+    atualizarSaldos();
+    modalTransferir.style.display = "none";
+    valorTransferirInput.value = "";
+    alert("Transferência realizada com sucesso!");
+  } catch (err) {
+    console.error("Erro ao confirmar transferência:", err);
+    // se a transação lançou a nossa mensagem, mostramos para o usuário
+    alert(err.message || "Erro ao confirmar transferência. Veja o console.");
+  }
+});
 // Evento do botão Transferir
 
 
