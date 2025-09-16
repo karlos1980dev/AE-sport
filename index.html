@@ -626,6 +626,7 @@ background:lime;
 
   <!-- Linha de valores menores -->
   <div style="display:flex; gap:10px; justify-content:center;">
+      
     <input type="radio" name="modo" id="modo01" value="0.10">
     <label for="modo01"><span style="color:red;">Cust 0.10</span> (R$ 2)</label>
 
@@ -1283,9 +1284,9 @@ async function abrirGeladeira(geladeira) {
     // Define custo, prêmio e limite de escolhas por modo
     let custo = 0, premio = 0, limiteEscolhas = 1;
     switch (modoSelecionado) {
-        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 2; break;
+        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 1; break;
         case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
-        case "1.00": custo = 1; premio = 10; limiteEscolhas = 3; break;
+        case "1.00": custo = 1; premio = 10; limiteEscolhas = 2; break;
         case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
         case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
         case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
