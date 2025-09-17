@@ -561,6 +561,168 @@ background:lime;
 .pulsar-btn {
   animation: pulsarBtn 0.8s ease-in-out infinite;
 }
+#extras {
+  border: 2px solid gold;
+  padding: 10px;
+  background: #222;
+  color: gold;
+  border-radius: 10px;
+  text-align: center;
+}
+.geladeira-extra {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  margin: 5px;
+  font-size: 2rem;
+  background: #444;
+  border-radius: 10px;
+  line-height: 60px;
+}
+.geladeira-extra.acertou {
+  background: green;
+  color: white;
+}
+/* Container das geladeiras extras */
+#extras {
+  display: none; /* aparece só quando liberar */
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* Grade com 4 geladeiras */
+#extras .grid-extras {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Geladeira extra */
+.geladeira-extra {
+  width: 120px;
+  height: 160px;
+  background: linear-gradient(180deg, #e0e0e0, #cfcfcf);
+  border: 3px solid #aaa;
+  border-radius: 10px;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.3s ease;
+  perspective: 800px;
+}
+
+.geladeira-extra:hover {
+  transform: scale(1.05);
+}
+
+/* Porta da geladeira extra */
+.geladeira-extra .interior {
+  width: 100%;
+  height: 100%;
+  background: #f9f9f9;
+  border-radius: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #444;
+  text-align: center;
+  transition: transform 0.6s ease, background 0.3s;
+  backface-visibility: hidden;
+  border: 2px solid #ccc;
+}
+
+/* Quando abre */
+.geladeira-extra.aberta .interior {
+  background: #fffae5;
+  color: #222;
+  transform: rotateY(180deg);
+}
+
+/* Estilo quando premiada */
+.geladeira-extra.premiada .interior {
+  background: #ffe066;
+  color: #000;
+  border: 2px solid #ffbf00;
+  box-shadow: 0 0 15px rgba(255, 223, 0, 0.7);
+}
+
+/* Texto dentro */
+.geladeira-extra .interior span {
+  padding: 5px;
+}
+.extras-container {
+  display: none;
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.geladeira-extra {
+  width: 80px;
+  height: 120px;
+  background: #ccc;
+  border: 2px solid #999;
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: transform 0.3s;
+}
+
+.geladeira-extra.aberta {
+  background: #ffeb3b;
+  transform: rotateX(20deg);
+}
+
+.geladeira-extra .interior {
+  position: absolute;
+  text-align: center;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+}
+
+
+/* Container das extras */
+#extras {
+  display: none;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+/* Cada geladeira extra */
+.geladeira-extra {
+  width: 100px;
+  height: 140px;
+  background: #ccc;
+  border: 2px solid #555;
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+.geladeira-extra:hover {
+  transform: scale(1.05);
+}
+.geladeira-extra.aberta {
+  background: #ffeb3b;
+  color: #000;
+}
+.geladeira-extra .interior {
+  text-align: center;
+}
 
 </style></head>
 <body>
@@ -671,6 +833,13 @@ background:lime;
     <p id="mensagem" style="margin:0; color:yellow; display:flex; align-items:center;">ACHOU GANHOU</p>
 
   </div>
+  <div id="extras" style="display:none; margin-top:20px;">
+  <h3>🎁 Geladeiras Extras</h3>
+  <div class="geladeira-extra">Extra 1</div>
+  <div class="geladeira-extra">Extra 2</div>
+  <div class="geladeira-extra">Extra 3</div>
+  <div class="geladeira-extra">Extra 4</div>
+</div>
 </div>
 <!-- Geladeiras -->
 <div class="geladeiras">
@@ -737,9 +906,11 @@ background:lime;
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Comprar Créditos</a></li>
       <li style="margin:10px 0;"><a href="#" style="color:white; text-decoration:none;">Contato / Suporte</a></li>
       <l><a href="https://wa.me/5571992290058?text=🎟️%20Seu%20ticket%20tá%20quase%20liberado!%0A%0A👉%20Depois%20do%20pagamento,%20manda%20o%20comprovante%20aqui.%0A%0A💳%20Para%20pagar%20use%20o%20Mercado%20Pago:%0A🌐%20link.mercadopago.com.br/newtechiptv">CONTATO</a></l>  </ul> </div></div></div>
-<div id="modalTransferir" class="modal"><div class="modal-content"><h2>Transferir </br>SALDO ganhou para SALDO Atual</h2><p>Saldo disponível: <b id="saldoDisponivel">0</b></p><input type="number" id="valorTransferir" placeholder="Digite valor R$" min="1"><div class="modal-buttons"> <button style="background:#ccc;" id="cancelarTransferencia">Cancelar</button><button id="confirmarTransferencia">Transferir</button></div></div></div>
+<div id="modalTransferir" class="modal"><div class="modal-content"><h2>Transferir </br>SALDO ganhou para SALDO Atual</h2><p> <b id="saldoDisponivel"></b></p><input type="number" id="valorTransferir" placeholder="Digite valor R$" min="1"><div class="modal-buttons"> <button style="background:#ccc;" id="cancelarTransferencia">Cancelar</button><button id="confirmarTransferencia">Transferir</button></div></div></div>
 <!-- Modal Tabela de Prêmios -->
 <div id="tabelaModal" class="modal"><div class="modal-content" style="background:#111; color:white; border-radius:12px; padding:20px; text-align:center;"> <span class="closeTabela" style="cursor:pointer; float:right; font-size:20px;">&times;</span><h3 style="color:gold;">📊 TABELA DE PRÊMIOS</h3><ul style="list-style:none; padding:0; font-size:16px; text-align:left; line-height:1.8;"><li>✅ Marque 2  → Custa R$ 0.10 → Ganha →  <b>R$ 2</b></li><li>✅ Marque 2→ Custa R$ 0.50 →  Ganha →  <b>R$ 3.00</b></li><li>✅ Marque 3 → Custa R$ 1.00 → Ganha →  <b>R$ 10</b></li><li>✅ Marque 2  → Custa R$ 2.00 → Ganha →  <b>R$ 16</b></li><li>✅ Marque 3 → Custa R$ 5.00 →  Ganha →  <b>R$ 20</b></li><li>✅ Marque 4 → Custa R$ 10.00 → Ganha →  <b>R$ 30</b></li> </ul></div></div>
+
+
 <script type="module">
 // --- Inicialização Firebase ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -820,26 +991,7 @@ async function atualizarInterfaceSaldo() {
 }
 
 // Função de saque: zera saldoGanho e salva último saque
-async function sacarSaldo() {
-    if (!usuarioId) return;
 
-    const userRef = ref(db, `usuarios/${usuarioId}`);
-
-    await runTransaction(userRef, (user) => {
-        if (!user) user = { saldo: 0, saldoGanhou: 0 };
-        const ganho = Number(user.saldoGanhou || 0);
-
-        if (ganho > 0) {
-            user.saldo = Number(user.saldo || 0) + ganho; // adiciona o ganho ao saldo atual
-            user.saldoGanhou = 0; // zera saldoGanhou
-
-         
-        }
-        return user;
-    });
-
-    await atualizarInterfaceSaldo(); // garante que interface e localStorage estejam corretos
-}
 
 // Ao carregar página, busca do Firebase (não do localStorage!)
 document.addEventListener("DOMContentLoaded", async () => {
@@ -1153,44 +1305,55 @@ onValue(usuarioRef, snapshot => {
 
 // --- Função de saque ---
 enviarBtn.addEventListener("click", async () => {
+    const nome = nomeInput.value.trim();
+    const pix = pixInput.value.trim();
+
+    if (!nome || !pix) {
+        alert("Preencha todos os campos corretamente!");
+        return;
+    }
+
     if (saldoGanho <= 0) {
         alert("Não há saldo disponível para saque.");
         return;
     }
 
-    // Transação no Firebase para transferir saldoGanho para saldo
-        try {
-        // Transação no Firebase para reduzir apenas saldoGanho
+    try {
+        // 1. Salva o pedido de saque no Firebase
+        const saqueRef = push(ref(db, "saques"));
+        await set(saqueRef, {
+            nome,
+            pix,
+            valor: saldoGanho,
+            data: Date.now(),
+            usuarioId
+        });
+
+        // 2. Atualiza usuário no Firebase
         await runTransaction(usuarioRef, (user) => {
             if (!user) user = { saldo: 0, saldoGanho: 0 };
-
-            if ((user.saldoGanho || 0) <= 0) {
-                throw new Error("Sem saldo disponível para saque.");
-            }
-
-            // ❌ não mexe em user.saldo
-            // ✅ apenas zera ou reduz saldoGanho
-            user.saldoGanho = 0;
-
+            user.saldo = (user.saldo || 0) + saldoGanho; // transfere ganho
+            user.saldoGanho = 0; // zera
             return user;
         });
-        // Atualiza variáveis locais
+
+        // 3. Atualiza variáveis locais
         saldoAtual += saldoGanho;
         saldoGanho = 0;
 
-        // Atualiza interface
         atualizarSaldos();
 
-        // Fecha modal
+        // 4. Limpa modal
         modalSaque.style.display = "none";
+        nomeInput.value = "";
+        pixInput.value = "";
 
-        alert("Saque realizado com sucesso!");
-    } catch (error) {
-        console.error("Erro ao sacar:", error);
-        alert("Erro ao realizar saque. Tente novamente.");
+        alert("✅ Saque solicitado com sucesso!");
+    } catch (err) {
+        console.error("Erro ao solicitar saque:", err);
+        alert("Erro ao solicitar saque, tente novamente.");
     }
 });
-
 // --- Botão cancelar ---
 cancelarBtn.addEventListener("click", () => {
     modalSaque.style.display = "none";
@@ -1273,111 +1436,7 @@ async function liberarCredito() {
 }
 window.liberarCredito = liberarCredito;
 
-// --- Função para abrir geladeira ---
-async function abrirGeladeira(geladeira) {
-    const geladeiras = document.querySelectorAll(".geladeira");
-    const index = Array.from(geladeiras).indexOf(geladeira);
 
-    const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
-    if (!modoSelecionado) return alert("Selecione um Valor para jogar!");
-
-    // Define custo, prêmio e limite de escolhas por modo
-    let custo = 0, premio = 0, limiteEscolhas = 1;
-    switch (modoSelecionado) {
-        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 1; break;
-        case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
-        case "1.00": custo = 1; premio = 10; limiteEscolhas = 2; break;
-        case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
-        case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
-        case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
-        default: return;
-    }
-
-    if (jogando) return;
-    if (saldoAtual < custo) return msg.textContent = "Saldo insuficiente! Compre saldo para continuar.";
-    if (escolhas.includes(index)) return;
-
-    // Marca a geladeira selecionada
-    escolhas.push(index);
-    geladeira.classList.add("aberta");
-    geladeira.querySelector(".interior").textContent = "✅ Marcada";
-    document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = true);
-
-    // Se ainda não atingiu o limite de escolhas, espera
-    if (escolhas.length < limiteEscolhas) return;
-
-    // Desconta o custo do saldo atual (uma vez)
-    saldoAtual -= custo;
-    saldoAtual = Math.round(saldoAtual * 100) / 100;
-
-    if (usuarioId) {
-        await runTransaction(ref(db, `usuarios/${usuarioId}`), u => {
-            if (!u) u = { saldo: 0, saldoGanhou: 0 };
-            u.saldo = saldoAtual;
-            return u;
-        });
-    }
-
-    jogando = true;
-
-    // Define qual geladeira terá o prêmio
-    const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-
-    escolhas.forEach(idx => {
-        const g = geladeiras[idx];
-        const interior = g.querySelector(".interior");
-
-        if (idx === brindeIndex) {
-            interior.textContent = `🎁 Você Ganhou R$${premio}!`;
-            g.classList.add("premiada");
-            saldoGanho += premio; // prêmio vai somente para saldoGanho
-        } else {
-            interior.textContent = "❌ Errou!";
-        }
-    });
-
-    atualizarSaldos();
-
-    // Mostra onde estava o prêmio se não marcou
-    if (!escolhas.includes(brindeIndex)) {
-        const gPremiada = geladeiras[brindeIndex];
-        const interiorPremiada = gPremiada.querySelector(".interior");
-        setTimeout(() => {
-            gPremiada.classList.add("aberta", "premiada");
-            interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
-            setTimeout(() => {
-                gPremiada.classList.remove("aberta", "premiada");
-                interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
-            }, 1500);
-        }, 800);
-    }
-setTimeout(async () => {
-  escolhas.forEach(idx => {
-    const g = geladeiras[idx];
-    g.classList.remove("aberta", "premiada");
-    g.querySelector(".interior").textContent = `Geladeira ${idx + 1}`;
-  });
-
-  escolhas = [];
-  jogando = false;
-  document.querySelectorAll('input[name="modo"]').forEach(radio => radio.disabled = false);
-  msg.textContent = saldoAtual >= Math.min(0.10, 2) ? "Pode jogar de novo!" : "Saldo insuficiente!";
-
-  // 🔹 Agora só atualiza corretamente os dois saldos
-  if (usuarioId) {
-    await runTransaction(ref(db, `usuarios/${usuarioId}`), u => {
-      if (!u) u = { saldo: 0, saldoGanho: 0 };
-      u.saldo = saldoAtual;        // desconta só o custo do jogo
-      u.saldoGanho = saldoGanho;   // mantém o prêmio separado
-      return u;
-    });
-  }
-
-  atualizarSaldos();
-}, 2200);
-}
-
-window.abrirGeladeira = abrirGeladeira;
 // --- Efeito automático ---
 function iniciarEfeitoAutomatico(){
   if(efeitoAutomatico) return;
@@ -1481,105 +1540,101 @@ const meuCodigo = localStorage.getItem("meuCodigo");
 if (meuCodigo) {
   mostrarLinkIndicacao(meuCodigo);
 }
-transferirBtn.addEventListener("click", (e) => {
-    e.preventDefault(); // evita comportamento padrão
+// ---------- Abrir modal de transferência ----------
+transferirBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
 
-    // Checa saldo ganho
+    if (!usuarioRef) return alert("Usuário não inicializado.");
+
+    // Pega o saldo mais recente do Firebase
+    const snap = await get(usuarioRef);
+    const uData = snap.val() || {};
+    saldoGanho = Number(uData.saldoGanho ?? uData.saldoGanhou ?? 0);
+
     if (saldoGanho > 0) {
-        // Só abre o modal se houver saldo
         modalTransferir.style.display = "flex";
-        valorTransferirInput.value = saldoGanho; // opcional: preenche o input com o saldo
+        valorTransferirInput.value = saldoGanho;
     } else {
-        // Se não tiver saldo, alerta e garante que o modal não abra
         alert("Você não possui saldo ganho para transferir!");
         modalTransferir.style.display = "none";
     }
 });
-const DENOMINADOR = 500;
-  const randi = (max) => Math.floor(Math.random() * (max + 1));
 
-  // sorteia o valor verde
-  const sorteado = randi(DENOMINADOR);
-  
-  document.getElementById('valor').textContent = sorteado;
+// ---------- Cancelar transferência ----------
 cancelarTransferencia.addEventListener("click", () => {
-  modalTransferir.style.display = "none";
+    modalTransferir.style.display = "none";
 });
 
-// ---------- Handler corrigido para confirmar transferência ----------
+// ---------- Confirmar transferência ----------
 confirmarTransferencia.addEventListener("click", async () => {
-  try {
-    // valida elementos
-    if (!usuarioRef) throw new Error("Usuário não inicializado.");
-    const valor = Number(valorTransferirInput.value || 0);
-    if (isNaN(valor) || valor <= 0) {
-      alert("Valor inválido!");
-      return;
+    try {
+        if (!usuarioRef) throw new Error("Usuário não inicializado.");
+
+        const valor = Number(valorTransferirInput.value || 0);
+        if (isNaN(valor) || valor <= 0) {
+            alert("Valor inválido!");
+            return;
+        }
+
+        // Faz a transação garantindo consistência
+        await runTransaction(usuarioRef, (u) => {
+            if (!u) u = { saldo: 0, saldoGanho: 0, saldoGanhou: 0 };
+
+            const ganhoAtual = Number(u.saldoGanho ?? u.saldoGanhou ?? 0);
+
+            if (valor > ganhoAtual) {
+                throw new Error("Saldo ganho insuficiente");
+            }
+
+            u.saldo = Number(u.saldo || 0) + valor;
+
+            const resto = ganhoAtual - valor;
+            u.saldoGanho = resto;
+            u.saldoGanhou = resto;
+
+            return u;
+        });
+
+        // Registra a transferência no log
+        const transferRef = push(ref(db, "transferencias"));
+        await set(transferRef, {
+            usuarioId,
+            valor,
+            data: Date.now(),
+            tipo: "transferencia"
+        });
+
+        // Atualiza variáveis locais com o saldo mais recente
+        const snap = await get(usuarioRef);
+        const uData = snap.val() || {};
+        saldoAtual = Number(uData.saldo || 0);
+        saldoGanho = Number(uData.saldoGanho ?? uData.saldoGanhou ?? 0);
+
+        atualizarSaldos();
+        modalTransferir.style.display = "none";
+        valorTransferirInput.value = "";
+        alert("Transferência realizada com sucesso!");
+    } catch (err) {
+        console.error("Erro ao confirmar transferência:", err);
+        alert(err.message || "Erro ao confirmar transferência. Veja o console.");
     }
+});
 
-    // Faz a transação no Firebase (garante consistência)
-    await runTransaction(usuarioRef, (u) => {
-      if (!u) u = { saldo: 0, saldoGanho: 0, saldoGanhou: 0 }; // compatibilidade com nomes
-      // pega saldo ganho do registro (tanto saldoGanho quanto saldoGanhou)
-      const ganhoAtual = Number(u.saldoGanho ?? u.saldoGanhou ?? 0);
+// ---------- Abrir modal do saldo ganho (botão) ----------
+btnSaldoGanho.addEventListener('click', async () => {
+    if (!usuarioRef) return alert("Usuário não inicializado.");
 
-      if (valor > ganhoAtual) {
-        // retorna sem alterar para abortar a transaction
-        throw new Error("Saldo ganho insuficiente");
-      }
-
-      // atualiza saldos
-      u.saldo = (Number(u.saldo) || 0) + valor;
-
-      // reduz ambos os campos para manter compatibilidade com o DB antigo/novo
-      const resto = ganhoAtual - valor;
-      u.saldoGanho = resto;
-      u.saldoGanhou = resto;
-
-      return u;
-    });
-
-    // grava um log da transferência (opcional, útil para auditoria)
-    const transferRef = push(ref(db, "transferencias"));
-    await set(transferRef, {
-      usuarioId,
-      valor,
-      data: Date.now(),
-      tipo: "transferencia"
-    });
-
-    // atualiza variáveis locais buscando o estado mais recente no DB
+    // Pega saldo ganho mais recente
     const snap = await get(usuarioRef);
     const uData = snap.val() || {};
-    saldoAtual = Number(uData.saldo || 0);
     saldoGanho = Number(uData.saldoGanho ?? uData.saldoGanhou ?? 0);
 
-    // atualiza interface e fecha modal
-    atualizarSaldos();
-    modalTransferir.style.display = "none";
-    valorTransferirInput.value = "";
-    alert("Transferência realizada com sucesso!");
-  } catch (err) {
-    console.error("Erro ao confirmar transferência:", err);
-    // se a transação lançou a nossa mensagem, mostramos para o usuário
-    alert(err.message || "Erro ao confirmar transferência. Veja o console.");
-  }
-});
-// Evento do botão Transferir
-
-
-// Cancelar transferência
-cancelarTransferencia.addEventListener("click", () => {
-    modalTransferir.style.display = "none";
-});
-btnSaldoGanho.addEventListener('click', () => {
-    if(saldoGanho > 0){
-        abrirModalComValor(saldoGanho); // coloca o valor no input
+    if (saldoGanho > 0) {
+        abrirModalComValor(saldoGanho);
     } else {
         alert("Você não tem saldo disponível para saque!");
     }
 });
-
 function processarSaque() {
     const valorInput = document.getElementById("valorInput");
     const nomeInput = document.getElementById("nomeInput");
@@ -1734,7 +1789,7 @@ cancelarInfoBtn.addEventListener("click", () => infoModal.style.display = "none"
     });
   });
 
-
+  
 // Exemplo: botão COMPRAR ACESSO só pulsa quando saldo e saldoGanho = 0
 function atualizarBotaoPulsar() {
   const saldoAtual = parseFloat(btnSaldo.textContent.replace(/\D/g,'') || 0);
@@ -1779,12 +1834,236 @@ atualizarBotaoPulsar();
       setTimeout(() => notificacaoIndicacao.style.display = "none", 3000);
     }
   }
-  
  
-  // --- Inicialização ---
-  atualizarSaldos();
 
+
+
+
+
+// --- Geladeiras Extras ---
+
+
+
+
+
+// --- Geladeiras Extras ---
+const containerExtras = document.getElementById("extras");
+const NUM_EXTRAS = 4;
+let valoresExtras = [];
+let geladeirasExtras = [];
+let extrasJaClicadas = false; // impede mais de 1 clique
+
+// Variáveis do brinde principal
+let rodadasBrinde = 0;
+let acertosBrinde = 0;
+
+function gerarGeladeirasExtras() {
+  containerExtras.innerHTML = "";
+  extrasJaClicadas = false;
+
+  // gera valores aleatórios entre 10 e 100
+  valoresExtras = Array.from({ length: NUM_EXTRAS }, () =>
+    Math.floor(Math.random() * 91) + 10
+  );
+
+  for (let i = 0; i < NUM_EXTRAS; i++) {
+    const g = document.createElement("div");
+    g.classList.add("geladeira-extra");
+    g.innerHTML = `<div class="interior">Extra ${i + 1}</div>`;
+    g.addEventListener("click", () => abrirGeladeiraExtra(g, i));
+    containerExtras.appendChild(g);
+  }
+
+  geladeirasExtras = document.querySelectorAll(".geladeira-extra");
+  containerExtras.style.display = "none";
+}
+
+// Abre geladeira extra
+function abrirGeladeiraExtra(geladeira, index) {
+  if (extrasJaClicadas) return;
+  extrasJaClicadas = true;
+
+  const interior = geladeira.querySelector(".interior");
+  const valor = valoresExtras[index];
+
+  geladeira.classList.add("aberta", "premiada");
+  interior.textContent = `🎁 R$${valor}`;
+
+  saldoGanho += valor;
+  atualizarSaldos();
+  salvarSaldoFirebase();
+
+  // Fecha todas as extras após 5 segundos
+  setTimeout(() => {
+    geladeirasExtras.forEach((g, i) => {
+      g.classList.remove("aberta", "premiada");
+      g.querySelector(".interior").textContent = `Extra ${i + 1}`;
+    });
+    containerExtras.style.display = "none";
+    extrasJaClicadas = false;
+  }, 5000);
+}
+
+function registrarRodadaBrinde(acertou) {
+  rodadasBrinde++;
+  if (acertou) acertosBrinde++;
+
+  if (rodadasBrinde >= 5) {
+    if (acertosBrinde >= 3) {
+      liberarGeladeirasExtras();
+    }
+    rodadasBrinde = 0;
+    acertosBrinde = 0;
+  }
+}
+
+function liberarGeladeirasExtras() {
+  gerarGeladeirasExtras();
+  containerExtras.style.display = "flex";
+  alert("🎉 Você liberou as Geladeiras Extras!");
+}
+
+// Inicializa
+gerarGeladeirasExtras();
+
+async function abrirGeladeira(geladeira) {
+    const geladeiras = document.querySelectorAll(".geladeira");
+    const index = Array.from(geladeiras).indexOf(geladeira);
+
+    const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
+    if (!modoSelecionado) return alert("Selecione um valor para jogar!");
+
+    let custo = 0, premio = 0, limiteEscolhas = 1;
+    switch (modoSelecionado) {
+        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 1; break;
+        case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
+        case "1.00": custo = 1; premio = 10; limiteEscolhas = 2; break;
+        case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
+        case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
+        case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
+        default: return;
+    }
+
+    if (jogando) return;
+    if (saldoAtual < custo) return msg.textContent = "Saldo insuficiente!";
+    if (escolhas.includes(index)) return;
+    if (escolhas.length >= limiteEscolhas) return;
+
+    // Marca geladeira selecionada
+    escolhas.push(index);
+    geladeira.classList.add("aberta");
+    geladeira.querySelector(".interior").textContent = "✅ Marcada";
+    document.querySelectorAll('input[name="modo"]').forEach(r => r.disabled = true);
+
+    if (escolhas.length < limiteEscolhas) return;
+
+    // Desconta custo do saldo atual
+    saldoAtual = Math.round((saldoAtual - custo) * 100) / 100;
+
+    // Atualiza saldo atual no Firebase
+    if (usuarioId) {
+        const userRef = ref(db, `usuarios/${usuarioId}`);
+        await runTransaction(userRef, u => {
+            if (!u) u = { saldo: 0, saldoGanho: 0 };
+            u.saldo = saldoAtual;
+            return u;
+        });
+    }
+
+    jogando = true;
+
+    // Sorteio do brinde principal
+    const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+    let acertou = false;
+
+    // Revela as geladeiras escolhidas
+    for (const idx of escolhas) {
+        const g = geladeiras[idx];
+        const interior = g.querySelector(".interior");
+
+        if (idx === brindeIndex) {
+            interior.textContent = `🎁 Você Ganhou R$${premio}!`;
+            g.classList.add("premiada");
+
+            // Atualiza saldo ganho de forma segura no Firebase
+            if (usuarioId) {
+                const userRef = ref(db, `usuarios/${usuarioId}`);
+                await runTransaction(userRef, (u) => {
+                    if (!u) u = { saldo: 0, saldoGanho: 0, saldoGanhou: 0 };
+                    const ganhoAtual = Number(u.saldoGanho ?? u.saldoGanhou ?? 0);
+                    const novoGanho = ganhoAtual + premio;
+
+                    u.saldoGanho = novoGanho;
+                    u.saldoGanhou = novoGanho;
+                    return u;
+                });
+
+                // Atualiza variável local com o valor mais recente
+                const snap = await get(userRef);
+                const uData = snap.val() || {};
+                saldoGanho = Number(uData.saldoGanho ?? uData.saldoGanhou ?? 0);
+            }
+
+            acertou = true;
+        } else {
+            interior.textContent = "❌ Errou!";
+        }
+    }
+
+    // Se nenhuma foi premiada, revela apenas uma geladeira com brinde verdadeiro
+    if (!acertou) {
+        const gPremiada = geladeiras[brindeIndex];
+        const interiorPremiada = gPremiada.querySelector(".interior");
+        setTimeout(() => {
+            gPremiada.classList.add("aberta", "premiada");
+            interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
+            setTimeout(() => {
+                gPremiada.classList.remove("aberta", "premiada");
+                interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
+            }, 1500);
+        }, 800);
+    } else {
+        // ✅ Registra rodada do brinde e verifica liberação das geladeiras extras
+        setTimeout(() => registrarRodadaBrinde(acertou), 1200);
+    }
+
+    atualizarSaldos();
+
+    // Reset de rodada
+    setTimeout(() => {
+        escolhas.forEach(idx => {
+            const g = geladeiras[idx];
+            g.classList.remove("aberta", "premiada");
+            g.querySelector(".interior").textContent = `Geladeira ${idx + 1}`;
+        });
+        escolhas = [];
+        jogando = false;
+        document.querySelectorAll('input[name="modo"]').forEach(r => r.disabled = false);
+        msg.textContent = saldoAtual >= 0.10 ? "Pode jogar de novo!" : "Saldo insuficiente!";
+    }, 2200);
+}
+// coloca isto junto com as outras funções que lidam com Firebase
+async function salvarSaldoFirebase() {
+  if (!usuarioId) return;
+  try {
+    const userRef = ref(db, `usuarios/${usuarioId}`);
+    await runTransaction(userRef, (u) => {
+      if (!u) u = { saldo: 0, saldoGanho: 0 };
+      u.saldo = Number(saldoAtual || 0);
+      u.saldoGanho = Number(saldoGanho || 0);
+      return u;
+    });
+  } catch (err) {
+    console.error("Erro ao salvar saldo no Firebase:", err);
+  }
+}
+
+function limpar(){
+    alert("tá limpo");
+    localStorage.clear();
+}
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </body>
 </html>
+
