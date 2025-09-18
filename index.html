@@ -1859,6 +1859,7 @@ atualizarBotaoPulsar();
 
 
 // --- Geladeiras Extras ---
+// --- Geladeiras Extras ---
 const containerExtras = document.getElementById("extras");
 const NUM_EXTRAS = 4;
 let valoresExtras = [];
@@ -1868,11 +1869,11 @@ let extrasJaClicadas = false; // impede mais de 1 clique
 // Variáveis do brinde principal
 let rodadasBrinde = 0;
 let acertosBrinde = 0;
+
 function gerarGeladeirasExtras() {
   containerExtras.innerHTML = "";
   extrasJaClicadas = false;
 
-  // gera valores aleatórios entre 10 e 100
   valoresExtras = Array.from({ length: NUM_EXTRAS }, () =>
     Math.floor(Math.random() * 41) + 10
   );
@@ -1889,7 +1890,6 @@ function gerarGeladeirasExtras() {
   containerExtras.style.display = "none";
 }
 
-// Abre geladeira extra
 function abrirGeladeiraExtra(geladeira, index) {
   if (extrasJaClicadas) return;
   extrasJaClicadas = true;
@@ -1904,7 +1904,6 @@ function abrirGeladeiraExtra(geladeira, index) {
   atualizarSaldos();
   salvarSaldoFirebase();
 
-  // Fecha todas as extras após 5 segundos
   setTimeout(() => {
     geladeirasExtras.forEach((g, i) => {
       g.classList.remove("aberta", "premiada");
@@ -1916,29 +1915,18 @@ function abrirGeladeiraExtra(geladeira, index) {
 }
 
 function registrarRodadaBrinde(acertou) {
-  // Evita contar duas vezes
   if (rodadasBrinde >= 5) return;
 
   rodadasBrinde++;
-
   if (acertou) acertosBrinde++;
-
   const errosBrinde = rodadasBrinde - acertosBrinde;
 
-  // Atualiza o progresso na div
   progressoDiv.textContent =
     `Rodadas: ${rodadasBrinde}/5 | ✅ Acertos: ${acertosBrinde} | ❌ Erros: ${errosBrinde}`;
 
-  // Efeito visual
-  if (acertou) {
-    progressoDiv.classList.add("acerto");
-  } else {
-    progressoDiv.classList.add("erro");
-  }
-
+  progressoDiv.classList.add(acertou ? "acerto" : "erro");
   setTimeout(() => progressoDiv.classList.remove("acerto", "erro"), 300);
 
-  // Checa se completou 5 rodadas
   if (rodadasBrinde >= 5) {
     if (acertosBrinde >= 3) {
       liberarGeladeirasExtras();
@@ -1947,16 +1935,15 @@ function registrarRodadaBrinde(acertou) {
       alert(`❌ Você acertou apenas ${acertosBrinde} vezes em 5 rodadas. Precisa de 3 para liberar.`);
     }
 
-    // Reseta contadores
     rodadasBrinde = 0;
     acertosBrinde = 0;
 
-    // Atualiza div zerada
     setTimeout(() => {
       progressoDiv.textContent = "Rodadas: 0/5 | ✅ Acertos: 0 | ❌ Erros: 0";
     }, 500);
   }
 }
+
 function liberarGeladeirasExtras() {
   gerarGeladeirasExtras();
   containerExtras.style.display = "flex";
@@ -1965,114 +1952,111 @@ function liberarGeladeirasExtras() {
 
 // Inicializa extras ocultas
 gerarGeladeirasExtras();
+
+// --- Função principal de abrir geladeira ---
 async function abrirGeladeira(geladeira) {
-    const geladeiras = document.querySelectorAll(".geladeira");
-    const index = Array.from(geladeiras).indexOf(geladeira);
+  const geladeiras = document.querySelectorAll(".geladeira");
+  const index = Array.from(geladeiras).indexOf(geladeira);
 
-    const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
-    if (!modoSelecionado) return alert("Selecione um valor para jogar!");
+  const modoSelecionado = document.querySelector('input[name="modo"]:checked')?.value;
+  if (!modoSelecionado) return alert("Selecione um valor para jogar!");
 
-    let custo = 0, premio = 0, limiteEscolhas = 1;
-    switch (modoSelecionado) {
-        case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 1; break;
-        case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
-        case "1.00": custo = 1; premio = 10; limiteEscolhas = 2; break;
-        case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
-        case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
-        case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
-        default: return;}
-        
-    if (jogando) return;
-    if (saldoAtual < custo) return msg.textContent = "Saldo insuficiente!";
-    if (escolhas.includes(index)) return;
-    if (escolhas.length >= limiteEscolhas) return;
+  let custo = 0, premio = 0, limiteEscolhas = 1;
+  switch (modoSelecionado) {
+    case "0.10": custo = 0.10; premio = 2; limiteEscolhas = 1; break;
+    case "0.50": custo = 0.50; premio = 3; limiteEscolhas = 2; break;
+    case "1.00": custo = 1; premio = 10; limiteEscolhas = 2; break;
+    case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
+    case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
+    case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
+    default: return;
+  }
 
-    // Marca geladeira selecionada
-    escolhas.push(index);
-    geladeira.classList.add("aberta");
-    geladeira.querySelector(".interior").textContent = "✅ Marcada";
-    document.querySelectorAll('input[name="modo"]').forEach(r => r.disabled = true);
+  if (jogando) return;
+  if (saldoAtual < custo) return msg.textContent = "Saldo insuficiente!";
+  if (escolhas.includes(index)) return;
+  if (escolhas.length >= limiteEscolhas) return;
 
-    if (escolhas.length < limiteEscolhas) return;
+  escolhas.push(index);
+  geladeira.classList.add("aberta");
+  geladeira.querySelector(".interior").textContent = "✅ Marcada";
+  document.querySelectorAll('input[name="modo"]').forEach(r => r.disabled = true);
 
-    // Desconta custo do saldo atual
-    saldoAtual = Math.round((saldoAtual - custo) * 100) / 100;
+  if (escolhas.length < limiteEscolhas) return;
 
-    // Atualiza saldo atual no Firebase
-    if (usuarioId) {
-        const userRef = ref(db, `usuarios/${usuarioId}`);
-        await runTransaction(userRef, u => {
-            if (!u) u = { saldo: 0, saldoGanho: 0 };
-            u.saldo = saldoAtual;
-            return u;
-        });
-    }
+  saldoAtual = Math.round((saldoAtual - custo) * 100) / 100;
+  if (usuarioId) {
+    const userRef = ref(db, `usuarios/${usuarioId}`);
+    await runTransaction(userRef, u => {
+      if (!u) u = { saldo: 0, saldoGanho: 0 };
+      u.saldo = saldoAtual;
+      return u;
+    });
+  }
 
-    jogando = true;
+  jogando = true;
 
-    // Sorteio do brinde principal
-    // Sorteio do brinde principal
-const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-let acertou = false;
+  // Sorteio do brinde
+  const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+  let acertou = false;
 
-// Dentro do for que revela as geladeiras escolhidas
-for (const idx of escolhas) {
+  for (const idx of escolhas) {
     const g = geladeiras[idx];
     const interior = g.querySelector(".interior");
 
     if (idx === brindeIndex) {
-        interior.textContent = `🎁 Você Ganhou R$${premio}!`;
-        g.classList.add("premiada");
-        acertou = true;
+      interior.textContent = `🎁 Você Ganhou R$${premio}!`;
+      g.classList.add("premiada");
+      acertou = true;
 
-        // ✅ Adiciona ao saldo ganho e atualiza Firebase
-        saldoGanho = Math.round((saldoGanho + premio) * 100) / 100;
-        atualizarSaldos(); // atualiza na tela
-        if (usuarioId) {
-            const userRef = ref(db, `usuarios/${usuarioId}`);
-            runTransaction(userRef, u => {
-                if (!u) u = { saldo: saldoAtual, saldoGanho: 0 };
-                u.saldoGanho = saldoGanho;
-                return u;
-            });
-        }
-    } else {
-        interior.textContent = "❌ Errou!";
-    }
-}
-registrarRodadaBrinde(acertou);
-if (!acertou) {
-  const gPremiada = geladeiras[brindeIndex];
-  const interiorPremiada = gPremiada.querySelector(".interior");
-  setTimeout(() => {
-    gPremiada.classList.add("aberta", "premiada");
-    interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
-    setTimeout(() => {
-      gPremiada.classList.remove("aberta", "premiada");
-      interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
-    }, 1500);
-  }, 800);
-} else {
-        // ✅ Registra rodada do brinde e verifica liberação das geladeiras extras
-        setTimeout(() => registrarRodadaBrinde(acertou), 1200);
-    }
-
-    atualizarSaldos();
-
-    // Reset de rodada
-    setTimeout(() => {
-        escolhas.forEach(idx => {
-            const g = geladeiras[idx];
-            g.classList.remove("aberta", "premiada");
-            g.querySelector(".interior").textContent = `Geladeira ${idx + 1}`;
+      saldoGanho = Math.round((saldoGanho + premio) * 100) / 100;
+      atualizarSaldos();
+      if (usuarioId) {
+        const userRef = ref(db, `usuarios/${usuarioId}`);
+        runTransaction(userRef, u => {
+          if (!u) u = { saldo: saldoAtual, saldoGanho: 0 };
+          u.saldoGanho = saldoGanho;
+          return u;
         });
-        escolhas = [];
-        jogando = false;
-        document.querySelectorAll('input[name="modo"]').forEach(r => r.disabled = false);
-        msg.textContent = saldoAtual >= 0.10 ? "Pode jogar de novo!" : "Saldo insuficiente!";
-    }, 2200);
+      }
+    } else {
+      interior.textContent = "❌ Errou!";
+    }
+  }
+
+  // Se errou, mostra a geladeira premiada
+  if (!acertou) {
+    const gPremiada = geladeiras[brindeIndex];
+    const interiorPremiada = gPremiada.querySelector(".interior");
+    setTimeout(() => {
+      gPremiada.classList.add("aberta", "premiada");
+      interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
+      setTimeout(() => {
+        gPremiada.classList.remove("aberta", "premiada");
+        interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
+      }, 1500);
+    }, 800);
+  }
+
+  // Chama registrarRodadaBrinde apenas 1 vez, após exibir tudo
+  setTimeout(() => {
+    registrarRodadaBrinde(acertou);
+
+    // Reset das geladeiras e escolhas
+    escolhas.forEach(idx => {
+      const g = geladeiras[idx];
+      g.classList.remove("aberta", "premiada");
+      g.querySelector(".interior").textContent = `Geladeira ${idx + 1}`;
+    });
+    escolhas = [];
+    jogando = false;
+    document.querySelectorAll('input[name="modo"]').forEach(r => r.disabled = false);
+    msg.textContent = saldoAtual >= 0.10 ? "Pode jogar de novo!" : "Saldo insuficiente!";
+    atualizarSaldos();
+  }, 2200);
 }
-// coloca isto junto com as outras funções que lidam com Firebase
+
+// Salva saldo no Firebase
 async function salvarSaldoFirebase() {
   if (!usuarioId) return;
   try {
@@ -2088,9 +2072,9 @@ async function salvarSaldoFirebase() {
   }
 }
 
-function limpar(){
-    alert("tá limpo");
-    localStorage.clear();
+function limpar() {
+  alert("tá limpo");
+  localStorage.clear();
 }
 </script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
