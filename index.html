@@ -724,12 +724,33 @@ background:lime;
   text-align: center;
 }
 
+  #progressoBrinde {
+    text-align: center;      /* centraliza horizontalmente */
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 15px;
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Classe de efeito de acerto */
+  .acerto {
+    color: green;
+    transform: scale(1.2);
+  }
+
+  /* Classe de efeito de erro */
+  .erro {
+    color: red;
+    transform: scale(1.2);
+  }
 </style></head>
 <body>
+    
     <div id="notificacaoIndicacao" style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%); background: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px; display: none; z-index: 9999; font-weight: bold;">
   Indicador recebeu 20% do valor!
 </div>
 <div class="container-principal">
+    <div id="progressoBrinde">Rodadas: 0/5 | ✅ Acertos: 0 | ❌ Erros: 0</div>
 <!-- Modal info usuário -->
 <div id="infoModal" class="modal">
   <div style="width:80%;background:grey;color:white;" class="modal-content">
@@ -934,6 +955,7 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 // --- Elementos DOM ---
+const progressoDiv = document.getElementById("progressoBrinde");
 const msg = document.getElementById("mensagem");
 const btnSaldo = document.getElementById("btnSaldo");
 const btnSaldoGanho = document.getElementById("btnSaldoGanho");
@@ -1834,16 +1856,6 @@ atualizarBotaoPulsar();
       setTimeout(() => notificacaoIndicacao.style.display = "none", 3000);
     }
   }
- 
-
-
-
-
-
-// --- Geladeiras Extras ---
-
-
-
 
 
 // --- Geladeiras Extras ---
@@ -1856,14 +1868,13 @@ let extrasJaClicadas = false; // impede mais de 1 clique
 // Variáveis do brinde principal
 let rodadasBrinde = 0;
 let acertosBrinde = 0;
-
 function gerarGeladeirasExtras() {
   containerExtras.innerHTML = "";
   extrasJaClicadas = false;
 
   // gera valores aleatórios entre 10 e 100
   valoresExtras = Array.from({ length: NUM_EXTRAS }, () =>
-    Math.floor(Math.random() * 91) + 10
+    Math.floor(Math.random() * 41) + 10
   );
 
   for (let i = 0; i < NUM_EXTRAS; i++) {
@@ -1905,27 +1916,55 @@ function abrirGeladeiraExtra(geladeira, index) {
 }
 
 function registrarRodadaBrinde(acertou) {
+  // Evita contar duas vezes
+  if (rodadasBrinde >= 5) return;
+
   rodadasBrinde++;
+
   if (acertou) acertosBrinde++;
 
+  const errosBrinde = rodadasBrinde - acertosBrinde;
+
+  // Atualiza o progresso na div
+  progressoDiv.textContent =
+    `Rodadas: ${rodadasBrinde}/5 | ✅ Acertos: ${acertosBrinde} | ❌ Erros: ${errosBrinde}`;
+
+  // Efeito visual
+  if (acertou) {
+    progressoDiv.classList.add("acerto");
+  } else {
+    progressoDiv.classList.add("erro");
+  }
+
+  setTimeout(() => progressoDiv.classList.remove("acerto", "erro"), 300);
+
+  // Checa se completou 5 rodadas
   if (rodadasBrinde >= 5) {
     if (acertosBrinde >= 3) {
       liberarGeladeirasExtras();
+      alert(`🎉 Você acertou ${acertosBrinde} vezes em 5 rodadas e liberou as Geladeiras Extras!`);
+    } else {
+      alert(`❌ Você acertou apenas ${acertosBrinde} vezes em 5 rodadas. Precisa de 3 para liberar.`);
     }
+
+    // Reseta contadores
     rodadasBrinde = 0;
     acertosBrinde = 0;
+
+    // Atualiza div zerada
+    setTimeout(() => {
+      progressoDiv.textContent = "Rodadas: 0/5 | ✅ Acertos: 0 | ❌ Erros: 0";
+    }, 500);
   }
 }
-
 function liberarGeladeirasExtras() {
   gerarGeladeirasExtras();
   containerExtras.style.display = "flex";
   alert("🎉 Você liberou as Geladeiras Extras!");
 }
 
-// Inicializa
+// Inicializa extras ocultas
 gerarGeladeirasExtras();
-
 async function abrirGeladeira(geladeira) {
     const geladeiras = document.querySelectorAll(".geladeira");
     const index = Array.from(geladeiras).indexOf(geladeira);
@@ -1941,9 +1980,8 @@ async function abrirGeladeira(geladeira) {
         case "2":    custo = 2; premio = 15; limiteEscolhas = 2; break;
         case "5":    custo = 5; premio = 20; limiteEscolhas = 3; break;
         case "10":   custo = 10; premio = 30; limiteEscolhas = 4; break;
-        default: return;
-    }
-
+        default: return;}
+        
     if (jogando) return;
     if (saldoAtual < custo) return msg.textContent = "Saldo insuficiente!";
     if (escolhas.includes(index)) return;
@@ -1973,56 +2011,48 @@ async function abrirGeladeira(geladeira) {
     jogando = true;
 
     // Sorteio do brinde principal
-    const brindeIndex = Math.floor(Math.random() * geladeiras.length);
-    let acertou = false;
+    // Sorteio do brinde principal
+const brindeIndex = Math.floor(Math.random() * geladeiras.length);
+let acertou = false;
 
-    // Revela as geladeiras escolhidas
-    for (const idx of escolhas) {
-        const g = geladeiras[idx];
-        const interior = g.querySelector(".interior");
+// Dentro do for que revela as geladeiras escolhidas
+for (const idx of escolhas) {
+    const g = geladeiras[idx];
+    const interior = g.querySelector(".interior");
 
-        if (idx === brindeIndex) {
-            interior.textContent = `🎁 Você Ganhou R$${premio}!`;
-            g.classList.add("premiada");
+    if (idx === brindeIndex) {
+        interior.textContent = `🎁 Você Ganhou R$${premio}!`;
+        g.classList.add("premiada");
+        acertou = true;
 
-            // Atualiza saldo ganho de forma segura no Firebase
-            if (usuarioId) {
-                const userRef = ref(db, `usuarios/${usuarioId}`);
-                await runTransaction(userRef, (u) => {
-                    if (!u) u = { saldo: 0, saldoGanho: 0, saldoGanhou: 0 };
-                    const ganhoAtual = Number(u.saldoGanho ?? u.saldoGanhou ?? 0);
-                    const novoGanho = ganhoAtual + premio;
-
-                    u.saldoGanho = novoGanho;
-                    u.saldoGanhou = novoGanho;
-                    return u;
-                });
-
-                // Atualiza variável local com o valor mais recente
-                const snap = await get(userRef);
-                const uData = snap.val() || {};
-                saldoGanho = Number(uData.saldoGanho ?? uData.saldoGanhou ?? 0);
-            }
-
-            acertou = true;
-        } else {
-            interior.textContent = "❌ Errou!";
+        // ✅ Adiciona ao saldo ganho e atualiza Firebase
+        saldoGanho = Math.round((saldoGanho + premio) * 100) / 100;
+        atualizarSaldos(); // atualiza na tela
+        if (usuarioId) {
+            const userRef = ref(db, `usuarios/${usuarioId}`);
+            runTransaction(userRef, u => {
+                if (!u) u = { saldo: saldoAtual, saldoGanho: 0 };
+                u.saldoGanho = saldoGanho;
+                return u;
+            });
         }
-    }
-
-    // Se nenhuma foi premiada, revela apenas uma geladeira com brinde verdadeiro
-    if (!acertou) {
-        const gPremiada = geladeiras[brindeIndex];
-        const interiorPremiada = gPremiada.querySelector(".interior");
-        setTimeout(() => {
-            gPremiada.classList.add("aberta", "premiada");
-            interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
-            setTimeout(() => {
-                gPremiada.classList.remove("aberta", "premiada");
-                interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
-            }, 1500);
-        }, 800);
     } else {
+        interior.textContent = "❌ Errou!";
+    }
+}
+registrarRodadaBrinde(acertou);
+if (!acertou) {
+  const gPremiada = geladeiras[brindeIndex];
+  const interiorPremiada = gPremiada.querySelector(".interior");
+  setTimeout(() => {
+    gPremiada.classList.add("aberta", "premiada");
+    interiorPremiada.textContent = "🎁 Aqui estava o brinde!";
+    setTimeout(() => {
+      gPremiada.classList.remove("aberta", "premiada");
+      interiorPremiada.textContent = `Geladeira ${brindeIndex + 1}`;
+    }, 1500);
+  }, 800);
+} else {
         // ✅ Registra rodada do brinde e verifica liberação das geladeiras extras
         setTimeout(() => registrarRodadaBrinde(acertou), 1200);
     }
@@ -2066,4 +2096,3 @@ function limpar(){
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 </body>
 </html>
-
